@@ -1,0 +1,173 @@
+[
+  {
+    "wp_id": 88,
+    "slug": "hotel-deluxe",
+    "name": "Hotel Deluxe",
+    "branch": "Hotel",
+    "price": 800000,
+    "regular_price": 800000,
+    "image": "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800&q=80"
+  },
+  {
+    "wp_id": 95,
+    "slug": "hotel-family",
+    "name": "Hotel Family",
+    "branch": "Hotel",
+    "price": 1500000,
+    "regular_price": 1500000,
+    "image": "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800&q=80"
+  },
+  {
+    "wp_id": 103,
+    "slug": "hotel-couple",
+    "name": "Hotel Couple",
+    "branch": "Hotel",
+    "price": 1400000,
+    "regular_price": 1400000,
+    "image": "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800&q=80"
+  },
+  {
+    "wp_id": 109,
+    "slug": "hotel-suite",
+    "name": "Hotel Suite",
+    "branch": "Hotel",
+    "price": 700000,
+    "regular_price": 700000,
+    "image": "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800&q=80"
+  },
+  {
+    "wp_id": 115,
+    "slug": "hotel-standard",
+    "name": "Hotel Standard",
+    "branch": "Hotel",
+    "price": 300000,
+    "regular_price": 300000,
+    "image": "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800&q=80"
+  },
+  {
+    "wp_id": 122,
+    "slug": "villa-suite-2",
+    "name": "Villa Suite 2",
+    "branch": "Villa",
+    "price": 800000,
+    "regular_price": 800000,
+    "image": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&q=80"
+  },
+  {
+    "wp_id": 128,
+    "slug": "villa-suite-1",
+    "name": "Villa Suite 1",
+    "branch": "Villa",
+    "price": 600000,
+    "regular_price": 600000,
+    "image": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&q=80"
+  },
+  {
+    "wp_id": 134,
+    "slug": "villa-deluxe-2",
+    "name": "Villa Deluxe 2",
+    "branch": "Villa",
+    "price": 900000,
+    "regular_price": 900000,
+    "image": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&q=80"
+  },
+  {
+    "wp_id": 140,
+    "slug": "villa-deluxe-1",
+    "name": "Villa Deluxe 1",
+    "branch": "Villa",
+    "price": 800000,
+    "regular_price": 800000,
+    "image": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&q=80"
+  },
+  {
+    "wp_id": 147,
+    "slug": "villa-family",
+    "name": "Villa Family",
+    "branch": "Villa",
+    "price": 1100000,
+    "regular_price": 1100000,
+    "image": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&q=80"
+  },
+  {
+    "wp_id": 219,
+    "slug": "residence-standard-2",
+    "name": "Residence Standard 2",
+    "branch": "Residence",
+    "price": 800000,
+    "regular_price": 800000,
+    "image": "https://images.unsplash.com/photo-1540518614846-7eded433c457?w=800&q=80"
+  },
+  {
+    "wp_id": 225,
+    "slug": "residence-standard-1",
+    "name": "Residence Standard 1",
+    "branch": "Residence",
+    "price": 700000,
+    "regular_price": 700000,
+    "image": "https://images.unsplash.com/photo-1540518614846-7eded433c457?w=800&q=80"
+  },
+  {
+    "wp_id": 231,
+    "slug": "residence-suite",
+    "name": "Residence Suite",
+    "branch": "Residence",
+    "price": 1000000,
+    "regular_price": 1000000,
+    "image": "https://images.unsplash.com/photo-1540518614846-7eded433c457?w=800&q=80"
+  },
+  {
+    "wp_id": 242,
+    "slug": "hotel-deluxe-2",
+    "name": "Residence Executive 1 bed",
+    "branch": "Residence",
+    "price": 1600000,
+    "regular_price": 1600000,
+    "image": "https://images.unsplash.com/photo-1540518614846-7eded433c457?w=800&q=80"
+  },
+  {
+    "wp_id": 248,
+    "slug": "residence-executive-2-bed",
+    "name": "Residence Executive 2 bed",
+    "branch": "Residence",
+    "price": 1700000,
+    "regular_price": 1700000,
+    "image": "https://images.unsplash.com/photo-1540518614846-7eded433c457?w=800&q=80"
+  },
+  {
+    "wp_id": 265,
+    "slug": "residence-1",
+    "name": "Residence 1",
+    "branch": "Residence",
+    "price": 1200000,
+    "regular_price": 1200000,
+    "image": "https://images.unsplash.com/photo-1540518614846-7eded433c457?w=800&q=80"
+  },
+  {
+    "wp_id": 271,
+    "slug": "residence-2",
+    "name": "Residence 2",
+    "branch": "Residence",
+    "price": 1300000,
+    "regular_price": 1300000,
+    "image": "https://images.unsplash.com/photo-1540518614846-7eded433c457?w=800&q=80"
+  },
+  {
+    "wp_id": 277,
+    "slug": "residence-3",
+    "name": "Residence 3",
+    "branch": "Residence",
+    "price": 1200000,
+    "regular_price": 1200000,
+    "image": "https://images.unsplash.com/photo-1540518614846-7eded433c457?w=800&q=80"
+  },
+  {
+    "wp_id": 283,
+    "slug": "residence-family",
+    "name": "Residence Family",
+    "branch": "Residence",
+    "price": 1700000,
+    "regular_price": 1700000,
+    "image": "https://images.unsplash.com/photo-1540518614846-7eded433c457?w=800&q=80"
+  }
+]

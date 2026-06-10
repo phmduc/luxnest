@@ -1,0 +1,195 @@
+/**
+ * Amenities Section Styles
+ */
+
+/* Section Container */
+.amenities-section {
+    position: relative;
+    width: 100%;
+    padding: 50px 0;
+    background: #fff;
+    overflow: hidden;
+}
+
+.amenities-section .container {
+    max-width: 1100px;
+    /* Slightly narrower for amenities grid */
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Section Header */
+.amenities-section .section-header {
+    text-align: left;
+    margin-bottom: 30px;
+}
+
+.amenities-section .section-header h2 {
+    font-size: clamp(1.3rem, 1.8vw, 1.6rem);
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 1rem;
+    letter-spacing: -0.5px;
+}
+
+.amenities-section .section-header p {
+    display: none;
+    display: none;
+    font-size: clamp(1rem, 2vw, 1.25rem);
+    color: #666;
+    max-width: 600px;
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* Amenities Grid */
+.amenities-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 32px;
+    justify-content: center;
+}
+
+/* Amenity Card */
+.amenity-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: #f8f9fa;
+    border-radius: 16px;
+    text-align: center;
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.amenity-card:hover {
+    background: #fff;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    transform: translateY(-5px);
+}
+
+/* Amenity Icon */
+.amenity-icon {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    color: #FF5B00;
+    margin-bottom: 16px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.amenity-card:hover .amenity-icon {
+    background: #FF5B00;
+    color: #fff;
+    transform: scale(1.1);
+}
+
+.amenity-icon img {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+}
+
+/* Amenity Label */
+.amenity-label {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #333;
+    line-height: 1.4;
+    transition: color 0.3s ease;
+}
+
+.amenity-card:hover .amenity-label {
+    color: #1a1a1a;
+}
+
+/* Responsive Styles */
+
+/* Tablet: Adjust grid */
+@media (max-width: 1024px) {
+    .amenities-section {
+        padding: 40px 0;
+    }
+
+    .amenities-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 24px;
+    }
+}
+
+/* Mobile: Smaller grid */
+@media (max-width: 768px) {
+    .amenities-section {
+        padding: 50px 0;
+    }
+
+    .amenities-section .container {
+        padding: 0 1.5rem;
+    }
+
+    .amenities-section .section-header {
+        margin-bottom: 24px;
+    }
+
+    .amenities-grid {
+        grid-template-columns: repeat(3, 1fr);
+        /* 3 cols on mobile looks good for small icons */
+        gap: 16px;
+    }
+
+    .amenity-card {
+        padding: 16px;
+        border-radius: 12px;
+    }
+
+    .amenity-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 24px;
+        margin-bottom: 12px;
+    }
+
+    .amenity-icon img {
+        width: 24px;
+        height: 24px;
+    }
+
+    .amenity-label {
+        font-size: 0.8125rem;
+    }
+}
+
+/* Small mobile: 2 cols */
+@media (max-width: 480px) {
+    .amenities-section .container {
+        padding: 0 1rem;
+    }
+    
+    .amenities-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+}
+
+/* Print styles */
+@media print {
+    .amenity-card {
+        border: 1px solid #ddd;
+        break-inside: avoid;
+        box-shadow: none;
+        background: transparent;
+    }
+
+    .amenity-icon {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+}
