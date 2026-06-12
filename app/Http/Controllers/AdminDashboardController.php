@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Faq;
+use App\Models\News;
+use App\Models\PageContent;
 use App\Models\Room;
 use App\Models\Setting;
 use App\Models\User;
@@ -467,5 +470,172 @@ class AdminDashboardController extends Controller
         $url  = asset('storage/' . $path);
 
         return response()->json(['success' => true, 'url' => $url, 'path' => $path]);
+    }
+
+    // ---------------------------------------------------------------
+    // News CRUD (admin only)
+    // ---------------------------------------------------------------
+
+    public function getNews(Request $request): JsonResponse
+    {
+        $search = trim((string) $request->input('search', ''));
+
+        $query = News::query()->orderByDesc('published_at')->orderByDesc('id');
+
+        if (!empty($search)) {
+            $query->where('title', 'like', "%$search%");
+        }
+
+        $page = (int) $request->input('page', 1);
+
+        return response()->json([
+            'success' => true,
+            'data'    => $query->paginate(10, ['*'], 'page', $page),
+        ]);
+    }
+
+    public function storeNews(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'title'        => 'required|string|max:255',
+            'excerpt'      => 'nullable|string|max:1000',
+            'content'      => 'nullable|string',
+            'tag'          => 'nullable|string|max:100',
+            'image'        => 'nullable|string|max:1000',
+            'published_at' => 'nullable|date',
+            'status'       => 'required|in:active,draft',
+        ]);
+
+        $validated['published_at'] = $validated['published_at'] ?? now()->toDateString();
+
+        $news = News::create($validated);
+
+        return response()->json(['success' => true, 'data' => $news], 201);
+    }
+
+    public function updateNews(Request $request, int $id): JsonResponse
+    {
+        $news = News::findOrFail($id);
+
+        $validated = $request->validate([
+            'title'        => 'required|string|max:255',
+            'excerpt'      => 'nullable|string|max:1000',
+            'content'      => 'nullable|string',
+            'tag'          => 'nullable|string|max:100',
+            'image'        => 'nullable|string|max:1000',
+            'published_at' => 'nullable|date',
+            'status'       => 'required|in:active,draft',
+        ]);
+
+        $validated['published_at'] = $validated['published_at'] ?? now()->toDateString();
+
+        $news->update($validated);
+
+        return response()->json(['success' => true, 'data' => $news]);
+    }
+
+    public function destroyNews(int $id): JsonResponse
+    {
+        $news = News::findOrFail($id);
+        $news->delete();
+
+        return response()->json(['success' => true]);
+    }
+
+    public function uploadNewsImage(Request $request): JsonResponse
+    {
+        $request->validate([
+            'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:4096',
+        ]);
+
+        $path = $request->file('image')->store('news', 'public');
+        $url  = asset('storage/' . $path);
+
+        return response()->json(['success' => true, 'url' => $url, 'path' => $path]);
+    }
+
+    // ---------------------------------------------------------------
+    // FAQ CRUD (admin only)
+    // ---------------------------------------------------------------
+
+    public function getFaqs(): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'data'    => Faq::orderBy('sort_order')->orderBy('id')->get(),
+        ]);
+    }
+
+    public function storeFaq(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'group_name' => 'required|string|max:255',
+            'question'   => 'required|string',
+            'answer'     => 'required|string',
+            'sort_order' => 'nullable|integer',
+        ]);
+
+        $validated['sort_order'] = $validated['sort_order'] ?? ((int) Faq::max('sort_order') + 1);
+
+        $faq = Faq::create($validated);
+
+        return response()->json(['success' => true, 'data' => $faq], 201);
+    }
+
+    public function updateFaq(Request $request, int $id): JsonResponse
+    {
+        $faq = Faq::findOrFail($id);
+
+        $validated = $request->validate([
+            'group_name' => 'required|string|max:255',
+            'question'   => 'required|string',
+            'answer'     => 'required|string',
+            'sort_order' => 'nullable|integer',
+        ]);
+
+        $validated['sort_order'] = $validated['sort_order'] ?? $faq->sort_order;
+
+        $faq->update($validated);
+
+        return response()->json(['success' => true, 'data' => $faq]);
+    }
+
+    public function destroyFaq(int $id): JsonResponse
+    {
+        $faq = Faq::findOrFail($id);
+        $faq->delete();
+
+        return response()->json(['success' => true]);
+    }
+
+    // ---------------------------------------------------------------
+    // Page Content - Giới thiệu / Hợp tác (admin only)
+    // ---------------------------------------------------------------
+
+    public function getPageContent(string $slug): JsonResponse
+    {
+        if (!in_array($slug, ['about', 'partner'], true)) {
+            return response()->json(['success' => false, 'message' => 'Trang không hợp lệ.'], 404);
+        }
+
+        return response()->json(['success' => true, 'data' => PageContent::dataFor($slug)]);
+    }
+
+    public function updatePageContent(Request $request, string $slug): JsonResponse
+    {
+        if (!in_array($slug, ['about', 'partner'], true)) {
+            return response()->json(['success' => false, 'message' => 'Trang không hợp lệ.'], 404);
+        }
+
+        $defaults = PageContent::defaults($slug);
+        $data     = [];
+
+        foreach ($defaults as $key => $default) {
+            $data[$key] = (string) $request->input($key, $default);
+        }
+
+        PageContent::updateOrCreate(['slug' => $slug], ['data' => $data]);
+
+        return response()->json(['success' => true, 'data' => PageContent::dataFor($slug)]);
     }
 }

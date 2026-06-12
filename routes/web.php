@@ -122,6 +122,23 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,employee'])->group(funct
         Route::get('/settings', [AdminDashboardController::class, 'getSettings']);
         Route::post('/settings', [AdminDashboardController::class, 'updateSettings']);
         Route::post('/settings/upload-logo', [AdminDashboardController::class, 'uploadSettingsLogo']);
+
+        // News management
+        Route::get('/news', [AdminDashboardController::class, 'getNews']);
+        Route::post('/news', [AdminDashboardController::class, 'storeNews']);
+        Route::put('/news/{id}', [AdminDashboardController::class, 'updateNews']);
+        Route::delete('/news/{id}', [AdminDashboardController::class, 'destroyNews']);
+        Route::post('/news/upload-image', [AdminDashboardController::class, 'uploadNewsImage']);
+
+        // FAQ management
+        Route::get('/faqs', [AdminDashboardController::class, 'getFaqs']);
+        Route::post('/faqs', [AdminDashboardController::class, 'storeFaq']);
+        Route::put('/faqs/{id}', [AdminDashboardController::class, 'updateFaq']);
+        Route::delete('/faqs/{id}', [AdminDashboardController::class, 'destroyFaq']);
+
+        // Page content (Giới thiệu / Hợp tác)
+        Route::get('/page-contents/{slug}', [AdminDashboardController::class, 'getPageContent']);
+        Route::post('/page-contents/{slug}', [AdminDashboardController::class, 'updatePageContent']);
     });
 });
 

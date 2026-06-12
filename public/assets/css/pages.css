@@ -232,6 +232,10 @@
     justify-content: center;
     font-size: 2.5rem;
 }
+.pg-news-card__thumb--img {
+    background-size: cover;
+    background-position: center;
+}
 .pg-news-card__body { padding: 20px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
 .pg-news-card__tag {
     display: inline-block;

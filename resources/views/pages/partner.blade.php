@@ -10,58 +10,37 @@
 
 <div class="pg-hero">
     <div class="lx-container">
-        <h1>Hợp tác cùng {{ $settings->site_name }}</h1>
-        <p>Bạn đang sở hữu khách sạn, villa, dịch vụ thuê xe hoặc tour du lịch tại Đà Lạt? Cùng đồng hành với {{ $settings->site_name }} để tiếp cận thêm nhiều khách hàng.</p>
+        <h1>{{ $content['hero_title'] }}</h1>
+        <p>{{ $content['hero_subtitle'] }}</p>
     </div>
 </div>
 
 <section class="pg-section pg-section--center">
     <div class="lx-container">
-        <h2>Hình thức hợp tác</h2>
+        <h2>{{ $content['types_title'] }}</h2>
         <div class="pg-grid pg-grid--3">
+            @for ($i = 1; $i <= 3; $i++)
             <div class="pg-card">
-                <div class="pg-card__icon">🏠</div>
-                <div class="pg-card__title">Chủ chỗ ở</div>
-                <p class="pg-card__text">Đưa khách sạn, villa, homestay của bạn lên hệ thống LuxNest để tiếp cận lượng lớn khách du lịch.</p>
+                <div class="pg-card__icon">{{ $content["type_{$i}_icon"] }}</div>
+                <div class="pg-card__title">{{ $content["type_{$i}_title"] }}</div>
+                <p class="pg-card__text">{{ $content["type_{$i}_text"] }}</p>
             </div>
-            <div class="pg-card">
-                <div class="pg-card__icon">🚐</div>
-                <div class="pg-card__title">Đối tác vận chuyển</div>
-                <p class="pg-card__text">Cung cấp dịch vụ thuê xe, đưa đón sân bay cho khách hàng đặt phòng qua LuxNest.</p>
-            </div>
-            <div class="pg-card">
-                <div class="pg-card__icon">🗺️</div>
-                <div class="pg-card__title">Đối tác tour & trải nghiệm</div>
-                <p class="pg-card__text">Giới thiệu các tour tham quan, hoạt động trải nghiệm tại Đà Lạt đến khách hàng của LuxNest.</p>
-            </div>
+            @endfor
         </div>
     </div>
 </section>
 
 <section class="pg-section pg-section--gray">
     <div class="lx-container">
-        <h2 style="text-align:center;">Quyền lợi khi hợp tác</h2>
+        <h2 style="text-align:center;">{{ $content['benefits_title'] }}</h2>
         <div class="pg-grid">
+            @for ($i = 1; $i <= 4; $i++)
             <div class="pg-card">
-                <div class="pg-card__icon">📈</div>
-                <div class="pg-card__title">Tăng lượng khách</div>
-                <p class="pg-card__text">Tiếp cận tệp khách hàng đang tìm chỗ ở, thuê xe và tour tại Đà Lạt thông qua LuxNest.</p>
+                <div class="pg-card__icon">{{ $content["benefit_{$i}_icon"] }}</div>
+                <div class="pg-card__title">{{ $content["benefit_{$i}_title"] }}</div>
+                <p class="pg-card__text">{{ $content["benefit_{$i}_text"] }}</p>
             </div>
-            <div class="pg-card">
-                <div class="pg-card__icon">⚙️</div>
-                <div class="pg-card__title">Vận hành đơn giản</div>
-                <p class="pg-card__text">Quản lý đặt phòng, đơn hàng tập trung, không cần đầu tư hệ thống riêng.</p>
-            </div>
-            <div class="pg-card">
-                <div class="pg-card__icon">🤝</div>
-                <div class="pg-card__title">Hỗ trợ tận tâm</div>
-                <p class="pg-card__text">Đội ngũ LuxNest đồng hành, hỗ trợ đối tác trong suốt quá trình hợp tác.</p>
-            </div>
-            <div class="pg-card">
-                <div class="pg-card__icon">💰</div>
-                <div class="pg-card__title">Chính sách minh bạch</div>
-                <p class="pg-card__text">Tỷ lệ hoa hồng và chính sách thanh toán rõ ràng, công bằng cho đối tác.</p>
-            </div>
+            @endfor
         </div>
     </div>
 </section>

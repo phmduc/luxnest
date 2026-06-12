@@ -30,6 +30,15 @@
             <a href="#" class="nav-item" data-tab="members">
                 <i class="ph ph-users"></i> Thành Viên
             </a>
+            <a href="#" class="nav-item" data-tab="news">
+                <i class="ph ph-newspaper"></i> Tin Tức
+            </a>
+            <a href="#" class="nav-item" data-tab="faqs">
+                <i class="ph ph-question"></i> Câu Hỏi Thường Gặp
+            </a>
+            <a href="#" class="nav-item" data-tab="pagecontent">
+                <i class="ph ph-file-text"></i> Nội Dung Trang
+            </a>
             <a href="#" class="nav-item" data-tab="settings">
                 <i class="ph ph-storefront"></i> Thông Tin Doanh Nghiệp
             </a>
@@ -405,6 +414,256 @@
             </section>
             @endif
 
+            {{-- ═══ TAB: NEWS (admin only) ═══ --}}
+            @if(auth()->user()->isAdmin())
+            <section id="tab-news" class="dashboard-tab">
+
+                <div class="section-toolbar">
+                    <h2>Quản Lý Tin Tức</h2>
+                    <div class="toolbar-actions">
+                        <div class="search-wrapper">
+                            <input type="text" id="news-search" placeholder="Tìm theo tiêu đề...">
+                            <i class="ph ph-magnifying-glass"></i>
+                        </div>
+                        <button onclick="AdminApp.openNewsModal()" class="btn-primary">
+                            <i class="ph ph-plus"></i> Thêm bài viết
+                        </button>
+                    </div>
+                </div>
+
+                <div class="data-table-container">
+                    <table class="manager-table">
+                        <thead>
+                            <tr>
+                                <th>Bài viết</th>
+                                <th>Tag</th>
+                                <th>Ngày đăng</th>
+                                <th>Trạng thái</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="news-list-body">
+                            <tr>
+                                <td colspan="5" style="text-align:center; color:var(--lux-gray); padding:40px;">
+                                    Đang tải...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="news-pagination" class="pagination-container"></div>
+
+            </section>
+            @endif
+
+            {{-- ═══ TAB: FAQ (admin only) ═══ --}}
+            @if(auth()->user()->isAdmin())
+            <section id="tab-faqs" class="dashboard-tab">
+
+                <div class="section-toolbar">
+                    <h2>Quản Lý Câu Hỏi Thường Gặp</h2>
+                    <div class="toolbar-actions">
+                        <button onclick="AdminApp.openFaqModal()" class="btn-primary">
+                            <i class="ph ph-plus"></i> Thêm câu hỏi
+                        </button>
+                    </div>
+                </div>
+
+                <div class="data-table-container">
+                    <table class="manager-table">
+                        <thead>
+                            <tr>
+                                <th>Nhóm</th>
+                                <th>Câu hỏi</th>
+                                <th>Thứ tự</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="faqs-list-body">
+                            <tr>
+                                <td colspan="4" style="text-align:center; color:var(--lux-gray); padding:40px;">
+                                    Đang tải...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </section>
+            @endif
+
+            {{-- ═══ TAB: PAGE CONTENT - Giới thiệu / Hợp tác (admin only) ═══ --}}
+            @if(auth()->user()->isAdmin())
+            <section id="tab-pagecontent" class="dashboard-tab">
+
+                <div class="section-toolbar">
+                    <h2>Nội Dung Trang</h2>
+                </div>
+
+                {{-- ── Trang Giới thiệu ── --}}
+                <div style="margin-bottom:40px;">
+                    <h3 style="font-size:1.05rem; font-weight:800; color:var(--text); margin-bottom:14px;">
+                        <i class="ph ph-info"></i> Trang Giới thiệu
+                    </h3>
+
+                    <form id="about-content-form" style="max-width:920px;">
+                        @csrf
+                        <div class="mf-grid-2">
+                            <div class="mf-group" style="grid-column:1/-1;">
+                                <label class="mf-label">Tiêu đề Hero</label>
+                                <input type="text" id="about-hero_title" class="mf-input">
+                            </div>
+                            <div class="mf-group" style="grid-column:1/-1;">
+                                <label class="mf-label">Mô tả Hero</label>
+                                <textarea id="about-hero_subtitle" class="mf-input" rows="2"></textarea>
+                            </div>
+
+                            <div class="mf-group" style="grid-column:1/-1;">
+                                <label class="mf-label">Tiêu đề mục "Câu chuyện"</label>
+                                <input type="text" id="about-story_title" class="mf-input">
+                            </div>
+                            <div class="mf-group" style="grid-column:1/-1;">
+                                <label class="mf-label">Đoạn văn 1</label>
+                                <textarea id="about-story_paragraph_1" class="mf-input" rows="3"></textarea>
+                            </div>
+                            <div class="mf-group" style="grid-column:1/-1;">
+                                <label class="mf-label">Đoạn văn 2</label>
+                                <textarea id="about-story_paragraph_2" class="mf-input" rows="3"></textarea>
+                            </div>
+
+                            <div class="mf-group" style="grid-column:1/-1;">
+                                <label class="mf-label">Tiêu đề mục "Vì sao chọn..."</label>
+                                <input type="text" id="about-why_title" class="mf-input">
+                            </div>
+
+                            @for($i = 1; $i <= 3; $i++)
+                            <div class="mf-group">
+                                <label class="mf-label">Icon thẻ {{ $i }}</label>
+                                <input type="text" id="about-why_card_{{ $i }}_icon" class="mf-input">
+                            </div>
+                            <div class="mf-group">
+                                <label class="mf-label">Tiêu đề thẻ {{ $i }}</label>
+                                <input type="text" id="about-why_card_{{ $i }}_title" class="mf-input">
+                            </div>
+                            <div class="mf-group" style="grid-column:1/-1;">
+                                <label class="mf-label">Nội dung thẻ {{ $i }}</label>
+                                <textarea id="about-why_card_{{ $i }}_text" class="mf-input" rows="2"></textarea>
+                            </div>
+                            @endfor
+
+                            @for($i = 1; $i <= 4; $i++)
+                            <div class="mf-group">
+                                <label class="mf-label">Số liệu {{ $i }}</label>
+                                <input type="text" id="about-stat_{{ $i }}_number" class="mf-input">
+                            </div>
+                            <div class="mf-group">
+                                <label class="mf-label">Nhãn số liệu {{ $i }}</label>
+                                <input type="text" id="about-stat_{{ $i }}_label" class="mf-input">
+                            </div>
+                            @endfor
+
+                            <div class="mf-group" style="grid-column:1/-1;">
+                                <label class="mf-label">Tiêu đề CTA</label>
+                                <input type="text" id="about-cta_title" class="mf-input">
+                            </div>
+                            <div class="mf-group" style="grid-column:1/-1;">
+                                <label class="mf-label">Mô tả CTA</label>
+                                <textarea id="about-cta_text" class="mf-input" rows="2"></textarea>
+                            </div>
+                            <div class="mf-group">
+                                <label class="mf-label">Chữ trên nút CTA</label>
+                                <input type="text" id="about-cta_button" class="mf-input">
+                            </div>
+                        </div>
+
+                        <div id="about-content-error"
+                             style="display:none; margin-top:14px; padding:11px 14px; background:#FEE2E2; border-radius:9px; color:#991B1B; font-weight:600; font-size:0.85rem;"></div>
+                        <div id="about-content-success"
+                             style="display:none; margin-top:14px; padding:11px 14px; background:#DCFCE7; border-radius:9px; color:#166534; font-weight:600; font-size:0.85rem;"></div>
+
+                        <div style="margin-top:24px; display:flex; gap:10px; justify-content:flex-end;">
+                            <button type="submit" class="btn-primary" style="padding:10px 22px;">
+                                <i class="ph ph-floppy-disk"></i> Lưu nội dung Giới thiệu
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                {{-- ── Trang Hợp tác ── --}}
+                <div>
+                    <h3 style="font-size:1.05rem; font-weight:800; color:var(--text); margin-bottom:14px;">
+                        <i class="ph ph-handshake"></i> Trang Hợp tác
+                    </h3>
+
+                    <form id="partner-content-form" style="max-width:920px;">
+                        @csrf
+                        <div class="mf-grid-2">
+                            <div class="mf-group" style="grid-column:1/-1;">
+                                <label class="mf-label">Tiêu đề Hero</label>
+                                <input type="text" id="partner-hero_title" class="mf-input">
+                            </div>
+                            <div class="mf-group" style="grid-column:1/-1;">
+                                <label class="mf-label">Mô tả Hero</label>
+                                <textarea id="partner-hero_subtitle" class="mf-input" rows="2"></textarea>
+                            </div>
+
+                            <div class="mf-group" style="grid-column:1/-1;">
+                                <label class="mf-label">Tiêu đề mục "Hình thức hợp tác"</label>
+                                <input type="text" id="partner-types_title" class="mf-input">
+                            </div>
+
+                            @for($i = 1; $i <= 3; $i++)
+                            <div class="mf-group">
+                                <label class="mf-label">Icon hình thức {{ $i }}</label>
+                                <input type="text" id="partner-type_{{ $i }}_icon" class="mf-input">
+                            </div>
+                            <div class="mf-group">
+                                <label class="mf-label">Tiêu đề hình thức {{ $i }}</label>
+                                <input type="text" id="partner-type_{{ $i }}_title" class="mf-input">
+                            </div>
+                            <div class="mf-group" style="grid-column:1/-1;">
+                                <label class="mf-label">Nội dung hình thức {{ $i }}</label>
+                                <textarea id="partner-type_{{ $i }}_text" class="mf-input" rows="2"></textarea>
+                            </div>
+                            @endfor
+
+                            <div class="mf-group" style="grid-column:1/-1;">
+                                <label class="mf-label">Tiêu đề mục "Quyền lợi khi hợp tác"</label>
+                                <input type="text" id="partner-benefits_title" class="mf-input">
+                            </div>
+
+                            @for($i = 1; $i <= 4; $i++)
+                            <div class="mf-group">
+                                <label class="mf-label">Icon quyền lợi {{ $i }}</label>
+                                <input type="text" id="partner-benefit_{{ $i }}_icon" class="mf-input">
+                            </div>
+                            <div class="mf-group">
+                                <label class="mf-label">Tiêu đề quyền lợi {{ $i }}</label>
+                                <input type="text" id="partner-benefit_{{ $i }}_title" class="mf-input">
+                            </div>
+                            <div class="mf-group" style="grid-column:1/-1;">
+                                <label class="mf-label">Nội dung quyền lợi {{ $i }}</label>
+                                <textarea id="partner-benefit_{{ $i }}_text" class="mf-input" rows="2"></textarea>
+                            </div>
+                            @endfor
+                        </div>
+
+                        <div id="partner-content-error"
+                             style="display:none; margin-top:14px; padding:11px 14px; background:#FEE2E2; border-radius:9px; color:#991B1B; font-weight:600; font-size:0.85rem;"></div>
+                        <div id="partner-content-success"
+                             style="display:none; margin-top:14px; padding:11px 14px; background:#DCFCE7; border-radius:9px; color:#166534; font-weight:600; font-size:0.85rem;"></div>
+
+                        <div style="margin-top:24px; display:flex; gap:10px; justify-content:flex-end;">
+                            <button type="submit" class="btn-primary" style="padding:10px 22px;">
+                                <i class="ph ph-floppy-disk"></i> Lưu nội dung Hợp tác
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+            </section>
+            @endif
+
         </div>{{-- /page-content --}}
     </main>
 </div>
@@ -704,6 +963,141 @@
         </form>
     </div>
 </div>
+
+{{-- ═══ MODAL: News ═══ --}}
+<div id="news-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-content" style="max-width:640px; max-height:90vh; overflow-y:auto;">
+        <button class="modal-close" id="news-modal-close"><i class="ph ph-x"></i></button>
+        <h2 id="news-modal-title" style="font-size:1.4rem; font-weight:800; margin-bottom:24px; color:var(--text);">
+            Thêm bài viết
+        </h2>
+
+        <form id="news-form">
+            @csrf
+            <input type="hidden" id="news-id">
+
+            <div class="mf-grid-2">
+                <div class="mf-group" style="grid-column:1/-1;">
+                    <label class="mf-label">Tiêu đề</label>
+                    <input type="text" id="news-title" class="mf-input" placeholder="VD: LuxNest khai trương villa mới">
+                </div>
+
+                {{-- Image --}}
+                <div class="mf-group" style="grid-column:1/-1;">
+                    <label class="mf-label">
+                        Ảnh đại diện <span style="font-weight:400; font-size:0.75rem; text-transform:none; letter-spacing:0;">(tuỳ chọn)</span>
+                    </label>
+                    <input type="file" id="news-file-input" accept="image/*" style="display:none">
+                    <div id="news-image-slot"
+                         style="border:2px dashed var(--border-strong); border-radius:11px; overflow:hidden; aspect-ratio:16/9; max-width:280px; position:relative; cursor:pointer; background:#FAFAFA; display:flex; flex-direction:column; align-items:center; justify-content:center; transition:border-color .2s;"
+                         onclick="AdminApp.openNewsImagePicker()"
+                         ondragover="event.preventDefault(); this.style.borderColor='var(--orange)'"
+                         ondragleave="this.style.borderColor='var(--border-strong)'"
+                         ondrop="AdminApp.handleNewsImageDrop(event)">
+                        <div id="news-image-empty" class="slot-empty">
+                            <i class="ph ph-image" style="font-size:1.8rem; color:#CBD5E1;"></i>
+                            <span style="font-size:0.72rem; color:#94A3B8; margin-top:5px; display:block;">Chọn ảnh</span>
+                        </div>
+                        <img id="news-image-preview" style="display:none; width:100%; height:100%; object-fit:cover;">
+                        <div id="news-image-overlay" style="display:none; position:absolute; inset:0; background:rgba(0,0,0,.4); align-items:center; justify-content:center; gap:8px;">
+                            <button type="button" onclick="event.stopPropagation(); AdminApp.openNewsImagePicker()"
+                                    style="background:#fff; border:none; border-radius:7px; padding:5px 9px; cursor:pointer; font-size:0.78rem; font-weight:600;">
+                                <i class="ph ph-pencil"></i>
+                            </button>
+                            <button type="button" onclick="event.stopPropagation(); AdminApp.clearNewsImage()"
+                                    style="background:#EF4444; color:#fff; border:none; border-radius:7px; padding:5px 9px; cursor:pointer; font-size:0.78rem;">
+                                <i class="ph ph-trash"></i>
+                            </button>
+                        </div>
+                        <div id="news-image-uploading" style="display:none; position:absolute; inset:0; background:rgba(255,255,255,.85); flex-direction:column; align-items:center; justify-content:center; gap:7px;">
+                            <div style="width:60%; height:4px; background:var(--border); border-radius:3px; overflow:hidden;">
+                                <div id="news-image-bar" style="height:100%; background:var(--orange); width:0%; transition:width .3s;"></div>
+                            </div>
+                            <span style="font-size:0.72rem; color:var(--text-muted);">Đang tải...</span>
+                        </div>
+                    </div>
+                    <input type="hidden" id="news-image">
+                </div>
+
+                <div class="mf-group">
+                    <label class="mf-label">Tag <span style="font-weight:400; font-size:0.75rem; text-transform:none; letter-spacing:0;">(tuỳ chọn)</span></label>
+                    <input type="text" id="news-tag" class="mf-input" placeholder="VD: Ưu đãi, Sự kiện...">
+                </div>
+                <div class="mf-group">
+                    <label class="mf-label">Ngày đăng</label>
+                    <input type="date" id="news-published-at" class="mf-input">
+                </div>
+
+                <div class="mf-group" style="grid-column:1/-1;">
+                    <label class="mf-label">Mô tả ngắn</label>
+                    <textarea id="news-excerpt" class="mf-input" rows="2" placeholder="Tóm tắt ngắn hiển thị ở trang Tin tức..."></textarea>
+                </div>
+                <div class="mf-group" style="grid-column:1/-1;">
+                    <label class="mf-label">Nội dung chi tiết <span style="font-weight:400; font-size:0.75rem; text-transform:none; letter-spacing:0;">(tuỳ chọn)</span></label>
+                    <textarea id="news-content" class="mf-input" rows="5" placeholder="Nội dung đầy đủ của bài viết..."></textarea>
+                </div>
+
+                <div class="mf-group">
+                    <label class="mf-label">Trạng thái</label>
+                    <select id="news-status" class="mf-select">
+                        <option value="active">Hiển thị</option>
+                        <option value="draft">Bản nháp</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="news-form-error"
+                 style="display:none; margin-top:14px; padding:11px 14px; background:#FEE2E2; border-radius:9px; color:#991B1B; font-weight:600; font-size:0.85rem;"></div>
+
+            <div style="margin-top:24px; display:flex; gap:10px; justify-content:flex-end;">
+                <button type="button" id="news-modal-cancel" class="btn-view">Hủy</button>
+                <button type="submit" id="news-submit-btn" class="btn-primary" style="padding:10px 22px;">Lưu bài viết</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- ═══ MODAL: FAQ ═══ --}}
+<div id="faq-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-content" style="max-width:560px; max-height:90vh; overflow-y:auto;">
+        <button class="modal-close" id="faq-modal-close"><i class="ph ph-x"></i></button>
+        <h2 id="faq-modal-title" style="font-size:1.4rem; font-weight:800; margin-bottom:24px; color:var(--text);">
+            Thêm câu hỏi
+        </h2>
+
+        <form id="faq-form">
+            @csrf
+            <input type="hidden" id="faq-id">
+
+            <div class="mf-grid-2">
+                <div class="mf-group" style="grid-column:1/-1;">
+                    <label class="mf-label">Nhóm</label>
+                    <input type="text" id="faq-group" class="mf-input" placeholder="VD: Đặt phòng & Thanh toán">
+                </div>
+                <div class="mf-group" style="grid-column:1/-1;">
+                    <label class="mf-label">Câu hỏi</label>
+                    <input type="text" id="faq-question" class="mf-input" placeholder="VD: Tôi có thể đặt phòng như thế nào?">
+                </div>
+                <div class="mf-group" style="grid-column:1/-1;">
+                    <label class="mf-label">Câu trả lời</label>
+                    <textarea id="faq-answer" class="mf-input" rows="4" placeholder="Nội dung trả lời..."></textarea>
+                </div>
+                <div class="mf-group">
+                    <label class="mf-label">Thứ tự</label>
+                    <input type="number" id="faq-sort-order" class="mf-input" min="0" step="1">
+                </div>
+            </div>
+
+            <div id="faq-form-error"
+                 style="display:none; margin-top:14px; padding:11px 14px; background:#FEE2E2; border-radius:9px; color:#991B1B; font-weight:600; font-size:0.85rem;"></div>
+
+            <div style="margin-top:24px; display:flex; gap:10px; justify-content:flex-end;">
+                <button type="button" id="faq-modal-cancel" class="btn-view">Hủy</button>
+                <button type="submit" id="faq-submit-btn" class="btn-primary" style="padding:10px 22px;">Lưu câu hỏi</button>
+            </div>
+        </form>
+    </div>
+</div>
 @endif
 
 @push('scripts')
@@ -792,11 +1186,14 @@ if (typeof AdminApp !== 'undefined') AdminApp.loadRooms();
 
     // Sync topbar title on tab switch
     var titles = {
-        overview: 'Bảng Điều Khiển',
-        bookings: 'Quản Lý Booking',
-        rooms:    'Quản Lý Phòng',
-        members:  'Quản Lý Thành Viên',
-        settings: 'Thông Tin Doanh Nghiệp'
+        overview:    'Bảng Điều Khiển',
+        bookings:    'Quản Lý Booking',
+        rooms:       'Quản Lý Phòng',
+        members:     'Quản Lý Thành Viên',
+        settings:    'Thông Tin Doanh Nghiệp',
+        news:        'Quản Lý Tin Tức',
+        faqs:        'Câu Hỏi Thường Gặp',
+        pagecontent: 'Nội Dung Trang'
     };
     document.querySelectorAll('.nav-item[data-tab]').forEach(function (el) {
         el.addEventListener('click', function () {

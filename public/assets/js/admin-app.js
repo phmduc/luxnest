@@ -94,10 +94,13 @@
         });
         currentTab = tab;
 
-        if (tab === 'bookings') loadBookings();
-        if (tab === 'members')  loadMembers();
-        if (tab === 'rooms')    loadRooms();
-        if (tab === 'settings') loadSettings();
+        if (tab === 'bookings')    loadBookings();
+        if (tab === 'members')     loadMembers();
+        if (tab === 'rooms')       loadRooms();
+        if (tab === 'settings')    loadSettings();
+        if (tab === 'news')        loadNews();
+        if (tab === 'faqs')        loadFaqs();
+        if (tab === 'pagecontent') loadPageContent();
     }
 
     document.querySelectorAll('.nav-item[data-tab]').forEach(el => {
@@ -1042,6 +1045,460 @@
     });
 
     // ---------------------------------------------------------------
+    // News
+    // ---------------------------------------------------------------
+
+    let newsPage = 1;
+    let newsSearchTimer = null;
+
+    async function loadNews(page = 1) {
+        newsPage = page;
+        const search = (document.getElementById('news-search') || {}).value || '';
+        const tbody  = document.getElementById('news-list-body');
+        if (!tbody) return;
+
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--lux-gray);">Đang tải...</td></tr>';
+
+        const params = new URLSearchParams({ page, search });
+        const data   = await apiFetch(ADMIN_BASE + '/news?' + params.toString());
+
+        if (!data.success) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#e11d48;padding:30px;">${data.message || 'Lỗi tải dữ liệu.'}</td></tr>`;
+            return;
+        }
+
+        const items      = (data.data && data.data.data) ? data.data.data : (data.data || []);
+        const pagination = data.data || {};
+
+        if (!items.length) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--lux-gray);">Chưa có bài viết nào.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = items.map(n => {
+            const escaped   = JSON.stringify(n).replace(/"/g, '&quot;');
+            const isActive  = n.status === 'active';
+            const published = n.published_at ? formatDate(n.published_at) : '-';
+
+            return `<tr>
+                <td>
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        ${n.image
+                            ? `<img src="${n.image}" style="width:48px;height:38px;object-fit:cover;border-radius:8px;flex-shrink:0;">`
+                            : `<div style="width:48px;height:38px;background:#f1f5f9;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ph ph-image" style="color:#94a3b8;"></i></div>`
+                        }
+                        <div>
+                            <strong style="display:block;">${n.title}</strong>
+                            <span style="font-size:.8rem;color:var(--lux-gray);">#${n.id}</span>
+                        </div>
+                    </div>
+                </td>
+                <td style="color:var(--lux-gray);">${n.tag || '—'}</td>
+                <td style="color:var(--lux-gray);">${published}</td>
+                <td>
+                    <span class="status-badge" style="background:${isActive ? '#dcfce7' : '#fee2e2'};color:${isActive ? '#166534' : '#dc2626'};">
+                        ${isActive ? 'Hiển thị' : 'Bản nháp'}
+                    </span>
+                </td>
+                <td>
+                    <div style="display:flex;gap:8px;justify-content:flex-end;">
+                        <button class="btn-view" onclick='AdminApp.openNewsModal(${escaped})'>Sửa</button>
+                        <button class="btn-view" style="color:#dc2626;border-color:#fecdd3;"
+                                onclick="AdminApp.deleteNews(${n.id},'${n.title.replace(/'/g, "\\'")}')">Xóa</button>
+                    </div>
+                </td>
+            </tr>`;
+        }).join('');
+
+        renderPagination('news-pagination', pagination.last_page || 1, pagination.current_page || 1, loadNews);
+    }
+
+    document.getElementById('news-search')?.addEventListener('input', function () {
+        clearTimeout(newsSearchTimer);
+        newsSearchTimer = setTimeout(() => loadNews(), 500);
+    });
+
+    // ── News image (single slot) ──────────────────────────────────
+
+    function renderNewsImage(url) {
+        const empty   = document.getElementById('news-image-empty');
+        const preview = document.getElementById('news-image-preview');
+        const slot    = document.getElementById('news-image-slot');
+        if (!empty || !preview) return;
+
+        if (url) {
+            preview.src            = url;
+            preview.style.display  = 'block';
+            empty.style.display    = 'none';
+            if (slot) { slot.style.borderStyle = 'solid'; slot.style.borderColor = '#e2e8f0'; }
+        } else {
+            preview.style.display  = 'none';
+            empty.style.display    = 'flex';
+            if (slot) { slot.style.borderStyle = 'dashed'; slot.style.borderColor = 'var(--border-strong)'; }
+        }
+    }
+
+    function openNewsImagePicker() {
+        const fi = document.getElementById('news-file-input');
+        if (fi) { fi.value = ''; fi.click(); }
+    }
+
+    function clearNewsImage() {
+        document.getElementById('news-image').value = '';
+        renderNewsImage('');
+    }
+
+    document.getElementById('news-file-input')?.addEventListener('change', function () {
+        if (this.files[0]) uploadNewsImageFile(this.files[0]);
+    });
+
+    function handleNewsImageDrop(e) {
+        e.preventDefault();
+        const slot = document.getElementById('news-image-slot');
+        if (slot) slot.style.borderColor = 'var(--border-strong)';
+        const file = e.dataTransfer?.files?.[0];
+        if (file && file.type.startsWith('image/')) uploadNewsImageFile(file);
+    }
+
+    async function uploadNewsImageFile(file) {
+        const uploading = document.getElementById('news-image-uploading');
+        const bar       = document.getElementById('news-image-bar');
+
+        if (uploading) uploading.style.display = 'flex';
+        if (bar)       bar.style.width = '0%';
+
+        let pct = 0;
+        const ticker = setInterval(() => {
+            pct = Math.min(pct + 12, 88);
+            if (bar) bar.style.width = pct + '%';
+        }, 100);
+
+        const form = new FormData();
+        form.append('image', file);
+
+        try {
+            const res = await fetch(ADMIN_BASE + '/news/upload-image', {
+                method:  'POST',
+                headers: { 'X-CSRF-TOKEN': csrf() },
+                body:    form,
+            }).then(r => r.json());
+
+            clearInterval(ticker);
+            if (bar) bar.style.width = '100%';
+
+            if (res.success) {
+                document.getElementById('news-image').value = res.url;
+                renderNewsImage(res.url);
+            } else {
+                alert('Upload thất bại: ' + (res.message || 'Lỗi'));
+            }
+        } catch {
+            clearInterval(ticker);
+            alert('Lỗi kết nối khi tải ảnh.');
+        } finally {
+            setTimeout(() => {
+                if (uploading) uploading.style.display = 'none';
+                if (bar)       bar.style.width = '0%';
+            }, 500);
+        }
+    }
+
+    function openNewsModal(article) {
+        const modal = document.getElementById('news-modal');
+        const title = document.getElementById('news-modal-title');
+        if (!modal) return;
+
+        ['news-id','news-title','news-tag','news-published-at','news-excerpt','news-content','news-image'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+        document.getElementById('news-status').value = 'active';
+        renderNewsImage('');
+        const fileInput = document.getElementById('news-file-input');
+        if (fileInput) fileInput.value = '';
+        const errEl = document.getElementById('news-form-error');
+        if (errEl) errEl.style.display = 'none';
+
+        if (article && article.id) {
+            title.textContent = 'Sửa bài viết';
+            document.getElementById('news-id').value           = article.id;
+            document.getElementById('news-title').value        = article.title || '';
+            document.getElementById('news-tag').value          = article.tag || '';
+            document.getElementById('news-published-at').value = article.published_at ? String(article.published_at).slice(0, 10) : '';
+            document.getElementById('news-excerpt').value      = article.excerpt || '';
+            document.getElementById('news-content').value      = article.content || '';
+            document.getElementById('news-status').value       = article.status || 'active';
+            document.getElementById('news-image').value        = article.image || '';
+            renderNewsImage(article.image || '');
+        } else {
+            title.textContent = 'Thêm bài viết';
+        }
+
+        modal.style.display = 'flex';
+    }
+
+    document.getElementById('news-form')?.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const id  = document.getElementById('news-id').value;
+        const btn = document.getElementById('news-submit-btn');
+        const origText = btn.textContent;
+        btn.disabled    = true;
+        btn.textContent = 'Đang lưu...';
+
+        const payload = {
+            title:        document.getElementById('news-title').value,
+            tag:          document.getElementById('news-tag').value || null,
+            published_at: document.getElementById('news-published-at').value || null,
+            excerpt:      document.getElementById('news-excerpt').value || null,
+            content:      document.getElementById('news-content').value || null,
+            image:        document.getElementById('news-image').value || null,
+            status:       document.getElementById('news-status').value,
+        };
+
+        const url    = id ? (ADMIN_BASE + '/news/' + id) : (ADMIN_BASE + '/news');
+        const method = id ? 'PUT' : 'POST';
+        const res    = await apiFetch(url, { method, body: payload });
+
+        btn.disabled    = false;
+        btn.textContent = origText;
+
+        if (res.success) {
+            document.getElementById('news-modal').style.display = 'none';
+            loadNews(newsPage);
+        } else {
+            const errEl = document.getElementById('news-form-error');
+            let msg = res.message || 'Lỗi không xác định.';
+            if (res.errors) msg = Object.values(res.errors).flat().join(' ');
+            if (errEl) { errEl.textContent = msg; errEl.style.display = 'block'; }
+        }
+    });
+
+    async function deleteNews(id, title) {
+        if (!confirm(`Xóa bài viết "${title}"?\nHành động này không thể hoàn tác.`)) return;
+
+        const res = await apiFetch(ADMIN_BASE + '/news/' + id, { method: 'DELETE' });
+        if (res.success) {
+            loadNews(newsPage);
+        } else {
+            alert('Lỗi: ' + (res.message || 'Không thể xóa.'));
+        }
+    }
+
+    function closeNewsModal() {
+        const modal = document.getElementById('news-modal');
+        if (modal) modal.style.display = 'none';
+    }
+
+    document.getElementById('news-modal-close')?.addEventListener('click', closeNewsModal);
+    document.getElementById('news-modal-cancel')?.addEventListener('click', closeNewsModal);
+    document.getElementById('news-modal')?.addEventListener('click', function (e) {
+        if (e.target === this) closeNewsModal();
+    });
+
+    // ---------------------------------------------------------------
+    // FAQs
+    // ---------------------------------------------------------------
+
+    async function loadFaqs() {
+        const tbody = document.getElementById('faqs-list-body');
+        if (!tbody) return;
+
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:40px;color:var(--lux-gray);">Đang tải...</td></tr>';
+
+        const data = await apiFetch(ADMIN_BASE + '/faqs');
+
+        if (!data.success) {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#e11d48;padding:30px;">${data.message || 'Lỗi tải dữ liệu.'}</td></tr>`;
+            return;
+        }
+
+        const items = data.data || [];
+
+        if (!items.length) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:40px;color:var(--lux-gray);">Chưa có câu hỏi nào.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = items.map(f => {
+            const escaped = JSON.stringify(f).replace(/"/g, '&quot;');
+            return `<tr>
+                <td style="color:var(--lux-gray);">${f.group_name}</td>
+                <td><strong>${f.question}</strong></td>
+                <td style="color:var(--lux-gray);">${f.sort_order}</td>
+                <td>
+                    <div style="display:flex;gap:8px;justify-content:flex-end;">
+                        <button class="btn-view" onclick='AdminApp.openFaqModal(${escaped})'>Sửa</button>
+                        <button class="btn-view" style="color:#dc2626;border-color:#fecdd3;"
+                                onclick="AdminApp.deleteFaq(${f.id},'${f.question.replace(/'/g, "\\'")}')">Xóa</button>
+                    </div>
+                </td>
+            </tr>`;
+        }).join('');
+    }
+
+    function openFaqModal(faq) {
+        const modal = document.getElementById('faq-modal');
+        const title = document.getElementById('faq-modal-title');
+        if (!modal) return;
+
+        ['faq-id','faq-group','faq-question','faq-answer','faq-sort-order'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+        const errEl = document.getElementById('faq-form-error');
+        if (errEl) errEl.style.display = 'none';
+
+        if (faq && faq.id) {
+            title.textContent = 'Sửa câu hỏi';
+            document.getElementById('faq-id').value         = faq.id;
+            document.getElementById('faq-group').value      = faq.group_name || '';
+            document.getElementById('faq-question').value   = faq.question || '';
+            document.getElementById('faq-answer').value     = faq.answer || '';
+            document.getElementById('faq-sort-order').value = (faq.sort_order ?? '');
+        } else {
+            title.textContent = 'Thêm câu hỏi';
+        }
+
+        modal.style.display = 'flex';
+    }
+
+    document.getElementById('faq-form')?.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const id  = document.getElementById('faq-id').value;
+        const btn = document.getElementById('faq-submit-btn');
+        const origText = btn.textContent;
+        btn.disabled    = true;
+        btn.textContent = 'Đang lưu...';
+
+        const sortOrderRaw = document.getElementById('faq-sort-order').value;
+
+        const payload = {
+            group_name: document.getElementById('faq-group').value,
+            question:   document.getElementById('faq-question').value,
+            answer:     document.getElementById('faq-answer').value,
+            sort_order: sortOrderRaw !== '' ? parseInt(sortOrderRaw) : null,
+        };
+
+        const url    = id ? (ADMIN_BASE + '/faqs/' + id) : (ADMIN_BASE + '/faqs');
+        const method = id ? 'PUT' : 'POST';
+        const res    = await apiFetch(url, { method, body: payload });
+
+        btn.disabled    = false;
+        btn.textContent = origText;
+
+        if (res.success) {
+            document.getElementById('faq-modal').style.display = 'none';
+            loadFaqs();
+        } else {
+            const errEl = document.getElementById('faq-form-error');
+            let msg = res.message || 'Lỗi không xác định.';
+            if (res.errors) msg = Object.values(res.errors).flat().join(' ');
+            if (errEl) { errEl.textContent = msg; errEl.style.display = 'block'; }
+        }
+    });
+
+    async function deleteFaq(id, question) {
+        if (!confirm(`Xóa câu hỏi "${question}"?\nHành động này không thể hoàn tác.`)) return;
+
+        const res = await apiFetch(ADMIN_BASE + '/faqs/' + id, { method: 'DELETE' });
+        if (res.success) {
+            loadFaqs();
+        } else {
+            alert('Lỗi: ' + (res.message || 'Không thể xóa.'));
+        }
+    }
+
+    function closeFaqModal() {
+        const modal = document.getElementById('faq-modal');
+        if (modal) modal.style.display = 'none';
+    }
+
+    document.getElementById('faq-modal-close')?.addEventListener('click', closeFaqModal);
+    document.getElementById('faq-modal-cancel')?.addEventListener('click', closeFaqModal);
+    document.getElementById('faq-modal')?.addEventListener('click', function (e) {
+        if (e.target === this) closeFaqModal();
+    });
+
+    // ---------------------------------------------------------------
+    // Page Content (Giới thiệu / Hợp tác)
+    // ---------------------------------------------------------------
+
+    const ABOUT_KEYS = (() => {
+        const keys = ['hero_title', 'hero_subtitle', 'story_title', 'story_paragraph_1', 'story_paragraph_2', 'why_title'];
+        for (let i = 1; i <= 3; i++) keys.push(`why_card_${i}_icon`, `why_card_${i}_title`, `why_card_${i}_text`);
+        for (let i = 1; i <= 4; i++) keys.push(`stat_${i}_number`, `stat_${i}_label`);
+        keys.push('cta_title', 'cta_text', 'cta_button');
+        return keys;
+    })();
+
+    const PARTNER_KEYS = (() => {
+        const keys = ['hero_title', 'hero_subtitle', 'types_title'];
+        for (let i = 1; i <= 3; i++) keys.push(`type_${i}_icon`, `type_${i}_title`, `type_${i}_text`);
+        keys.push('benefits_title');
+        for (let i = 1; i <= 4; i++) keys.push(`benefit_${i}_icon`, `benefit_${i}_title`, `benefit_${i}_text`);
+        return keys;
+    })();
+
+    async function loadPageContentSlug(slug, keys) {
+        const res = await apiFetch(ADMIN_BASE + '/page-contents/' + slug);
+        if (!res.success) return;
+
+        keys.forEach(key => {
+            const el = document.getElementById(slug + '-' + key);
+            if (el) el.value = res.data[key] || '';
+        });
+    }
+
+    function loadPageContent() {
+        loadPageContentSlug('about', ABOUT_KEYS);
+        loadPageContentSlug('partner', PARTNER_KEYS);
+    }
+
+    async function submitPageContent(slug, keys) {
+        const errEl = document.getElementById(slug + '-content-error');
+        const okEl  = document.getElementById(slug + '-content-success');
+        if (errEl) errEl.style.display = 'none';
+        if (okEl)  okEl.style.display  = 'none';
+
+        const payload = {};
+        keys.forEach(key => {
+            const el = document.getElementById(slug + '-' + key);
+            payload[key] = el ? el.value : '';
+        });
+
+        const form = document.getElementById(slug + '-content-form');
+        const btn  = form.querySelector('button[type="submit"]');
+        const orig = btn.innerHTML;
+        btn.disabled  = true;
+        btn.innerHTML = 'Đang lưu...';
+
+        const res = await apiFetch(ADMIN_BASE + '/page-contents/' + slug, { method: 'POST', body: payload });
+
+        btn.disabled  = false;
+        btn.innerHTML = orig;
+
+        if (res.success) {
+            if (okEl) { okEl.textContent = 'Đã lưu nội dung!'; okEl.style.display = 'block'; }
+        } else if (res.errors) {
+            if (errEl) { errEl.innerHTML = Object.values(res.errors).flat().join('<br>'); errEl.style.display = 'block'; }
+        } else {
+            if (errEl) { errEl.textContent = res.message || 'Có lỗi xảy ra, vui lòng thử lại.'; errEl.style.display = 'block'; }
+        }
+    }
+
+    document.getElementById('about-content-form')?.addEventListener('submit', function (e) {
+        e.preventDefault();
+        submitPageContent('about', ABOUT_KEYS);
+    });
+
+    document.getElementById('partner-content-form')?.addEventListener('submit', function (e) {
+        e.preventDefault();
+        submitPageContent('partner', PARTNER_KEYS);
+    });
+
+    // ---------------------------------------------------------------
     // Public API
     // ---------------------------------------------------------------
 
@@ -1066,6 +1523,15 @@
         loadSettings,
         openSettingsLogoPicker,
         clearSettingsLogo,
+        // News
+        openNewsModal,
+        deleteNews,
+        openNewsImagePicker,
+        handleNewsImageDrop,
+        clearNewsImage,
+        // FAQs
+        openFaqModal,
+        deleteFaq,
     };
 
 })();
