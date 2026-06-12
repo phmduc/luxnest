@@ -13,6 +13,7 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\MemberDashboardController;
+use App\Http\Controllers\PageController;
 use App\Services\GoHostService;
 
 // ---------------------------------------------------------------
@@ -23,6 +24,12 @@ Route::get('/hotel/{slug}', [HotelController::class, 'show'])->name('hotel.show'
 Route::get('/rooms', [RoomsController::class, 'index'])->name('rooms.index');
 Route::get('/villa', [VillaController::class, 'index'])->name('villa.index');
 Route::get('/thue-xe', [CarRentalController::class, 'index'])->name('car-rental.index');
+
+Route::get('/gioi-thieu', [PageController::class, 'about'])->name('about.index');
+Route::get('/cau-hoi-thuong-gap', [PageController::class, 'faq'])->name('faq.index');
+Route::get('/hop-tac', [PageController::class, 'partner'])->name('partner.index');
+Route::get('/lien-he', [PageController::class, 'contact'])->name('contact.index');
+Route::get('/tin-tuc', [PageController::class, 'news'])->name('news.index');
 
 Route::post('/chat/send', [ChatController::class, 'send'])->name('chat.send');
 

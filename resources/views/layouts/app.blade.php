@@ -45,9 +45,14 @@
                 <div class="lx-header__menu" id="mobileMenu">
                     <!-- Main Nav -->
                     <nav class="lx-header__nav">
-                        <a href="{{ route('rooms.index') }}" class="lx-header__nav-item">Chỗ ở</a>
+                        <a href="{{ route('rooms.index') }}" class="lx-header__nav-item">Phòng</a>
                         <a href="{{ route('villa.index') }}" class="lx-header__nav-item">Villa</a>
-                        <a href="{{ route('car-rental.index') }}" class="lx-header__nav-item">Thuê xe</a>
+                        <a href="{{ route('car-rental.index') }}" class="lx-header__nav-item">Thuê xe - Tour</a>
+                        <a href="{{ route('about.index') }}" class="lx-header__nav-item">Giới thiệu</a>
+                        <a href="{{ route('faq.index') }}" class="lx-header__nav-item">Câu hỏi thường gặp</a>
+                        <a href="{{ route('partner.index') }}" class="lx-header__nav-item">Hợp tác</a>
+                        <a href="{{ route('contact.index') }}" class="lx-header__nav-item">Liên hệ</a>
+                        <a href="{{ route('news.index') }}" class="lx-header__nav-item">Tin tức</a>
                     </nav>
 
                     <!-- Auth & Utils -->
