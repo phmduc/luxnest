@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Setting;
 use Illuminate\Http\Request;
 
 class VillaController extends Controller
@@ -115,7 +116,8 @@ class VillaController extends Controller
         $matched  = collect($branches)->first(fn($b) => mb_strtolower($b) === mb_strtolower($location));
         $location = $matched ?? $branches[0];
         $villas   = $villas_by_branch[$location] ?? [];
+        $settings = Setting::current();
 
-        return view('villa.index', compact('villas', 'villas_by_branch', 'branches', 'location'));
+        return view('villa.index', compact('villas', 'villas_by_branch', 'branches', 'location', 'settings'));
     }
 }

@@ -105,16 +105,16 @@
 }
 
 .hero-btn-primary {
-    background: #FF5B00;
+    background: #996d4e;
     color: #fff;
-    border-color: #FF5B00;
+    border-color: #996d4e;
 }
 
 .hero-btn-primary:hover {
     background: #e64f00;
     border-color: #e64f00;
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(255, 91, 0, 0.4);
+    box-shadow: 0 8px 20px rgba(153, 109, 78, 0.4);
 }
 
 .hero-btn-secondary {
@@ -175,7 +175,7 @@
 }
 
 .hero-pagination .swiper-pagination-bullet-active {
-    background: #FF5B00;
+    background: #996d4e;
     width: 40px;
     border-radius: 6px;
 }
@@ -315,7 +315,7 @@
 
 .hero-search-filter .pill-field>i {
     font-size: 24px;
-    color: #FF5B00;
+    color: #996d4e;
     /* Primary color */
     margin-right: 15px;
 }
@@ -387,12 +387,12 @@
 
 .custom-dropdown-item:hover {
     background: #fff5f0;
-    color: #FF5B00;
+    color: #996d4e;
 }
 
 .custom-dropdown-item.active {
     font-weight: 600;
-    color: #FF5B00;
+    color: #996d4e;
     background: #fff0e6;
 }
 
@@ -497,16 +497,16 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    color: #FF5B00;
+    color: #996d4e;
     font-size: 14px;
     transition: all 0.2s ease;
     padding: 0;
 }
 
 .guest-btn:hover:not(:disabled) {
-    border-color: #FF5B00;
+    border-color: #996d4e;
     color: #fff;
-    background: #FF5B00;
+    background: #996d4e;
 }
 
 .guest-btn:disabled {
@@ -531,7 +531,7 @@
 
 /* Submit Button */
 .hero-search-btn-round {
-    background: #FF5B00;
+    background: #996d4e;
     color: #fff;
     border: none;
     width: 60px;
@@ -559,7 +559,7 @@
 .hero-search-btn-round:hover {
     background: #e64f00;
     transform: translateY(-50%) scale(1.05);
-    box-shadow: 0 8px 24px rgba(255, 91, 0, 0.35);
+    box-shadow: 0 8px 24px rgba(153, 109, 78, 0.35);
 }
 
 /* Responsive adjustments for filter bar */

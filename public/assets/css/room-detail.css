@@ -137,7 +137,7 @@
 }
 
 .badge.popular {
-    background: #FF5B00;
+    background: #996d4e;
     color: #fff;
 }
 
@@ -345,7 +345,7 @@
 
 .btn-book-now {
     width: 100%;
-    background: #FF5B00;
+    background: #996d4e;
     color: #fff;
     padding: 16px;
     border: none;
@@ -357,7 +357,7 @@
 }
 
 .btn-book-now:hover {
-    background: #e04f00;
+    background: #7a573e;
 }
 
 .charge-note {
@@ -443,7 +443,7 @@
 }
 
 .btn-book-now-mobile {
-    background: #FF5B00;
+    background: #996d4e;
     color: #fff;
     border: none;
     padding: 12px 24px;
@@ -674,7 +674,7 @@
 }
 
 .btn-view-room {
-    background-color: #FF5B00;
+    background-color: #996d4e;
     color: #fff;
     padding: 10px 20px;
     border-radius: 8px;
@@ -684,7 +684,7 @@
 }
 
 .btn-view-room:hover {
-    background-color: #e04f00;
+    background-color: #7a573e;
     color: #fff;
 }
 
@@ -720,8 +720,8 @@
 .flatpickr-day.selected.nextMonthDay,
 .flatpickr-day.startRange.nextMonthDay,
 .flatpickr-day.endRange.nextMonthDay {
-    background: #FF5B00 !important;
-    border-color: #FF5B00 !important;
+    background: #996d4e !important;
+    border-color: #996d4e !important;
 }
 
 .flatpickr-day:hover,
@@ -732,7 +732,7 @@
 .flatpickr-day.nextMonthDay:focus {
     background: #ffecd9 !important;
     border-color: #ffecd9 !important;
-    color: #FF5B00 !important;
+    color: #996d4e !important;
 }
 
 .flatpickr-months .flatpickr-month {
@@ -908,11 +908,11 @@
 }
 
 .form-group textarea:focus {
-    border-color: #FF5B00;
+    border-color: #996d4e;
 }
 
 .btn-submit-review {
-    background: #FF5B00;
+    background: #996d4e;
     color: #fff;
     padding: 12px 30px;
     border: none;
@@ -923,9 +923,9 @@
 }
 
 .btn-submit-review:hover {
-    background: #e04f00;
+    background: #7a573e;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(255, 91, 0, 0.2);
+    box-shadow: 0 4px 12px rgba(153, 109, 78, 0.2);
 }
 
 /* Review Login CTA */
@@ -939,12 +939,12 @@
 }
 
 .review-login-cta:hover {
-    border-color: #FF5B00;
+    border-color: #996d4e;
 }
 
 .review-login-cta i {
     font-size: 3rem;
-    color: #FF5B00;
+    color: #996d4e;
     margin-bottom: 15px;
 }
 
@@ -995,7 +995,7 @@
     text-align: center;
     padding: 24px 20px;
     background: #fff8f0;
-    border: 2px solid #FF5B00;
+    border: 2px solid #996d4e;
     border-radius: 12px;
     margin-top: 4px;
 }

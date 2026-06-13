@@ -113,7 +113,7 @@
 }
 
 .blog-category {
-    color: #FF5B00;
+    color: #996d4e;
 }
 
 .blog-date {
@@ -135,7 +135,7 @@
 }
 
 .blog-card:hover .blog-title {
-    color: #FF5B00;
+    color: #996d4e;
 }
 
 /* Excerpt */
@@ -156,7 +156,7 @@
 .read-more {
     font-size: 0.875rem;
     font-weight: 600;
-    color: #FF5B00;
+    color: #996d4e;
     display: inline-flex;
     align-items: center;
     gap: 6px;

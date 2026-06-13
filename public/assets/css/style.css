@@ -8,7 +8,7 @@ Text Domain: ducpham
 
 /* Reset & Basics */
 :root {
-    --primary-color: #FF5B00;
+    --primary-color: #996d4e;
     --secondary-color: #0f172a;
     --accent-color: #3b82f6;
     --text-color: #1e293b;
@@ -107,7 +107,7 @@ a:hover {
 .klook-logo-text {
     font-size: 24px;
     font-weight: 700;
-    color: #FF5B00;
+    color: #996d4e;
     letter-spacing: -0.5px;
 }
 
@@ -160,7 +160,7 @@ a:hover {
 }
 
 .klook-search-button:hover {
-    color: #FF5B00;
+    color: #996d4e;
 }
 
 /* Utilities */
@@ -215,11 +215,11 @@ a:hover {
 }
 
 .klook-link:hover {
-    color: #FF5B00;
+    color: #996d4e;
 }
 
 .klook-signin-btn {
-    background: #FF5B00;
+    background: #996d4e;
     color: #fff;
     padding: 8px 24px;
     border-radius: 20px;
@@ -233,7 +233,7 @@ a:hover {
 .klook-signin-btn:hover {
     background: #e64f00;
     transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(255, 91, 0, 0.3);
+    box-shadow: 0 4px 8px rgba(153, 109, 78, 0.3);
 }
 
 /* Bottom Navigation Row */
@@ -285,7 +285,7 @@ a:hover {
 }
 
 .klook-nav-menu a:hover {
-    color: #FF5B00;
+    color: #996d4e;
 }
 
 .klook-gift {
@@ -295,7 +295,7 @@ a:hover {
 }
 
 .klook-gift-link {
-    color: #FF5B00;
+    color: #996d4e;
     text-decoration: none;
     font-size: 14px;
     font-weight: 600;
@@ -414,7 +414,7 @@ a:hover {
 }
 
 .klook-mobile-signin {
-    background: #FF5B00;
+    background: #996d4e;
     color: #fff;
 }
 
@@ -462,7 +462,7 @@ a:hover {
 }
 
 .klook-mobile-menu-list a:hover {
-    color: #FF5B00;
+    color: #996d4e;
 }
 
 /* Mobile Links */
@@ -484,7 +484,7 @@ a:hover {
 }
 
 .klook-mobile-link:hover {
-    color: #FF5B00;
+    color: #996d4e;
 }
 
 .klook-mobile-link svg {
@@ -672,7 +672,7 @@ body.woocommerce-order-pay h1.entry-title {
     font-weight: 800 !important;
     color: #333 !important;
     margin-bottom: 30px !important;
-    border-bottom: 2px solid #FF5B00 !important;
+    border-bottom: 2px solid #996d4e !important;
     padding-bottom: 10px !important;
     display: inline-block !important;
 }
@@ -681,7 +681,7 @@ body.woocommerce-order-pay h1.entry-title {
 .woocommerce-error,
 .woocommerce-info,
 .woocommerce-message {
-    border-top-color: #FF5B00 !important;
+    border-top-color: #996d4e !important;
     border-radius: 8px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
     background-color: #fffaf5 !important;
@@ -692,7 +692,7 @@ body.woocommerce-order-pay h1.entry-title {
 .woocommerce-error::before,
 .woocommerce-info::before,
 .woocommerce-message::before {
-    color: #FF5B00 !important;
+    color: #996d4e !important;
 }
 
 /* Order Details Table */
@@ -733,7 +733,7 @@ body.woocommerce-order-pay h1.entry-title {
 .woocommerce table.shop_table tfoot tr:last-child td {
     font-size: 1.1rem;
     font-weight: 700;
-    color: #FF5B00;
+    color: #996d4e;
 }
 
 /* Payment Box Section */
@@ -756,7 +756,7 @@ body.woocommerce-order-pay h1.entry-title {
 #add_payment_method #payment div.payment_box,
 .woocommerce-cart #payment div.payment_box,
 .woocommerce-checkout #payment div.payment_box {
-    background-color: rgba(255, 91, 0, 0.05) !important;
+    background-color: rgba(153, 109, 78, 0.05) !important;
     color: #444 !important;
     border-radius: 8px !important;
     box-shadow: none !important;
@@ -766,7 +766,7 @@ body.woocommerce-order-pay h1.entry-title {
 #add_payment_method #payment div.payment_box::before,
 .woocommerce-cart #payment div.payment_box::before,
 .woocommerce-checkout #payment div.payment_box::before {
-    border-bottom-color: rgba(255, 91, 0, 0.05) !important;
+    border-bottom-color: rgba(153, 109, 78, 0.05) !important;
 }
 
 /* Payment Submit Button */
@@ -778,7 +778,7 @@ body.woocommerce-order-pay h1.entry-title {
 
 .woocommerce #payment #place_order,
 .woocommerce-page #payment #place_order {
-    background-color: #FF5B00 !important;
+    background-color: #996d4e !important;
     color: #fff !important;
     font-weight: 700 !important;
     font-size: 1.2rem !important;
@@ -791,6 +791,6 @@ body.woocommerce-order-pay h1.entry-title {
 
 .woocommerce #payment #place_order:hover,
 .woocommerce-page #payment #place_order:hover {
-    background-color: #e04f00 !important;
-    box-shadow: 0 5px 15px rgba(255, 91, 0, 0.3) !important;
+    background-color: #7a573e !important;
+    box-shadow: 0 5px 15px rgba(153, 109, 78, 0.3) !important;
 }

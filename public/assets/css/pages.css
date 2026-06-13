@@ -5,7 +5,7 @@
 
 /* ---- Hero banner ---- */
 .pg-hero {
-    background: linear-gradient(135deg, #1a3a6b 0%, #14305a 100%);
+    background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
     color: #fff;
     padding: 64px 0 48px;
     text-align: center;
@@ -64,7 +64,7 @@
 .pg-card__text { font-size: 0.875rem; color: #64748b; line-height: 1.6; margin: 0; }
 
 .pg-stat { text-align: center; }
-.pg-stat__number { font-size: 2rem; font-weight: 800; color: #FF5B00; }
+.pg-stat__number { font-size: 2rem; font-weight: 800; color: #996d4e; }
 .pg-stat__label { font-size: 0.875rem; color: #64748b; margin-top: 4px; }
 
 /* ---- CTA button ---- */
@@ -73,7 +73,7 @@
     align-items: center;
     gap: 8px;
     padding: 13px 32px;
-    background: #FF5B00;
+    background: #996d4e;
     color: #fff;
     border: none;
     border-radius: 10px;
@@ -87,17 +87,17 @@
 .pg-btn:hover { background: #e64f00; color: #fff; transform: translateY(-2px); }
 .pg-btn--outline {
     background: transparent;
-    color: #1a3a6b;
-    border: 1.5px solid #1a3a6b;
+    color: #1a1a1a;
+    border: 1.5px solid #1a1a1a;
 }
-.pg-btn--outline:hover { background: #1a3a6b; color: #fff; }
+.pg-btn--outline:hover { background: #1a1a1a; color: #fff; }
 
 /* ---- FAQ accordion ---- */
 .pg-faq-group { margin-bottom: 32px; }
 .pg-faq-group h3 {
     font-size: 1.125rem;
     font-weight: 700;
-    color: #1a3a6b;
+    color: #1a1a1a;
     margin-bottom: 14px;
 }
 .pg-faq-item {
@@ -123,7 +123,7 @@
     content: '+';
     flex-shrink: 0;
     font-size: 1.25rem;
-    color: #FF5B00;
+    color: #996d4e;
     font-weight: 700;
     transition: transform 0.2s;
 }
@@ -155,14 +155,14 @@
 .pg-contact-row i {
     width: 36px; height: 36px;
     border-radius: 50%;
-    background: rgba(255,91,0,0.1);
-    color: #FF5B00;
+    background: rgba(153, 109, 78,0.1);
+    color: #996d4e;
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
 }
 .pg-contact-row strong { display: block; color: #0f172a; margin-bottom: 2px; font-size: 0.9rem; }
 .pg-contact-row span, .pg-contact-row a { color: #64748b; font-size: 0.875rem; }
-.pg-contact-row a:hover { color: #FF5B00; }
+.pg-contact-row a:hover { color: #996d4e; }
 
 /* ---- Form (shared with contact/partner) ---- */
 .pg-form-wrap {
@@ -190,7 +190,7 @@
 }
 .pg-field input:focus,
 .pg-field select:focus,
-.pg-field textarea:focus { border-color: #FF5B00; box-shadow: 0 0 0 3px rgba(255,91,0,0.08); }
+.pg-field textarea:focus { border-color: #996d4e; box-shadow: 0 0 0 3px rgba(153, 109, 78,0.08); }
 .pg-field textarea { resize: vertical; }
 
 .pg-success {
@@ -226,7 +226,7 @@
 }
 .pg-news-card__thumb {
     height: 150px;
-    background: linear-gradient(135deg, #1a3a6b 0%, #FF5B00 120%);
+    background: linear-gradient(135deg, #1a1a1a 0%, #996d4e 120%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -239,8 +239,8 @@
 .pg-news-card__body { padding: 20px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
 .pg-news-card__tag {
     display: inline-block;
-    background: rgba(255,91,0,0.1);
-    color: #FF5B00;
+    background: rgba(153, 109, 78,0.1);
+    color: #996d4e;
     font-size: 0.75rem;
     font-weight: 700;
     padding: 3px 10px;

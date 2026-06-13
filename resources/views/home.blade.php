@@ -213,14 +213,14 @@
         </div>
         @php
         $branchMeta = [
-            'Hotel'     => ['logo' => '🏨', 'tag' => 'Khách sạn',  'sub' => 'Không gian tinh tế, dịch vụ chuyên nghiệp', 'bg' => '#1a3a6b', 'link' => route('rooms.index', ['keyword' => 'Hotel'])],
+            'Hotel'     => ['logo' => '🏨', 'tag' => 'Khách sạn',  'sub' => 'Không gian tinh tế, dịch vụ chuyên nghiệp', 'bg' => '#1a1a1a', 'link' => route('rooms.index', ['keyword' => 'Hotel'])],
             'Villa'     => ['logo' => '🏡', 'tag' => 'Villa',       'sub' => 'Riêng tư, sang trọng giữa thiên nhiên',      'bg' => '#7c3aed', 'link' => route('villa.index', ['location' => 'Đà Lạt'])],
             'Residence' => ['logo' => '🏢', 'tag' => 'Căn hộ',      'sub' => 'Tiện nghi như nhà, đẳng cấp resort',         'bg' => '#0f766e', 'link' => route('rooms.index', ['keyword' => 'Residence'])],
         ];
         @endphp
         <div class="brand-grid">
             @foreach($branchRooms as $branch => $room)
-            @php $meta = $branchMeta[$branch] ?? ['logo'=>'🏠','tag'=>$branch,'sub'=>'','bg'=>'#1a3a6b','link'=>'#']; @endphp
+            @php $meta = $branchMeta[$branch] ?? ['logo'=>'🏠','tag'=>$branch,'sub'=>'','bg'=>'#1a1a1a','link'=>'#']; @endphp
             <a href="{{ $meta['link'] }}" class="brand-card">
                 <img src="{{ $room->image }}" alt="{{ $branch }}" class="brand-card__img">
                 <div class="brand-card__overlay" style="background: linear-gradient(135deg, {{ $meta['bg'] }}cc, {{ $meta['bg'] }}88);">
@@ -429,17 +429,17 @@
               <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f1f5f9;">
                 <div><div style="font-weight:600;font-size:.9rem">Người lớn</div><div style="font-size:.75rem;color:#94a3b8">Từ 13 tuổi</div></div>
                 <div style="display:flex;align-items:center;gap:10px;">
-                  <button type="button" class="sw2-gc minus" data-type="adults" style="width:30px;height:30px;border-radius:50%;border:1.5px solid #e2e8f0;background:#fff;cursor:pointer;font-size:1rem;font-weight:700;color:#1a3a6b;">−</button>
+                  <button type="button" class="sw2-gc minus" data-type="adults" style="width:30px;height:30px;border-radius:50%;border:1.5px solid #e2e8f0;background:#fff;cursor:pointer;font-size:1rem;font-weight:700;color:#1a1a1a;">−</button>
                   <span class="sw2-gc-num" data-type="adults" style="width:20px;text-align:center;font-weight:700;">2</span>
-                  <button type="button" class="sw2-gc plus" data-type="adults" style="width:30px;height:30px;border-radius:50%;border:1.5px solid #e2e8f0;background:#fff;cursor:pointer;font-size:1rem;font-weight:700;color:#1a3a6b;">+</button>
+                  <button type="button" class="sw2-gc plus" data-type="adults" style="width:30px;height:30px;border-radius:50%;border:1.5px solid #e2e8f0;background:#fff;cursor:pointer;font-size:1rem;font-weight:700;color:#1a1a1a;">+</button>
                 </div>
               </div>
               <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;">
                 <div><div style="font-weight:600;font-size:.9rem">Trẻ em</div><div style="font-size:.75rem;color:#94a3b8">2–12 tuổi</div></div>
                 <div style="display:flex;align-items:center;gap:10px;">
-                  <button type="button" class="sw2-gc minus" data-type="children" style="width:30px;height:30px;border-radius:50%;border:1.5px solid #e2e8f0;background:#fff;cursor:pointer;font-size:1rem;font-weight:700;color:#1a3a6b;">−</button>
+                  <button type="button" class="sw2-gc minus" data-type="children" style="width:30px;height:30px;border-radius:50%;border:1.5px solid #e2e8f0;background:#fff;cursor:pointer;font-size:1rem;font-weight:700;color:#1a1a1a;">−</button>
                   <span class="sw2-gc-num" data-type="children" style="width:20px;text-align:center;font-weight:700;">0</span>
-                  <button type="button" class="sw2-gc plus" data-type="children" style="width:30px;height:30px;border-radius:50%;border:1.5px solid #e2e8f0;background:#fff;cursor:pointer;font-size:1rem;font-weight:700;color:#1a3a6b;">+</button>
+                  <button type="button" class="sw2-gc plus" data-type="children" style="width:30px;height:30px;border-radius:50%;border:1.5px solid #e2e8f0;background:#fff;cursor:pointer;font-size:1rem;font-weight:700;color:#1a1a1a;">+</button>
                 </div>
               </div>`;
             document.body.appendChild(drop);

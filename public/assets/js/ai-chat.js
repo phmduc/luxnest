@@ -156,7 +156,7 @@
             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
             .replace(/\*(.*?)\*/g, '<em>$1</em>');
         const cta = roomsUrl
-            ? `<br><br><a href="${roomsUrl}" style="color:#FF5B00;font-weight:700;text-decoration:underline;">→ Đặt phòng ngay</a>`
+            ? `<br><br><a href="${roomsUrl}" style="color:#996d4e;font-weight:700;text-decoration:underline;">→ Đặt phòng ngay</a>`
             : '';
         messages.insertAdjacentHTML('beforeend', `
         <div class="ai-message bot-message">

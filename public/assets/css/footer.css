@@ -83,7 +83,7 @@
 
 .footer-links li a:hover,
 .contact-list li a:hover {
-    color: #FF5B00;
+    color: #996d4e;
 }
 
 .contact-list li {
@@ -95,7 +95,7 @@
 
 .contact-list li i {
     font-size: 1.25rem;
-    color: #FF5B00;
+    color: #996d4e;
     margin-top: 2px;
 }
 
@@ -130,7 +130,7 @@
 }
 
 .newsletter-form button {
-    background: #FF5B00;
+    background: #996d4e;
     border: none;
     color: #fff;
     padding: 0 20px;
@@ -141,7 +141,7 @@
 }
 
 .newsletter-form button:hover {
-    background: #e04f00;
+    background: #7a573e;
 }
 
 .footer-social {
@@ -164,7 +164,7 @@
 }
 
 .social-icon:hover {
-    background: #FF5B00;
+    background: #996d4e;
     transform: translateY(-3px);
 }
 

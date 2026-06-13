@@ -24,7 +24,7 @@
     align-items: center;
     gap: 8px;
     padding: 12px 24px;
-    background: #FF5B00;
+    background: #996d4e;
     color: #fff;
     border-radius: 10px;
     font-weight: 700;
@@ -51,7 +51,7 @@
 .cr-table tbody tr:last-child td { border-bottom: none; }
 .cr-row-even { background: #f8fafc; }
 .cr-table tbody tr:hover { background: #fff7f3; }
-.cr-price-cell { font-weight: 700; color: #FF5B00; }
+.cr-price-cell { font-weight: 700; color: #996d4e; }
 .cr-note { color: #64748b; font-size: 13px; }
 
 .cr-table-note { font-size: 13px; color: #94a3b8; margin-bottom: 40px; font-style: italic; }
@@ -84,13 +84,13 @@
 }
 .cr-field input:focus,
 .cr-field select:focus,
-.cr-field textarea:focus { border-color: #FF5B00; box-shadow: 0 0 0 3px rgba(255,91,0,0.08); }
+.cr-field textarea:focus { border-color: #996d4e; box-shadow: 0 0 0 3px rgba(153, 109, 78,0.08); }
 .cr-field textarea { resize: vertical; }
 
 .cr-form-footer { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
 .cr-submit-btn {
     padding: 13px 32px;
-    background: #FF5B00;
+    background: #996d4e;
     color: #fff;
     border: none;
     border-radius: 10px;
@@ -104,7 +104,7 @@
 .cr-submit-btn:disabled { background: #94a3b8; cursor: not-allowed; transform: none; }
 
 .cr-history-link { font-size: 14px; color: #64748b; text-decoration: none; }
-.cr-history-link:hover { color: #FF5B00; }
+.cr-history-link:hover { color: #996d4e; }
 
 .cr-success {
     display: flex;
@@ -120,7 +120,7 @@
 .cr-success span { font-size: 24px; }
 .cr-success strong { display: block; color: #15803d; margin-bottom: 4px; }
 .cr-success p { color: #166534; margin: 0; }
-.cr-success a { color: #FF5B00; font-weight: 700; }
+.cr-success a { color: #996d4e; font-weight: 700; }
 
 /* Success Popup */
 .success-popup-overlay {
@@ -152,7 +152,7 @@
 .success-popup-card p  { font-size: 16px; color: #64748b; margin-bottom: 30px; line-height: 1.6; }
 .success-popup-card button {
     width: 100%; padding: 16px; border-radius: 12px; border: none;
-    background: #FF5B00; color: #fff; font-weight: 700; font-size: 16px;
+    background: #996d4e; color: #fff; font-weight: 700; font-size: 16px;
     cursor: pointer; transition: all 0.2s; font-family: inherit;
 }
 .success-popup-card button:hover { background: #e64f00; transform: translateY(-2px); }

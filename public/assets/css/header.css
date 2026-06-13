@@ -28,13 +28,13 @@ a { text-decoration: none; color: inherit; }
     position: fixed;
     top: 0; left: 0; right: 0;
     z-index: 1000;
-    background: #1a3a6b;
+    background: #1a1a1a;
     box-shadow: 0 2px 12px rgba(0,0,0,0.15);
     transition: background 0.3s, box-shadow 0.3s;
 }
 
 .lx-header--sticky {
-    background: #14305a;
+    background: #000000;
     box-shadow: 0 4px 20px rgba(0,0,0,0.25);
 }
 
@@ -141,7 +141,7 @@ a { text-decoration: none; color: inherit; }
 }
 .lx-header__auth-btn--solid {
     background: #ffd166;
-    color: #1a3a6b;
+    color: #1a1a1a;
     border: 1.5px solid #ffd166;
 }
 .lx-header__auth-btn--solid:hover { background: #f5c842; border-color: #f5c842; }
@@ -170,7 +170,7 @@ a { text-decoration: none; color: inherit; }
    FOOTER
    ========================================================= */
 .lx-footer {
-    background: #0f2040;
+    background: #111111;
     color: rgba(255,255,255,0.8);
     font-size: 0.875rem;
     margin-top: 60px;
@@ -214,7 +214,7 @@ a { text-decoration: none; color: inherit; }
     font-size: 0.875rem;
     transition: background 0.2s, color 0.2s;
 }
-.lx-footer__social:hover { background: #ffd166; color: #0f2040; }
+.lx-footer__social:hover { background: #ffd166; color: #111111; }
 
 .lx-footer__heading {
     color: #fff;
@@ -307,7 +307,7 @@ a { text-decoration: none; color: inherit; }
         bottom: 0;
         width: 320px;
         max-width: 85vw;
-        background: #14305a;
+        background: #000000;
         flex-direction: column;
         align-items: stretch;
         padding: 24px 20px;

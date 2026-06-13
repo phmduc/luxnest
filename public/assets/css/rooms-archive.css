@@ -406,16 +406,16 @@
 }
 
 .wishlist-btn-overlay:hover .heart-icon {
-    color: #FF5B00;
+    color: #996d4e;
 }
 
 .wishlist-btn-overlay.active {
     background: white;
-    box-shadow: 0 4px 15px rgba(255, 91, 0, 0.2);
+    box-shadow: 0 4px 15px rgba(153, 109, 78, 0.2);
 }
 
 .wishlist-btn-overlay.active .heart-icon {
-    color: #FF5B00 !important;
+    color: #996d4e !important;
 }
 
 .wishlist-btn-overlay.active .heart-outline {
@@ -691,7 +691,7 @@
 }
 
 .select-room-btn {
-    background: #ff5b00;
+    background: #996d4e;
     color: #fff;
     border: none;
     padding: 12px;

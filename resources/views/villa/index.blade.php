@@ -53,7 +53,7 @@
         <div style="display:flex;gap:10px;margin-bottom:32px;flex-wrap:wrap">
             @foreach($branches as $branch)
             <a href="{{ route('villa.index', ['location' => $branch]) }}"
-               style="padding:8px 20px;border-radius:50px;font-weight:700;font-size:.9rem;text-decoration:none;border:2px solid {{ $branch === $location ? '#1a3a6b' : '#e0e0e0' }};background:{{ $branch === $location ? '#1a3a6b' : '#fff' }};color:{{ $branch === $location ? '#fff' : '#555' }};transition:all .2s">
+               style="padding:8px 20px;border-radius:50px;font-weight:700;font-size:.9rem;text-decoration:none;border:2px solid {{ $branch === $location ? '#1a1a1a' : '#e0e0e0' }};background:{{ $branch === $location ? '#1a1a1a' : '#fff' }};color:{{ $branch === $location ? '#fff' : '#555' }};transition:all .2s">
                 {{ $branch }}
             </a>
             @endforeach
@@ -62,31 +62,38 @@
         @if(count($villas) > 0)
         <div class="villa-grid">
             @foreach($villas as $villa)
-            <div class="villa-card">
-                <a href="{{ $villa['link'] }}" class="villa-image-link">
-                    <img src="{{ $villa['image'] }}" alt="{{ $villa['name'] }}" class="villa-image" loading="lazy">
-                </a>
+            <div class="villa-item-horizontal">
+                <div class="villa-item-gallery">
+                    <a href="tel:{{ preg_replace('/\s+/', '', $settings->hotline ?? '') }}" class="main-image-link">
+                        <span class="main-image" style="background-image:url('{{ $villa['image'] }}')"></span>
+                    </a>
+                </div>
 
-                <div class="villa-card-content">
-                    <h3>
-                        <a href="{{ $villa['link'] }}">{{ $villa['name'] }}</a>
-                    </h3>
+                <div class="villa-item-content">
+                    <h3 class="villa-name">{{ $villa['name'] }}</h3>
 
-                    <div class="villa-meta">
-                        <div class="meta-item">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="#1a3a6b" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                            {{ $villa['location_desc'] }}
-                        </div>
-                        <div class="meta-item">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="#1a3a6b" xmlns="http://www.w3.org/2000/svg"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-                            {{ $villa['beds'] }}
-                        </div>
-                        <div class="meta-item">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="#1a3a6b" xmlns="http://www.w3.org/2000/svg"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
-                            {{ $villa['guests'] }}
-                        </div>
+                    <div class="villa-location">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="#1a1a1a" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                        {{ $villa['location_desc'] }}
                     </div>
 
+                    <div class="villa-amenities">
+                        <span>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="#1a1a1a" xmlns="http://www.w3.org/2000/svg"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                            {{ $villa['beds'] }}
+                        </span>
+                        <span>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="#1a1a1a" xmlns="http://www.w3.org/2000/svg"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+                            {{ $villa['guests'] }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="villa-item-action">
+                    <p class="villa-contact-label">Liên hệ đặt phòng</p>
+                    <a href="tel:{{ preg_replace('/\s+/', '', $settings->hotline ?? '') }}" class="villa-call-btn">
+                        <i class="fa-solid fa-phone"></i> {{ $settings->hotline }}
+                    </a>
                 </div>
             </div>
             @endforeach

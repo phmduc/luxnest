@@ -4,6 +4,7 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('assets/css/hotel-detail.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css" />
     <style>
     /* ── Policy grid responsive ── */
     .policy-grid {
@@ -40,7 +41,7 @@
         .mobile-book-bar__amount {
             font-size: 1.2rem;
             font-weight: 800;
-            color: #1a3a6b;
+            color: #1a1a1a;
             line-height: 1.2;
         }
         .mobile-book-bar__note {
@@ -48,7 +49,7 @@
             color: #888;
         }
         .mobile-book-bar__btn {
-            background: #ff5b00;
+            background: #996d4e;
             color: #fff;
             border: none;
             padding: 13px 28px;
@@ -99,21 +100,32 @@
     {{-- GALLERY --}}
     <div class="hd-gallery lx-container">
         <div class="hd-gallery__main">
-            <img src="{{ $hotel['images'][0] ?? '' }}" alt="{{ $hotel['name'] }}">
+            <a href="{{ $hotel['images'][0] ?? '' }}" data-fancybox="gallery" data-caption="{{ $hotel['name'] }}">
+                <img src="{{ $hotel['images'][0] ?? '' }}" alt="{{ $hotel['name'] }}">
+            </a>
         </div>
         @if(count($hotel['images']) > 1)
         <div class="hd-gallery__grid">
             @foreach(array_slice($hotel['images'], 1, 4) as $idx => $img)
                 <div class="hd-gallery__item @if($idx == 3) hd-gallery__item--last @endif">
-                    <img src="{{ $img }}" alt="Gallery {{ $idx + 2 }}">
-                    @if($idx == 3 && count($hotel['images']) > 5)
-                        <div class="hd-gallery__more">
-                            <span>+{{ count($hotel['images']) - 5 }} Ảnh</span>
-                        </div>
-                    @endif
+                    <a href="{{ $img }}" data-fancybox="gallery" data-caption="{{ $hotel['name'] }} - Ảnh {{ $idx + 2 }}">
+                        <img src="{{ $img }}" alt="Gallery {{ $idx + 2 }}">
+                        @if($idx == 3 && count($hotel['images']) > 5)
+                            <div class="hd-gallery__more">
+                                <span>+{{ count($hotel['images']) - 5 }} Ảnh</span>
+                            </div>
+                        @endif
+                    </a>
                 </div>
             @endforeach
         </div>
+        @endif
+
+        {{-- Hidden links so remaining images are reachable via lightbox slide --}}
+        @if(count($hotel['images']) > 5)
+            @foreach(array_slice($hotel['images'], 5) as $idx => $img)
+                <a href="{{ $img }}" data-fancybox="gallery" data-caption="{{ $hotel['name'] }} - Ảnh {{ $idx + 6 }}" style="display:none;"></a>
+            @endforeach
         @endif
     </div>
 
@@ -234,7 +246,7 @@
                                 Đặt ngay
                             </a>
                             @else
-                            <a href="{{ route('hotel.show', $r['slug']) }}" class="hd-room__book-btn" style="background:#1a3a6b;text-align:center;">
+                            <a href="{{ route('hotel.show', $r['slug']) }}" class="hd-room__book-btn" style="background:#1a1a1a;text-align:center;">
                                 Xem phòng
                             </a>
                             @endif
@@ -252,7 +264,7 @@
 
                     {{-- Check-in / out --}}
                     <div style="background:#f8fafc;border-radius:14px;padding:20px;">
-                        <h4 style="margin:0 0 14px;font-size:1rem;color:#1a3a6b;display:flex;align-items:center;gap:8px;">
+                        <h4 style="margin:0 0 14px;font-size:1rem;color:#1a1a1a;display:flex;align-items:center;gap:8px;">
                             <i class="fa-regular fa-clock"></i> Giờ nhận & trả phòng
                         </h4>
                         <div style="display:flex;flex-direction:column;gap:10px;font-size:.9rem;color:#444;">
@@ -277,7 +289,7 @@
 
                     {{-- Cancellation --}}
                     <div style="background:#f8fafc;border-radius:14px;padding:20px;">
-                        <h4 style="margin:0 0 14px;font-size:1rem;color:#1a3a6b;display:flex;align-items:center;gap:8px;">
+                        <h4 style="margin:0 0 14px;font-size:1rem;color:#1a1a1a;display:flex;align-items:center;gap:8px;">
                             <i class="fa-solid fa-rotate-left"></i> Chính sách hủy phòng
                         </h4>
                         <div style="display:flex;flex-direction:column;gap:10px;font-size:.9rem;color:#444;">
@@ -290,7 +302,7 @@
                                 <span>Hủy trong vòng 48 giờ: <strong>mất 100%</strong> tiền đặt cọc</span>
                             </div>
                             <div style="display:flex;align-items:flex-start;gap:8px;">
-                                <i class="fa-solid fa-circle-info" style="color:#3b82f6;margin-top:2px;flex-shrink:0;"></i>
+                                <i class="fa-solid fa-circle-info" style="color:#1a1a1a;margin-top:2px;flex-shrink:0;"></i>
                                 <span>Không hoàn tiền khi không đến (no-show)</span>
                             </div>
                         </div>
@@ -298,7 +310,7 @@
 
                     {{-- Payment --}}
                     <div style="background:#f8fafc;border-radius:14px;padding:20px;">
-                        <h4 style="margin:0 0 14px;font-size:1rem;color:#1a3a6b;display:flex;align-items:center;gap:8px;">
+                        <h4 style="margin:0 0 14px;font-size:1rem;color:#1a1a1a;display:flex;align-items:center;gap:8px;">
                             <i class="fa-solid fa-credit-card"></i> Thanh toán
                         </h4>
                         <div style="display:flex;flex-direction:column;gap:10px;font-size:.9rem;color:#444;">
@@ -323,7 +335,7 @@
 
                     {{-- Rules --}}
                     <div style="background:#f8fafc;border-radius:14px;padding:20px;">
-                        <h4 style="margin:0 0 14px;font-size:1rem;color:#1a3a6b;display:flex;align-items:center;gap:8px;">
+                        <h4 style="margin:0 0 14px;font-size:1rem;color:#1a1a1a;display:flex;align-items:center;gap:8px;">
                             <i class="fa-solid fa-scroll"></i> Nội quy chỗ ở
                         </h4>
                         <div style="display:flex;flex-direction:column;gap:10px;font-size:.9rem;color:#444;">
@@ -349,14 +361,14 @@
                 </div>
 
                 {{-- Contact --}}
-                <div style="margin-top:20px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:14px;padding:18px 22px;display:flex;align-items:center;gap:16px;">
-                    <i class="fa-solid fa-headset" style="font-size:1.5rem;color:#1a3a6b;flex-shrink:0;"></i>
+                <div style="margin-top:20px;background:#1a1a1a;border:1px solid #1a1a1a;border-radius:14px;padding:18px 22px;display:flex;align-items:center;gap:16px;">
+                    <i class="fa-solid fa-headset" style="font-size:1.5rem;color:#fff;flex-shrink:0;"></i>
                     <div>
-                        <strong style="font-size:.95rem;color:#1a3a6b;">Cần hỗ trợ?</strong>
-                        <p style="margin:4px 0 0;font-size:.85rem;color:#444;">Liên hệ LuxNest 24/7 qua hotline hoặc chat để được tư vấn đặt phòng và giải đáp mọi thắc mắc.</p>
+                        <strong style="font-size:.95rem;color:#fff;">Cần hỗ trợ?</strong>
+                        <p style="margin:4px 0 0;font-size:.85rem;color:#cbd5e1;">Liên hệ LuxNest 24/7 qua hotline hoặc chat để được tư vấn đặt phòng và giải đáp mọi thắc mắc.</p>
                     </div>
                     <a href="tel:+84123456789"
-                       style="flex-shrink:0;background:#1a3a6b;color:#fff;padding:10px 20px;border-radius:10px;font-weight:700;font-size:.85rem;text-decoration:none;white-space:nowrap;">
+                       style="flex-shrink:0;background:#996d4e;color:#fff;padding:10px 20px;border-radius:10px;font-weight:700;font-size:.85rem;text-decoration:none;white-space:nowrap;">
                         Gọi ngay
                     </a>
                 </div>
@@ -369,12 +381,12 @@
             {{-- Price summary card --}}
             <div class="hd-sidebar__box" style="text-align:center; padding:24px;">
                 <p style="font-size:.85rem;color:#888;margin-bottom:6px;">Giá từ</p>
-                <div style="font-size:1.8rem;font-weight:800;color:#1a3a6b;">
+                <div style="font-size:1.8rem;font-weight:800;color:#1a1a1a;">
                     {{ number_format($room->price, 0, ',', '.') }}₫
                 </div>
                 <p style="font-size:.8rem;color:#888;margin-bottom:20px;">/ đêm, chưa gồm thuế & phí</p>
                 <a href="#check-room"
-                   style="display:block;background:#ff5b00;color:#fff;padding:13px;border-radius:10px;font-weight:700;font-size:1rem;text-decoration:none;text-align:center;">
+                   style="display:block;background:#996d4e;color:#fff;padding:13px;border-radius:10px;font-weight:700;font-size:1rem;text-decoration:none;text-align:center;">
                     Đặt phòng ngay
                 </a>
             </div>
@@ -439,7 +451,7 @@
     if(gf){
         const drop = document.createElement('div');
         drop.style.cssText='display:none;position:absolute;top:calc(100% + 8px);left:0;background:#fff;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.12);border:1px solid #e2e8f0;padding:14px;z-index:999;min-width:220px;';
-        drop.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;gap:14px;"><span style="font-weight:600;font-size:.9rem;">Người lớn</span><div style="display:flex;align-items:center;gap:10px;"><button type="button" id="hdMinus" style="width:28px;height:28px;border-radius:50%;border:1.5px solid #e2e8f0;background:#fff;cursor:pointer;font-size:1rem;font-weight:700;color:#1a3a6b;">−</button><span id="hdAdultNum" style="width:18px;text-align:center;font-weight:700;">${hdAdults}</span><button type="button" id="hdPlus" style="width:28px;height:28px;border-radius:50%;border:1.5px solid #e2e8f0;background:#fff;cursor:pointer;font-size:1rem;font-weight:700;color:#1a3a6b;">+</button></div></div>`;
+        drop.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;gap:14px;"><span style="font-weight:600;font-size:.9rem;">Người lớn</span><div style="display:flex;align-items:center;gap:10px;"><button type="button" id="hdMinus" style="width:28px;height:28px;border-radius:50%;border:1.5px solid #e2e8f0;background:#fff;cursor:pointer;font-size:1rem;font-weight:700;color:#1a1a1a;">−</button><span id="hdAdultNum" style="width:18px;text-align:center;font-weight:700;">${hdAdults}</span><button type="button" id="hdPlus" style="width:28px;height:28px;border-radius:50%;border:1.5px solid #e2e8f0;background:#fff;cursor:pointer;font-size:1rem;font-weight:700;color:#1a1a1a;">+</button></div></div>`;
         gf.style.position='relative'; gf.appendChild(drop);
 
         function upHdGuests(){ document.getElementById('hdGuestDisplay').textContent=hdAdults+' người lớn'; adIn.value=hdAdults; document.getElementById('hdMinus').disabled=hdAdults<=1; document.getElementById('hdAdultNum').textContent=hdAdults; }
@@ -517,6 +529,18 @@ navItems.forEach(a => {
         const target = document.querySelector(a.getAttribute('href'));
         if (target) window.scrollTo({ top: target.offsetTop - 120, behavior: 'smooth' });
     });
+});
+</script>
+
+<!-- Fancybox lightbox for gallery -->
+<script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof Fancybox !== 'undefined') {
+        Fancybox.bind('[data-fancybox="gallery"]', {
+            Thumbs: { type: 'classic' },
+        });
+    }
 });
 </script>
 @endpush

@@ -42,24 +42,24 @@
             </div>
             <div style="display:flex;justify-content:space-between;padding:8px 0 0;">
                 <span style="color:#64748b;">Tổng tiền</span>
-                <strong style="color:#ff5b00;font-size:1.05rem;">{{ number_format($order->total_amount, 0, ',', '.') }}₫</strong>
+                <strong style="color:#996d4e;font-size:1.05rem;">{{ number_format($order->total_amount, 0, ',', '.') }}₫</strong>
             </div>
         </div>
         @endif
 
         <div style="display:flex;flex-direction:column;gap:10px;">
             <a href="{{ url('/') }}"
-               style="display:block;padding:14px;background:#1a3a6b;color:#fff;border-radius:10px;font-weight:700;font-size:.95rem;text-decoration:none;">
+               style="display:block;padding:14px;background:#1a1a1a;color:#fff;border-radius:10px;font-weight:700;font-size:.95rem;text-decoration:none;">
                 Về trang chủ
             </a>
             <a href="{{ route('rooms.index') }}"
-               style="display:block;padding:14px;background:#f1f5f9;color:#1a3a6b;border-radius:10px;font-weight:600;font-size:.9rem;text-decoration:none;">
+               style="display:block;padding:14px;background:#f1f5f9;color:#1a1a1a;border-radius:10px;font-weight:600;font-size:.9rem;text-decoration:none;">
                 Xem thêm phòng khác
             </a>
         </div>
 
         <p style="margin-top:20px;font-size:.78rem;color:#94a3b8;">
-            <i class="fa-solid fa-headset"></i> Hotline hỗ trợ: <a href="tel:+84123456789" style="color:#1a3a6b;font-weight:600;">0123 456 789</a>
+            <i class="fa-solid fa-headset"></i> Hotline hỗ trợ: <a href="tel:+84123456789" style="color:#1a1a1a;font-weight:600;">0123 456 789</a>
         </p>
     </div>
 </div>

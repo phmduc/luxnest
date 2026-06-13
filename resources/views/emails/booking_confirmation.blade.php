@@ -8,21 +8,21 @@
         body { margin: 0; padding: 0; background-color: #f0f0f0; }
         #wrapper { background-color: #f0f0f0; padding: 30px 0; }
         #template_container { box-shadow: 0 1px 4px rgba(0,0,0,.1); }
-        #template_header { background-color: #1a3a6b; border-radius: 3px 3px 0 0; }
+        #template_header { background-color: #1a1a1a; border-radius: 3px 3px 0 0; }
         #template_header h1 { color: #ffffff; font-family: Helvetica, Arial, sans-serif; font-size: 24px; font-weight: 700; margin: 0; padding: 28px 36px; }
         #template_header p.subtitle { color: #a8c4e8; font-size: 12px; margin: 0; padding: 0 36px 20px; letter-spacing: 1px; text-transform: uppercase; }
         #template_body { background-color: #ffffff; }
         #body_content { padding: 36px; font-family: Helvetica, Arial, sans-serif; font-size: 14px; color: #636363; }
-        #body_content h2 { color: #1a3a6b; font-size: 18px; font-weight: 700; margin: 0 0 20px; border-bottom: 3px solid #1a3a6b; padding-bottom: 10px; }
+        #body_content h2 { color: #1a1a1a; font-size: 18px; font-weight: 700; margin: 0 0 20px; border-bottom: 3px solid #1a1a1a; padding-bottom: 10px; }
         #body_content table.order-details { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
         #body_content table.order-details th,
         #body_content table.order-details td { padding: 10px 12px; text-align: left; border: 1px solid #e4e4e4; font-size: 14px; }
-        #body_content table.order-details thead th { background-color: #f8f8f8; color: #1a3a6b; font-weight: 700; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px; }
+        #body_content table.order-details thead th { background-color: #f8f8f8; color: #1a1a1a; font-weight: 700; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px; }
         #body_content table.order-details tfoot tr.total td { background-color: #fff7ed; font-size: 16px; font-weight: 700; color: #ea580c; border-top: 3px solid #e4e4e4; }
         .note-box { background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 14px 16px; border-radius: 0 6px 6px 0; margin-bottom: 24px; font-size: 13px; color: #92400e; line-height: 1.7; }
-        #template_footer { background-color: #1a3a6b; border-radius: 0 0 3px 3px; }
+        #template_footer { background-color: #1a1a1a; border-radius: 0 0 3px 3px; }
         #template_footer p { color: #a8c4e8; font-size: 12px; text-align: center; padding: 20px; margin: 0; line-height: 1.8; font-family: Helvetica, Arial, sans-serif; }
-        .btn { display: inline-block; background-color: #1a3a6b; color: #ffffff !important; text-decoration: none; font-size: 14px; font-weight: 700; padding: 12px 28px; border-radius: 5px; }
+        .btn { display: inline-block; background-color: #1a1a1a; color: #ffffff !important; text-decoration: none; font-size: 14px; font-weight: 700; padding: 12px 28px; border-radius: 5px; }
         @media only screen and (max-width: 620px) {
             #template_container { width: 100% !important; }
             #template_header h1 { font-size: 20px; padding: 20px 20px; }
@@ -50,7 +50,7 @@
                         <td id="template_body">
                             <div id="body_content">
 
-                                <p style="font-size:15px;color:#1a3a6b;font-weight:700;">Xin chào {{ $order->customer_name }},</p>
+                                <p style="font-size:15px;color:#1a1a1a;font-weight:700;">Xin chào {{ $order->customer_name }},</p>
                                 <p style="line-height:1.7;">Chúng tôi đã nhận được yêu cầu đặt phòng của Anh/Chị và đang xử lý.
                                 Vui lòng giữ lại email này để làm bằng chứng đặt phòng.</p>
 
@@ -176,7 +176,7 @@
                                 <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:28px;">
                                     <tr>
                                         <td align="center">
-                                            <div style="border:2px dashed #FF5B00; border-radius:12px; padding:24px 20px; background:#fffbf7; text-align:center;">
+                                            <div style="border:2px dashed #996d4e; border-radius:12px; padding:24px 20px; background:#fffbf7; text-align:center;">
                                                 <p style="margin:0 0 6px; font-size:15px; font-weight:700; color:#1a1a1a;">Mã QR Check-in của bạn</p>
                                                 <p style="margin:0 0 16px; font-size:13px; color:#64748b; line-height:1.6;">
                                                     Vui lòng xuất trình mã QR này cho lễ tân khi làm thủ tục nhận phòng

@@ -19,7 +19,7 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    color: #1a3a6b;
+    color: #1a1a1a;
     font-size: .9rem;
     font-weight: 600;
     text-decoration: none;
@@ -52,7 +52,7 @@
 }
 .bk-card h2 .bk-step {
     width: 30px; height: 30px;
-    background: #1a3a6b;
+    background: #1a1a1a;
     color: #fff;
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
@@ -87,8 +87,8 @@
     box-sizing: border-box;
 }
 .bk-input:focus, .bk-textarea:focus {
-    border-color: #1a3a6b;
-    box-shadow: 0 0 0 3px rgba(26,58,107,.08);
+    border-color: #1a1a1a;
+    box-shadow: 0 0 0 3px rgba(26,26,26,.08);
 }
 .bk-textarea { resize: vertical; min-height: 90px; }
 
@@ -104,13 +104,13 @@
     gap: 12px;
     align-items: flex-start;
 }
-.bk-policy i { font-size: 1.2rem; color: #1a3a6b; flex-shrink: 0; margin-top: 1px; }
+.bk-policy i { font-size: 1.2rem; color: #1a1a1a; flex-shrink: 0; margin-top: 1px; }
 
 /* Submit button */
 .bk-submit {
     width: 100%;
     padding: 16px;
-    background: #ff5b00;
+    background: #996d4e;
     color: #fff;
     border: none;
     border-radius: 12px;
@@ -124,7 +124,7 @@
     justify-content: center;
     gap: 8px;
 }
-.bk-submit:hover { background: #e04f00; transform: translateY(-1px); }
+.bk-submit:hover { background: #7a573e; transform: translateY(-1px); }
 .bk-secure {
     text-align: center;
     font-size: .78rem;
@@ -165,7 +165,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: .8px;
-    color: #1a3a6b;
+    color: #1a1a1a;
     margin-bottom: 4px;
 }
 .bk-room-name {
@@ -235,7 +235,7 @@
 }
 .bk-deposit-box {
     background: linear-gradient(135deg, #fff5f0, #fff8f5);
-    border: 1.5px solid #ff5b00;
+    border: 1.5px solid #996d4e;
     border-radius: 12px;
     padding: 16px;
     margin-top: 16px;
@@ -246,13 +246,13 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: .5px;
-    color: #ff5b00;
+    color: #996d4e;
     margin-bottom: 6px;
 }
 .bk-deposit-amount {
     font-size: 1.5rem;
     font-weight: 900;
-    color: #ff5b00;
+    color: #996d4e;
     line-height: 1;
 }
 .bk-deposit-note {
@@ -371,8 +371,8 @@
                         <h2><span class="bk-step">3</span> Xác nhận & Thanh toán</h2>
                         <p style="color:#64748b;font-size:.9rem;margin-bottom:24px;line-height:1.7;">
                             Bằng cách nhấn <strong>"Xác nhận đặt phòng"</strong>, bạn đồng ý với
-                            <a href="#" style="color:#1a3a6b;font-weight:600;">Điều khoản dịch vụ</a>
-                            và <a href="#" style="color:#1a3a6b;font-weight:600;">Chính sách bảo mật</a> của LuxNest.
+                            <a href="#" style="color:#1a1a1a;font-weight:600;">Điều khoản dịch vụ</a>
+                            và <a href="#" style="color:#1a1a1a;font-weight:600;">Chính sách bảo mật</a> của LuxNest.
                             Chúng tôi sẽ liên hệ xác nhận qua email/SĐT trong vòng 15 phút.
                         </p>
 
@@ -449,11 +449,11 @@
                                 Đặt phòng an toàn, bảo mật 100%
                             </div>
                             <div style="display:flex;align-items:center;gap:10px;">
-                                <i class="fa-solid fa-headset" style="color:#1a3a6b;font-size:1rem;width:20px;text-align:center;"></i>
+                                <i class="fa-solid fa-headset" style="color:#1a1a1a;font-size:1rem;width:20px;text-align:center;"></i>
                                 Hỗ trợ 24/7 qua chat & hotline
                             </div>
                             <div style="display:flex;align-items:center;gap:10px;">
-                                <i class="fa-solid fa-rotate-left" style="color:#ff5b00;font-size:1rem;width:20px;text-align:center;"></i>
+                                <i class="fa-solid fa-rotate-left" style="color:#996d4e;font-size:1rem;width:20px;text-align:center;"></i>
                                 Huỷ miễn phí trước 48 giờ
                             </div>
                         </div>
@@ -481,7 +481,7 @@
         @endif
         <div style="background:#f8fafc;border-radius:12px;padding:14px 18px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;">
             <span style="color:#64748b;font-size:.9rem;">Tổng thanh toán</span>
-            <strong style="font-size:1.1rem;color:#ff5b00;">{{ number_format($totalPrice, 0, ',', '.') }}₫</strong>
+            <strong style="font-size:1.1rem;color:#996d4e;">{{ number_format($totalPrice, 0, ',', '.') }}₫</strong>
         </div>
         <div style="display:flex;gap:10px;">
             <button type="button" id="bk-confirm-cancel"
@@ -489,7 +489,7 @@
                 Huỷ
             </button>
             <button type="button" id="bk-confirm-ok"
-                style="flex:2;padding:13px;border-radius:10px;border:none;background:#ff5b00;color:#fff;font-weight:700;font-size:.95rem;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(255,91,0,.3);">
+                style="flex:2;padding:13px;border-radius:10px;border:none;background:#996d4e;color:#fff;font-weight:700;font-size:.95rem;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(153, 109, 78,.3);">
                 Xác nhận & Đặt phòng
             </button>
         </div>

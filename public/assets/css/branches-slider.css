@@ -192,10 +192,10 @@
 
 .branches-nav-prev:hover,
 .branches-nav-next:hover {
-    background: #FF5B00;
+    background: #996d4e;
     color: #fff;
     transform: scale(1.1);
-    box-shadow: 0 6px 24px rgba(255, 91, 0, 0.3);
+    box-shadow: 0 6px 24px rgba(153, 109, 78, 0.3);
 }
 
 .branches-nav-prev::after,
@@ -230,7 +230,7 @@
 }
 
 .branches-pagination .swiper-pagination-bullet-active {
-    background: #FF5B00;
+    background: #996d4e;
     width: 32px;
     border-radius: 5px;
 }

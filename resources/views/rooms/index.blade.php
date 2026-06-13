@@ -7,7 +7,7 @@
 <style>
 /* ── Search strip ── */
 .ra-search-strip {
-    background: #1a3a6b;
+    background: #1a1a1a;
     padding: 12px 0;
     position: sticky;
     top: 64px;
@@ -37,7 +37,7 @@
 .ra-search-field-label { font-size: .7rem; color: #888; }
 .ra-search-field-val { font-size: .9rem; font-weight: 600; color: #1a1a1a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ra-search-btn {
-    background: #ff5b00;
+    background: #996d4e;
     color: #fff;
     border: none;
     padding: 10px 24px;
@@ -114,7 +114,7 @@
         position: sticky;
         top: 56px;
         z-index: 100;
-        background: #1a3a6b;
+        background: #1a1a1a;
         padding: 10px 16px;
         box-shadow: 0 2px 8px rgba(0,0,0,.25);
     }
@@ -413,9 +413,9 @@
                     <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f1f5f9;">
                         <span style="font-size:.88rem;font-weight:600;color:#0f172a;">{{ $label }}</span>
                         <div style="display:flex;align-items:center;gap:10px;">
-                            <button type="button" class="ra-gc-btn minus" data-type="{{ $type }}" style="width:28px;height:28px;border-radius:50%;border:1.5px solid #e2e8f0;background:#fff;cursor:pointer;font-size:1rem;font-weight:700;color:#1a3a6b;">−</button>
+                            <button type="button" class="ra-gc-btn minus" data-type="{{ $type }}" style="width:28px;height:28px;border-radius:50%;border:1.5px solid #e2e8f0;background:#fff;cursor:pointer;font-size:1rem;font-weight:700;color:#1a1a1a;">−</button>
                             <span class="ra-gc-num" data-type="{{ $type }}" style="width:18px;text-align:center;font-weight:700;">{{ $val }}</span>
-                            <button type="button" class="ra-gc-btn plus" data-type="{{ $type }}" style="width:28px;height:28px;border-radius:50%;border:1.5px solid #e2e8f0;background:#fff;cursor:pointer;font-size:1rem;font-weight:700;color:#1a3a6b;">+</button>
+                            <button type="button" class="ra-gc-btn plus" data-type="{{ $type }}" style="width:28px;height:28px;border-radius:50%;border:1.5px solid #e2e8f0;background:#fff;cursor:pointer;font-size:1rem;font-weight:700;color:#1a1a1a;">+</button>
                         </div>
                     </div>
                     @endforeach
