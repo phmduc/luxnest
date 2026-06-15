@@ -97,6 +97,7 @@
         if (tab === 'bookings')    loadBookings();
         if (tab === 'members')     loadMembers();
         if (tab === 'rooms')       loadRooms();
+        if (tab === 'villas')      loadVillas();
         if (tab === 'settings')    loadSettings();
         if (tab === 'news')        loadNews();
         if (tab === 'faqs')        loadFaqs();
@@ -909,6 +910,355 @@
     });
 
     // ---------------------------------------------------------------
+    // Villa Listings
+    // ---------------------------------------------------------------
+
+    let villaPage = 1;
+    let villaSearchTimer = null;
+
+    async function loadVillas(page = 1) {
+        villaPage = page;
+        if (typeof USER_ROLE !== 'undefined' && USER_ROLE !== 'admin') return;
+
+        const search = (document.getElementById('villa-search') || {}).value || '';
+        const tbody  = document.getElementById('villas-list-body');
+        if (!tbody) return;
+
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--lux-gray);">Đang tải...</td></tr>';
+
+        let data;
+        try {
+            const params = new URLSearchParams({ page, search });
+            data = await apiFetch(ADMIN_BASE + '/villas?' + params.toString());
+        } catch (err) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#e11d48;padding:30px;">Lỗi kết nối: ${err.message || err}</td></tr>`;
+            return;
+        }
+
+        if (!data || !data.success) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#e11d48;padding:30px;">${(data && data.message) || 'Lỗi tải dữ liệu.'}</td></tr>`;
+            return;
+        }
+
+        const villas     = (data.data && data.data.data) ? data.data.data : (data.data || []);
+        const pagination = data.data || {};
+
+        if (!villas.length) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--lux-gray);">Chưa có villa nào.</td></tr>';
+            return;
+        }
+
+        try { tbody.innerHTML = villas.map(v => {
+            const isActive = v.status === 'active';
+            const escaped  = JSON.stringify(v).replace(/"/g, '&quot;');
+
+            const gallery   = Array.isArray(v.gallery) ? v.gallery : [];
+            const allImages = [v.image, ...gallery].filter(Boolean).slice(0, 3);
+
+            return `<tr>
+                <td>
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <div style="display:flex;gap:3px;flex-shrink:0;">
+                        ${allImages.length
+                            ? allImages.map((img, idx) => `<img src="${img}" style="width:${idx===0?'48px':'28px'};height:${idx===0?'38px':'28px'};object-fit:cover;border-radius:${idx===0?'8px':'5px'};flex-shrink:0;">`).join('')
+                            : `<div style="width:48px;height:38px;background:#f1f5f9;border-radius:8px;display:flex;align-items:center;justify-content:center;"><i class="ph ph-image" style="color:#94a3b8;"></i></div>`
+                        }
+                        </div>
+                        <div>
+                            <strong style="display:block;">${v.name}</strong>
+                            <span style="font-size:.8rem;color:var(--lux-gray);">${v.location_desc || ''}</span>
+                        </div>
+                    </div>
+                </td>
+                <td>${v.location || '—'}</td>
+                <td style="color:var(--lux-gray);">${v.beds} / ${v.guests}</td>
+                <td>
+                    <button onclick="AdminApp.toggleVillaStatus(${v.id}, this)"
+                            style="border:none;cursor:pointer;padding:5px 12px;border-radius:8px;font-size:.82rem;font-weight:700;font-family:inherit;background:${isActive ? '#dcfce7' : '#fee2e2'};color:${isActive ? '#166534' : '#dc2626'};">
+                        ${isActive ? 'Hoạt động' : 'Tạm ẩn'}
+                    </button>
+                </td>
+                <td>
+                    <div style="display:flex;gap:8px;justify-content:flex-end;">
+                        <button class="btn-view" onclick='AdminApp.openVillaModal(${escaped})'>Sửa</button>
+                        <button class="btn-view" style="color:#dc2626;border-color:#fecdd3;"
+                                onclick="AdminApp.deleteVilla(${v.id},'${v.name.replace(/'/g, "\\'")}')">Xóa</button>
+                    </div>
+                </td>
+            </tr>`;
+        }).join(''); } catch (renderErr) {
+            console.error('[Villas] render error:', renderErr);
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#e11d48;padding:30px;">Lỗi hiển thị: ${renderErr.message}</td></tr>`;
+            return;
+        }
+
+        renderPagination('villas-pagination', pagination.last_page || 1, pagination.current_page || 1, loadVillas);
+    }
+
+    document.getElementById('villa-search')?.addEventListener('input', function () {
+        clearTimeout(villaSearchTimer);
+        villaSearchTimer = setTimeout(() => loadVillas(), 500);
+    });
+
+    // Auto-generate slug from name
+    document.getElementById('villa-name')?.addEventListener('input', function () {
+        const slugEl = document.getElementById('villa-slug');
+        if (!slugEl || slugEl.dataset.manual) return;
+        slugEl.value = this.value
+            .toLowerCase()
+            .normalize('NFD').replace(/[̀-ͯ]/g, '')
+            .replace(/đ/g, 'd').replace(/[^a-z0-9\s-]/g, '')
+            .trim().replace(/\s+/g, '-');
+    });
+    document.getElementById('villa-slug')?.addEventListener('input', function () {
+        this.dataset.manual = this.value ? '1' : '';
+    });
+
+    // ── Gallery: 5 slots ──────────────────────────────────────────
+
+    let villaGallerySlots = [null, null, null, null, null];
+    let activeVillaSlot   = 0;
+
+    function getVillaSlotEl(idx) {
+        return document.querySelectorAll('#villa-gallery-grid .villa-img-slot')[idx];
+    }
+
+    function renderVillaSlot(idx) {
+        const slot    = getVillaSlotEl(idx);
+        if (!slot) return;
+        const url     = villaGallerySlots[idx];
+        const imgEl   = slot.querySelector('.slot-img');
+        const empty   = slot.querySelector('.slot-empty');
+        const overlay = slot.querySelector('.slot-overlay');
+
+        if (url) {
+            imgEl.src             = url;
+            imgEl.style.display   = 'block';
+            empty.style.display   = 'none';
+            overlay.style.display = 'none';
+            slot.style.borderStyle = 'solid';
+            slot.style.borderColor = '#e2e8f0';
+        } else {
+            imgEl.style.display   = 'none';
+            empty.style.display   = 'flex';
+            overlay.style.display = 'none';
+            slot.style.borderStyle = 'dashed';
+            slot.style.borderColor = '#e2e8f0';
+        }
+    }
+
+    function resetVillaGallery() {
+        villaGallerySlots = [null, null, null, null, null];
+        for (let i = 0; i < 5; i++) renderVillaSlot(i);
+        const hiddenImg = document.getElementById('villa-image');
+        if (hiddenImg) hiddenImg.value = '';
+    }
+
+    function loadGalleryFromVilla(villa) {
+        villaGallerySlots = [null, null, null, null, null];
+        if (villa.image) villaGallerySlots[0] = villa.image;
+        const extra = Array.isArray(villa.gallery) ? villa.gallery : [];
+        extra.forEach((url, i) => { if (i + 1 < 5) villaGallerySlots[i + 1] = url; });
+        for (let i = 0; i < 5; i++) renderVillaSlot(i);
+    }
+
+    function collectVillaGallery() {
+        return {
+            image:   villaGallerySlots[0] || null,
+            gallery: villaGallerySlots.slice(1).filter(Boolean),
+        };
+    }
+
+    function openVillaSlotPicker(idx) {
+        activeVillaSlot = idx;
+        const fi = document.getElementById('villa-file-input');
+        if (fi) { fi.value = ''; fi.click(); }
+    }
+
+    document.getElementById('villa-file-input')?.addEventListener('change', function () {
+        if (this.files[0]) uploadVillaToSlot(this.files[0], activeVillaSlot);
+    });
+
+    function handleVillaSlotDrop(e, idx) {
+        e.preventDefault();
+        const slot = getVillaSlotEl(idx);
+        if (slot) slot.style.borderColor = '#e2e8f0';
+        const file = e.dataTransfer?.files?.[0];
+        if (file && file.type.startsWith('image/')) uploadVillaToSlot(file, idx);
+    }
+
+    async function uploadVillaToSlot(file, idx) {
+        const slot      = getVillaSlotEl(idx);
+        const uploading = slot?.querySelector('.slot-uploading');
+        const bar       = uploading?.querySelector('.slot-bar');
+
+        if (uploading) uploading.style.display = 'flex';
+        if (bar)       bar.style.width = '0%';
+
+        let pct = 0;
+        const ticker = setInterval(() => {
+            pct = Math.min(pct + 12, 88);
+            if (bar) bar.style.width = pct + '%';
+        }, 100);
+
+        const form = new FormData();
+        form.append('image', file);
+
+        try {
+            const res = await fetch(ADMIN_BASE + '/villas/upload-image', {
+                method:  'POST',
+                headers: { 'X-CSRF-TOKEN': csrf() },
+                body:    form,
+            }).then(r => r.json());
+
+            clearInterval(ticker);
+            if (bar) bar.style.width = '100%';
+
+            if (res.success) {
+                villaGallerySlots[idx] = res.url;
+                if (idx === 0) {
+                    const hi = document.getElementById('villa-image');
+                    if (hi) hi.value = res.url;
+                }
+                renderVillaSlot(idx);
+            } else {
+                alert('Upload thất bại: ' + (res.message || 'Lỗi'));
+            }
+        } catch {
+            clearInterval(ticker);
+            alert('Lỗi kết nối khi tải ảnh.');
+        } finally {
+            setTimeout(() => {
+                if (uploading) uploading.style.display = 'none';
+                if (bar)       bar.style.width = '0%';
+            }, 500);
+        }
+    }
+
+    function clearVillaSlot(idx) {
+        villaGallerySlots[idx] = null;
+        if (idx === 0) {
+            const hi = document.getElementById('villa-image');
+            if (hi) hi.value = '';
+        }
+        renderVillaSlot(idx);
+    }
+
+    function openVillaModal(villa) {
+        const modal = document.getElementById('villa-modal');
+        const title = document.getElementById('villa-modal-title');
+        if (!modal) return;
+
+        ['villa-id','villa-name','villa-slug','villa-location','villa-location-desc',
+         'villa-beds','villa-guests','villa-image','villa-description'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+        const slugEl = document.getElementById('villa-slug');
+        if (slugEl) delete slugEl.dataset.manual;
+        document.getElementById('villa-location').value = 'Đà Lạt';
+        document.getElementById('villa-status').value   = 'active';
+        resetVillaGallery();
+        const fileInput = document.getElementById('villa-file-input');
+        if (fileInput) fileInput.value = '';
+        const errEl = document.getElementById('villa-form-error');
+        if (errEl) errEl.style.display = 'none';
+
+        if (villa && villa.id) {
+            title.textContent = 'Sửa villa';
+            document.getElementById('villa-id').value                = villa.id;
+            document.getElementById('villa-name').value              = villa.name          || '';
+            document.getElementById('villa-slug').value               = villa.slug          || '';
+            document.getElementById('villa-slug').dataset.manual      = '1';
+            document.getElementById('villa-location').value           = villa.location      || 'Đà Lạt';
+            document.getElementById('villa-location-desc').value      = villa.location_desc || '';
+            document.getElementById('villa-beds').value                = villa.beds          || '';
+            document.getElementById('villa-guests').value              = villa.guests        || '';
+            document.getElementById('villa-status').value              = villa.status        || 'active';
+            document.getElementById('villa-description').value         = villa.description   || '';
+            loadGalleryFromVilla(villa);
+        } else {
+            title.textContent = 'Thêm villa mới';
+        }
+
+        modal.style.display = 'flex';
+    }
+
+    document.getElementById('villa-form')?.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const id  = document.getElementById('villa-id').value;
+        const btn = document.getElementById('villa-submit-btn');
+        const origText = btn.textContent;
+        btn.disabled    = true;
+        btn.textContent = 'Đang lưu...';
+
+        const { image, gallery } = collectVillaGallery();
+
+        const payload = {
+            name:          document.getElementById('villa-name').value,
+            slug:          document.getElementById('villa-slug').value,
+            location:      document.getElementById('villa-location').value,
+            location_desc: document.getElementById('villa-location-desc').value,
+            beds:          document.getElementById('villa-beds').value,
+            guests:        document.getElementById('villa-guests').value,
+            image,
+            gallery,
+            status:        document.getElementById('villa-status').value,
+            description:   document.getElementById('villa-description').value || null,
+        };
+
+        const url    = id ? (ADMIN_BASE + '/villas/' + id) : (ADMIN_BASE + '/villas');
+        const method = id ? 'PUT' : 'POST';
+        const res    = await apiFetch(url, { method, body: payload });
+
+        btn.disabled    = false;
+        btn.textContent = origText;
+
+        if (res.success) {
+            document.getElementById('villa-modal').style.display = 'none';
+            loadVillas(villaPage);
+        } else {
+            const errEl = document.getElementById('villa-form-error');
+            let msg = res.message || 'Lỗi không xác định.';
+            if (res.errors) msg = Object.values(res.errors).flat().join(' ');
+            if (errEl) { errEl.textContent = msg; errEl.style.display = 'block'; }
+        }
+    });
+
+    async function deleteVilla(id, name) {
+        if (!confirm(`Xóa villa "${name}"?\nHành động này không thể hoàn tác.`)) return;
+
+        const res = await apiFetch(ADMIN_BASE + '/villas/' + id, { method: 'DELETE' });
+        if (res.success) {
+            loadVillas(villaPage);
+        } else {
+            alert('Lỗi: ' + (res.message || 'Không thể xóa.'));
+        }
+    }
+
+    async function toggleVillaStatus(id, btn) {
+        const res = await apiFetch(ADMIN_BASE + '/villas/' + id + '/status', { method: 'PATCH' });
+        if (res.success) {
+            const isActive = res.status === 'active';
+            btn.textContent = isActive ? 'Hoạt động' : 'Tạm ẩn';
+            btn.style.background = isActive ? '#dcfce7' : '#fee2e2';
+            btn.style.color      = isActive ? '#166534' : '#dc2626';
+        }
+    }
+
+    function closeVillaModal() {
+        const modal = document.getElementById('villa-modal');
+        if (modal) modal.style.display = 'none';
+    }
+
+    document.getElementById('villa-modal-close')?.addEventListener('click', closeVillaModal);
+    document.getElementById('villa-modal-cancel')?.addEventListener('click', closeVillaModal);
+    document.getElementById('villa-modal')?.addEventListener('click', function (e) {
+        if (e.target === this) closeVillaModal();
+    });
+
+    // ---------------------------------------------------------------
     // Business Settings
     // ---------------------------------------------------------------
 
@@ -1519,6 +1869,14 @@
         clearSlot,
         handleRoomDrop,
         clearRoomImage: clearRoomPreview,
+        // Villas
+        loadVillas,
+        openVillaModal,
+        deleteVilla,
+        toggleVillaStatus,
+        openVillaSlotPicker,
+        handleVillaSlotDrop,
+        clearVillaSlot,
         // Settings
         loadSettings,
         openSettingsLogoPicker,

@@ -23,6 +23,7 @@ Route::get('/', [HomeController::class, 'index']);
 Route::get('/hotel/{slug}', [HotelController::class, 'show'])->name('hotel.show');
 Route::get('/rooms', [RoomsController::class, 'index'])->name('rooms.index');
 Route::get('/villa', [VillaController::class, 'index'])->name('villa.index');
+Route::get('/villa/{slug}', [VillaController::class, 'show'])->name('villa.show');
 Route::get('/thue-xe', [CarRentalController::class, 'index'])->name('car-rental.index');
 
 Route::get('/gioi-thieu', [PageController::class, 'about'])->name('about.index');
@@ -117,6 +118,14 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,employee'])->group(funct
         Route::delete('/rooms/{id}', [AdminDashboardController::class, 'destroyRoom']);
         Route::patch('/rooms/{id}/status', [AdminDashboardController::class, 'toggleRoomStatus']);
         Route::post('/rooms/upload-image', [AdminDashboardController::class, 'uploadRoomImage']);
+
+        // Villa listings management
+        Route::get('/villas', [AdminDashboardController::class, 'getVillas']);
+        Route::post('/villas', [AdminDashboardController::class, 'storeVilla']);
+        Route::put('/villas/{id}', [AdminDashboardController::class, 'updateVilla']);
+        Route::delete('/villas/{id}', [AdminDashboardController::class, 'destroyVilla']);
+        Route::patch('/villas/{id}/status', [AdminDashboardController::class, 'toggleVillaStatus']);
+        Route::post('/villas/upload-image', [AdminDashboardController::class, 'uploadVillaImage']);
 
         // Business settings
         Route::get('/settings', [AdminDashboardController::class, 'getSettings']);

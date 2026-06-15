@@ -27,6 +27,9 @@
             <a href="#" class="nav-item" data-tab="rooms">
                 <i class="ph ph-door"></i> Quản Lý Phòng
             </a>
+            <a href="#" class="nav-item" data-tab="villas">
+                <i class="ph ph-house-line"></i> Quản Lý Villa
+            </a>
             <a href="#" class="nav-item" data-tab="members">
                 <i class="ph ph-users"></i> Thành Viên
             </a>
@@ -269,6 +272,48 @@
                     </table>
                 </div>
                 <div id="rooms-pagination" class="pagination-container"></div>
+
+            </section>
+            @endif
+
+            {{-- ═══ TAB: VILLAS (admin only) ═══ --}}
+            @if(auth()->user()->isAdmin())
+            <section id="tab-villas" class="dashboard-tab">
+
+                <div class="section-toolbar">
+                    <h2>Quản Lý Villa</h2>
+                    <div class="toolbar-actions">
+                        <div class="search-wrapper">
+                            <input type="text" id="villa-search" placeholder="Tìm theo tên hoặc địa chỉ...">
+                            <i class="ph ph-magnifying-glass"></i>
+                        </div>
+                        <button onclick="AdminApp.openVillaModal()" class="btn-primary">
+                            <i class="ph ph-plus"></i> Thêm villa
+                        </button>
+                    </div>
+                </div>
+
+                <div class="data-table-container">
+                    <table class="manager-table">
+                        <thead>
+                            <tr>
+                                <th>Villa</th>
+                                <th>Khu vực</th>
+                                <th>Phòng / Khách</th>
+                                <th>Trạng thái</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="villas-list-body">
+                            <tr>
+                                <td colspan="5" style="text-align:center; color:var(--lux-gray); padding:40px;">
+                                    Đang tải...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="villas-pagination" class="pagination-container"></div>
 
             </section>
             @endif
@@ -959,6 +1004,146 @@
             <div style="margin-top:24px; display:flex; gap:10px; justify-content:flex-end;">
                 <button type="button" id="room-modal-cancel" class="btn-view">Hủy</button>
                 <button type="submit" id="room-submit-btn" class="btn-primary" style="padding:10px 22px;">Lưu phòng</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- ═══ MODAL: Villa ═══ --}}
+<div id="villa-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-content" style="max-width:660px; max-height:90vh; overflow-y:auto;">
+        <button class="modal-close" id="villa-modal-close"><i class="ph ph-x"></i></button>
+        <h2 id="villa-modal-title" style="font-size:1.4rem; font-weight:800; margin-bottom:24px; color:var(--text);">
+            Thêm villa
+        </h2>
+
+        <form id="villa-form">
+            @csrf
+            <input type="hidden" id="villa-id">
+
+            <div class="mf-grid-2">
+                <div class="mf-group" style="grid-column:1/-1;">
+                    <label class="mf-label">Tên villa</label>
+                    <input type="text" id="villa-name" class="mf-input" placeholder="VD: VILLA 6V4A">
+                </div>
+                <div class="mf-group" style="grid-column:1/-1;">
+                    <label class="mf-label">Slug <span style="font-weight:400; font-size:0.75rem; text-transform:none; letter-spacing:0;">(URL, không dấu)</span></label>
+                    <input type="text" id="villa-slug" class="mf-input" placeholder="villa-6v4a">
+                </div>
+                <div class="mf-group">
+                    <label class="mf-label">Khu vực <span style="font-weight:400; font-size:0.75rem; text-transform:none; letter-spacing:0;">(dùng để lọc tab)</span></label>
+                    <input type="text" id="villa-location" class="mf-input" placeholder="Đà Lạt">
+                </div>
+                <div class="mf-group">
+                    <label class="mf-label">Địa chỉ</label>
+                    <input type="text" id="villa-location-desc" class="mf-input" placeholder="VD: Triệu Việt Vương, Đà Lạt">
+                </div>
+                <div class="mf-group">
+                    <label class="mf-label">Số phòng</label>
+                    <input type="text" id="villa-beds" class="mf-input" placeholder="VD: 6 Phòng">
+                </div>
+                <div class="mf-group">
+                    <label class="mf-label">Số khách</label>
+                    <input type="text" id="villa-guests" class="mf-input" placeholder="VD: 12 Khách">
+                </div>
+
+                {{-- Gallery --}}
+                <div class="mf-group" style="grid-column:1/-1;">
+                    <label class="mf-label">
+                        Ảnh villa
+                        <span style="font-weight:400; font-size:0.75rem; text-transform:none; letter-spacing:0;"> — tối đa 5 tấm, tấm đầu là ảnh đại diện</span>
+                    </label>
+
+                    <input type="file" id="villa-file-input" accept="image/*" style="display:none">
+
+                    <div id="villa-gallery-grid" style="display:grid; grid-template-columns:1fr repeat(4,72px); gap:8px; align-items:start;">
+
+                        {{-- Slot 0: main --}}
+                        <div class="villa-img-slot villa-img-slot--main" data-slot="0"
+                             style="border:2px dashed var(--border-strong); border-radius:11px; overflow:hidden; aspect-ratio:4/3; position:relative; cursor:pointer; background:#FAFAFA; display:flex; flex-direction:column; align-items:center; justify-content:center; transition:border-color .2s;"
+                             onclick="AdminApp.openVillaSlotPicker(0)"
+                             ondragover="event.preventDefault(); this.style.borderColor='var(--orange)'"
+                             ondragleave="this.style.borderColor='var(--border-strong)'"
+                             ondrop="AdminApp.handleVillaSlotDrop(event,0)">
+                            <div class="slot-empty">
+                                <i class="ph ph-image" style="font-size:1.8rem; color:#CBD5E1;"></i>
+                                <span style="font-size:0.72rem; color:#94A3B8; margin-top:5px; display:block;">Ảnh chính</span>
+                            </div>
+                            <img class="slot-img" style="display:none; width:100%; height:100%; object-fit:cover;">
+                            <div class="slot-overlay" style="display:none; position:absolute; inset:0; background:rgba(0,0,0,.4); align-items:center; justify-content:center; gap:8px;">
+                                <button type="button" onclick="event.stopPropagation(); AdminApp.openVillaSlotPicker(0)"
+                                        style="background:#fff; border:none; border-radius:7px; padding:5px 9px; cursor:pointer; font-size:0.78rem; font-weight:600;">
+                                    <i class="ph ph-pencil"></i>
+                                </button>
+                                <button type="button" onclick="event.stopPropagation(); AdminApp.clearVillaSlot(0)"
+                                        style="background:#EF4444; color:#fff; border:none; border-radius:7px; padding:5px 9px; cursor:pointer; font-size:0.78rem;">
+                                    <i class="ph ph-trash"></i>
+                                </button>
+                            </div>
+                            <div class="slot-uploading" style="display:none; position:absolute; inset:0; background:rgba(255,255,255,.85); flex-direction:column; align-items:center; justify-content:center; gap:7px;">
+                                <div style="width:60%; height:4px; background:var(--border); border-radius:3px; overflow:hidden;">
+                                    <div class="slot-bar" style="height:100%; background:var(--orange); width:0%; transition:width .3s;"></div>
+                                </div>
+                                <span style="font-size:0.72rem; color:var(--text-muted);">Đang tải...</span>
+                            </div>
+                        </div>
+
+                        {{-- Slots 1–4 --}}
+                        @for($s = 1; $s <= 4; $s++)
+                        <div class="villa-img-slot" data-slot="{{ $s }}"
+                             style="border:2px dashed var(--border-strong); border-radius:9px; overflow:hidden; aspect-ratio:1; position:relative; cursor:pointer; background:#FAFAFA; display:flex; flex-direction:column; align-items:center; justify-content:center; transition:border-color .2s;"
+                             onclick="AdminApp.openVillaSlotPicker({{ $s }})"
+                             ondragover="event.preventDefault(); this.style.borderColor='var(--orange)'"
+                             ondragleave="this.style.borderColor='var(--border-strong)'"
+                             ondrop="AdminApp.handleVillaSlotDrop(event,{{ $s }})">
+                            <div class="slot-empty">
+                                <i class="ph ph-plus" style="font-size:1.2rem; color:#CBD5E1;"></i>
+                            </div>
+                            <img class="slot-img" style="display:none; width:100%; height:100%; object-fit:cover;">
+                            <div class="slot-overlay" style="display:none; position:absolute; inset:0; background:rgba(0,0,0,.4); align-items:center; justify-content:center; gap:5px;">
+                                <button type="button" onclick="event.stopPropagation(); AdminApp.openVillaSlotPicker({{ $s }})"
+                                        style="background:#fff; border:none; border-radius:6px; padding:4px 7px; cursor:pointer; font-size:0.72rem; font-weight:600;">
+                                    <i class="ph ph-pencil"></i>
+                                </button>
+                                <button type="button" onclick="event.stopPropagation(); AdminApp.clearVillaSlot({{ $s }})"
+                                        style="background:#EF4444; color:#fff; border:none; border-radius:6px; padding:4px 7px; cursor:pointer; font-size:0.72rem;">
+                                    <i class="ph ph-trash"></i>
+                                </button>
+                            </div>
+                            <div class="slot-uploading" style="display:none; position:absolute; inset:0; background:rgba(255,255,255,.85); flex-direction:column; align-items:center; justify-content:center; gap:6px;">
+                                <div style="width:70%; height:3px; background:var(--border); border-radius:2px; overflow:hidden;">
+                                    <div class="slot-bar" style="height:100%; background:var(--orange); width:0%; transition:width .3s;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        @endfor
+
+                    </div>
+                    <p style="margin:7px 0 0; font-size:0.74rem; color:var(--text-muted);">
+                        <i class="ph ph-info"></i> Click hoặc kéo thả ảnh vào ô. JPG/PNG/WebP, tối đa 4MB mỗi tấm.
+                    </p>
+                    <input type="hidden" id="villa-image">
+                </div>
+
+                <div class="mf-group">
+                    <label class="mf-label">Trạng thái</label>
+                    <select id="villa-status" class="mf-select">
+                        <option value="active">Đang hoạt động</option>
+                        <option value="inactive">Tạm ẩn</option>
+                    </select>
+                </div>
+                <div class="mf-group" style="grid-column:1/-1;">
+                    <label class="mf-label">Mô tả <span style="font-weight:400; font-size:0.75rem; text-transform:none; letter-spacing:0;">(tuỳ chọn, hiển thị ở trang chi tiết)</span></label>
+                    <textarea id="villa-description" class="mf-input" rows="3" placeholder="Mô tả ngắn về villa..."></textarea>
+                </div>
+            </div>
+
+            <div id="villa-form-error"
+                 style="display:none; margin-top:14px; padding:11px 14px; background:#FEE2E2; border-radius:9px; color:#991B1B; font-weight:600; font-size:0.85rem;"></div>
+
+            <div style="margin-top:24px; display:flex; gap:10px; justify-content:flex-end;">
+                <button type="button" id="villa-modal-cancel" class="btn-view">Hủy</button>
+                <button type="submit" id="villa-submit-btn" class="btn-primary" style="padding:10px 22px;">Lưu villa</button>
             </div>
         </form>
     </div>

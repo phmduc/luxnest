@@ -8,6 +8,7 @@ use App\Models\PageContent;
 use App\Models\Room;
 use App\Models\Setting;
 use App\Models\User;
+use App\Models\VillaListing;
 use App\Services\GoHostService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -379,6 +380,104 @@ class AdminDashboardController extends Controller
         ]);
 
         $path = $request->file('image')->store('rooms', 'public');
+        $url  = asset('storage/' . $path);
+
+        return response()->json(['success' => true, 'url' => $url, 'path' => $path]);
+    }
+
+    // ---------------------------------------------------------------
+    // Villa Listings CRUD (admin only)
+    // ---------------------------------------------------------------
+
+    public function getVillas(Request $request): JsonResponse
+    {
+        $search = trim((string) $request->input('search', ''));
+
+        $query = VillaListing::query()->orderBy('location')->orderBy('name');
+
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%$search%")
+                  ->orWhere('location_desc', 'like', "%$search%");
+            });
+        }
+
+        $page = (int) $request->input('page', 1);
+
+        return response()->json([
+            'success' => true,
+            'data'    => $query->paginate(10, ['*'], 'page', $page),
+        ]);
+    }
+
+    public function storeVilla(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'name'          => 'required|string|max:255',
+            'slug'          => 'required|string|unique:villa_listings,slug',
+            'location'      => 'required|string|max:100',
+            'location_desc' => 'required|string|max:255',
+            'beds'          => 'required|string|max:50',
+            'guests'        => 'required|string|max:50',
+            'description'   => 'nullable|string',
+            'image'         => 'nullable|string|max:1000',
+            'gallery'       => 'nullable|array|max:5',
+            'gallery.*'     => 'string|max:1000',
+            'status'        => 'required|in:active,inactive',
+        ]);
+
+        $villa = VillaListing::create($validated);
+
+        return response()->json(['success' => true, 'data' => $villa], 201);
+    }
+
+    public function updateVilla(Request $request, int $id): JsonResponse
+    {
+        $villa = VillaListing::findOrFail($id);
+
+        $validated = $request->validate([
+            'name'          => 'required|string|max:255',
+            'slug'          => "required|string|unique:villa_listings,slug,$id",
+            'location'      => 'required|string|max:100',
+            'location_desc' => 'required|string|max:255',
+            'beds'          => 'required|string|max:50',
+            'guests'        => 'required|string|max:50',
+            'description'   => 'nullable|string',
+            'image'         => 'nullable|string|max:1000',
+            'gallery'       => 'nullable|array|max:5',
+            'gallery.*'     => 'string|max:1000',
+            'status'        => 'required|in:active,inactive',
+        ]);
+
+        $villa->update($validated);
+
+        return response()->json(['success' => true, 'data' => $villa]);
+    }
+
+    public function destroyVilla(int $id): JsonResponse
+    {
+        $villa = VillaListing::findOrFail($id);
+        $villa->delete();
+
+        return response()->json(['success' => true]);
+    }
+
+    public function toggleVillaStatus(int $id): JsonResponse
+    {
+        $villa         = VillaListing::findOrFail($id);
+        $villa->status = $villa->status === 'active' ? 'inactive' : 'active';
+        $villa->save();
+
+        return response()->json(['success' => true, 'status' => $villa->status]);
+    }
+
+    public function uploadVillaImage(Request $request): JsonResponse
+    {
+        $request->validate([
+            'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:4096',
+        ]);
+
+        $path = $request->file('image')->store('villas', 'public');
         $url  = asset('storage/' . $path);
 
         return response()->json(['success' => true, 'url' => $url, 'path' => $path]);

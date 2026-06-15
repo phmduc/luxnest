@@ -308,3 +308,67 @@
         font-size: 1.8rem;
     }
 }
+
+/* ========== Villa detail page ========== */
+.villa-related-section {
+    padding: 40px 0 60px;
+}
+
+.villa-related-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.villa-related-card {
+    display: block;
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #f0f0f0;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.villa-related-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.villa-related-card__image {
+    height: 160px;
+    background-size: cover;
+    background-position: center;
+}
+
+.villa-related-card__content {
+    padding: 16px;
+}
+
+.villa-related-card__content h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0 0 6px;
+}
+
+.villa-related-card__content p {
+    font-size: 0.85rem;
+    color: #777;
+    margin: 0 0 10px;
+}
+
+.villa-related-card__link {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #996d4e;
+}
+
+@media (max-width: 768px) {
+    .villa-related-grid {
+        grid-template-columns: 1fr;
+    }
+}

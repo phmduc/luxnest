@@ -1093,6 +1093,9 @@ textarea.mf-input { resize: vertical; }
 .img-slot:hover { border-color: var(--orange) !important; }
 .img-slot:hover .slot-overlay { display: flex !important; }
 
+.villa-img-slot:hover { border-color: var(--orange) !important; }
+.villa-img-slot:hover .slot-overlay { display: flex !important; }
+
 /* ══════════════════════════════════════════
    ROOM GRID (legacy)
 ══════════════════════════════════════════ */
@@ -1226,6 +1229,10 @@ textarea.mf-input { resize: vertical; }
     /* Room image gallery */
     #room-gallery-grid { grid-template-columns: repeat(3, 1fr) !important; }
     #room-gallery-grid .img-slot--main { grid-column: 1 / -1; }
+
+    /* Villa image gallery */
+    #villa-gallery-grid { grid-template-columns: repeat(3, 1fr) !important; }
+    #villa-gallery-grid .villa-img-slot--main { grid-column: 1 / -1; }
 }
 
 @media (max-width: 480px) {
