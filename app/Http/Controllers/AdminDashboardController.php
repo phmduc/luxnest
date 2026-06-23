@@ -423,6 +423,7 @@ class AdminDashboardController extends Controller
             'image'         => 'nullable|string|max:1000',
             'gallery'       => 'nullable|array|max:9',
             'gallery.*'     => 'string|max:1000',
+            'video'         => 'nullable|string|max:1000',
             'status'        => 'required|in:active,inactive',
         ]);
 
@@ -446,6 +447,7 @@ class AdminDashboardController extends Controller
             'image'         => 'nullable|string|max:1000',
             'gallery'       => 'nullable|array|max:9',
             'gallery.*'     => 'string|max:1000',
+            'video'         => 'nullable|string|max:1000',
             'status'        => 'required|in:active,inactive',
         ]);
 
@@ -478,6 +480,18 @@ class AdminDashboardController extends Controller
         ]);
 
         $path = $request->file('image')->store('villas', 'public');
+        $url  = asset('storage/' . $path);
+
+        return response()->json(['success' => true, 'url' => $url, 'path' => $path]);
+    }
+
+    public function uploadVillaVideo(Request $request): JsonResponse
+    {
+        $request->validate([
+            'video' => 'required|mimetypes:video/mp4,video/quicktime,video/webm|max:51200',
+        ]);
+
+        $path = $request->file('video')->store('villas/videos', 'public');
         $url  = asset('storage/' . $path);
 
         return response()->json(['success' => true, 'url' => $url, 'path' => $path]);

@@ -126,6 +126,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,employee'])->group(funct
         Route::delete('/villas/{id}', [AdminDashboardController::class, 'destroyVilla']);
         Route::patch('/villas/{id}/status', [AdminDashboardController::class, 'toggleVillaStatus']);
         Route::post('/villas/upload-image', [AdminDashboardController::class, 'uploadVillaImage']);
+        Route::post('/villas/upload-video', [AdminDashboardController::class, 'uploadVillaVideo']);
 
         // Business settings
         Route::get('/settings', [AdminDashboardController::class, 'getSettings']);

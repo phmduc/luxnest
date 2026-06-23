@@ -1145,6 +1145,91 @@
         renderVillaSlot(idx);
     }
 
+    // ── Video upload ──────────────────────────────────────────────
+
+    function renderVillaVideo() {
+        const url     = document.getElementById('villa-video')?.value || '';
+        const empty   = document.getElementById('villa-video-empty');
+        const preview = document.getElementById('villa-video-preview');
+        if (!empty || !preview) return;
+
+        if (url) {
+            preview.src           = url;
+            preview.style.display = 'block';
+            empty.style.display   = 'none';
+        } else {
+            preview.removeAttribute('src');
+            preview.style.display = 'none';
+            empty.style.display   = 'flex';
+        }
+    }
+
+    function resetVillaVideo() {
+        const hi = document.getElementById('villa-video');
+        if (hi) hi.value = '';
+        renderVillaVideo();
+    }
+
+    function loadVillaVideo(villa) {
+        const hi = document.getElementById('villa-video');
+        if (hi) hi.value = villa.video || '';
+        renderVillaVideo();
+    }
+
+    function openVillaVideoPicker() {
+        const fi = document.getElementById('villa-video-input');
+        if (fi) { fi.value = ''; fi.click(); }
+    }
+
+    function clearVillaVideo() {
+        resetVillaVideo();
+    }
+
+    document.getElementById('villa-video-input')?.addEventListener('change', async function () {
+        const file = this.files[0];
+        if (!file) return;
+
+        const uploading = document.getElementById('villa-video-uploading');
+        const bar       = document.getElementById('villa-video-bar');
+        if (uploading) uploading.style.display = 'flex';
+        if (bar)       bar.style.width = '0%';
+
+        let pct = 0;
+        const ticker = setInterval(() => {
+            pct = Math.min(pct + 8, 88);
+            if (bar) bar.style.width = pct + '%';
+        }, 150);
+
+        const form = new FormData();
+        form.append('video', file);
+
+        try {
+            const res = await fetch(ADMIN_BASE + '/villas/upload-video', {
+                method:  'POST',
+                headers: { 'X-CSRF-TOKEN': csrf() },
+                body:    form,
+            }).then(r => r.json());
+
+            clearInterval(ticker);
+            if (bar) bar.style.width = '100%';
+
+            if (res.success) {
+                document.getElementById('villa-video').value = res.url;
+                renderVillaVideo();
+            } else {
+                alert('Upload video thất bại: ' + (res.message || 'Lỗi'));
+            }
+        } catch {
+            clearInterval(ticker);
+            alert('Lỗi kết nối khi tải video.');
+        } finally {
+            setTimeout(() => {
+                if (uploading) uploading.style.display = 'none';
+                if (bar)       bar.style.width = '0%';
+            }, 500);
+        }
+    });
+
     function openVillaModal(villa) {
         const modal = document.getElementById('villa-modal');
         const title = document.getElementById('villa-modal-title');
@@ -1160,8 +1245,11 @@
         document.getElementById('villa-location').value = 'Đà Lạt';
         document.getElementById('villa-status').value   = 'active';
         resetVillaGallery();
+        resetVillaVideo();
         const fileInput = document.getElementById('villa-file-input');
         if (fileInput) fileInput.value = '';
+        const videoInput = document.getElementById('villa-video-input');
+        if (videoInput) videoInput.value = '';
         const errEl = document.getElementById('villa-form-error');
         if (errEl) errEl.style.display = 'none';
 
@@ -1178,6 +1266,7 @@
             document.getElementById('villa-status').value              = villa.status        || 'active';
             document.getElementById('villa-description').value         = villa.description   || '';
             loadGalleryFromVilla(villa);
+            loadVillaVideo(villa);
         } else {
             title.textContent = 'Thêm villa mới';
         }
@@ -1205,6 +1294,7 @@
             guests:        document.getElementById('villa-guests').value,
             image,
             gallery,
+            video:         document.getElementById('villa-video').value || null,
             status:        document.getElementById('villa-status').value,
             description:   document.getElementById('villa-description').value || null,
         };
@@ -1878,6 +1968,8 @@
         openVillaSlotPicker,
         handleVillaSlotDrop,
         clearVillaSlot,
+        openVillaVideoPicker,
+        clearVillaVideo,
         // Settings
         loadSettings,
         openSettingsLogoPicker,

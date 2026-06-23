@@ -46,23 +46,32 @@
     </div>
 
     {{-- GALLERY --}}
-    @if(count($gallery) > 0)
+    @php
+        $hasVideo    = !empty($villa->video);
+        $thumbImages = $hasVideo ? $gallery : array_slice($gallery, 1);
+    @endphp
+    @if($hasVideo || count($gallery) > 0)
     <div class="hd-gallery lx-container">
         <div class="hd-gallery__main">
-            <a href="{{ $gallery[0] }}" data-fancybox="gallery" data-caption="{{ $villa->name }}">
-                <img src="{{ $gallery[0] }}" alt="{{ $villa->name }}">
-            </a>
+            @if($hasVideo)
+                <video src="{{ $villa->video }}" autoplay muted loop playsinline controls
+                       style="width:100%;height:100%;object-fit:cover;display:block;background:#000;"></video>
+            @else
+                <a href="{{ $gallery[0] }}" data-fancybox="gallery" data-caption="{{ $villa->name }}">
+                    <img src="{{ $gallery[0] }}" alt="{{ $villa->name }}">
+                </a>
+            @endif
         </div>
 
-        @if(count($gallery) > 1)
+        @if(count($thumbImages) > 0)
         <div class="hd-gallery__grid">
-            @foreach(array_slice($gallery, 1, 4) as $idx => $img)
+            @foreach(array_slice($thumbImages, 0, 4) as $idx => $img)
                 <div class="hd-gallery__item @if($idx == 3) hd-gallery__item--last @endif">
-                    <a href="{{ $img }}" data-fancybox="gallery" data-caption="{{ $villa->name }} - Ảnh {{ $idx + 2 }}">
-                        <img src="{{ $img }}" alt="Gallery {{ $idx + 2 }}">
-                        @if($idx == 3 && count($gallery) > 5)
+                    <a href="{{ $img }}" data-fancybox="gallery" data-caption="{{ $villa->name }} - Ảnh {{ $idx + 1 }}">
+                        <img src="{{ $img }}" alt="Gallery {{ $idx + 1 }}">
+                        @if($idx == 3 && count($thumbImages) > 4)
                             <div class="hd-gallery__more">
-                                <span>+{{ count($gallery) - 5 }} Ảnh</span>
+                                <span>+{{ count($thumbImages) - 4 }} Ảnh</span>
                             </div>
                         @endif
                     </a>
@@ -72,9 +81,9 @@
         @endif
 
         {{-- Hidden links so remaining images are reachable via lightbox slide --}}
-        @if(count($gallery) > 5)
-            @foreach(array_slice($gallery, 5) as $idx => $img)
-                <a href="{{ $img }}" data-fancybox="gallery" data-caption="{{ $villa->name }} - Ảnh {{ $idx + 6 }}" style="display:none;"></a>
+        @if(count($thumbImages) > 4)
+            @foreach(array_slice($thumbImages, 4) as $idx => $img)
+                <a href="{{ $img }}" data-fancybox="gallery" data-caption="{{ $villa->name }} - Ảnh {{ $idx + 5 }}" style="display:none;"></a>
             @endforeach
         @endif
     </div>

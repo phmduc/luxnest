@@ -1125,6 +1125,40 @@
                     <input type="hidden" id="villa-image">
                 </div>
 
+                {{-- Video --}}
+                <div class="mf-group" style="grid-column:1/-1;">
+                    <label class="mf-label">
+                        Video villa
+                        <span style="font-weight:400; font-size:0.75rem; text-transform:none; letter-spacing:0;"> — tuỳ chọn, hiển thị đầu tiên ở trang chi tiết (tự động phát)</span>
+                    </label>
+                    <input type="file" id="villa-video-input" accept="video/mp4,video/quicktime,video/webm" style="display:none">
+                    <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+                        <div id="villa-video-slot"
+                             style="width:160px; height:90px; border:2px dashed var(--border-strong); border-radius:11px; overflow:hidden; position:relative; cursor:pointer; background:#FAFAFA; display:flex; align-items:center; justify-content:center; flex-shrink:0;"
+                             onclick="AdminApp.openVillaVideoPicker()">
+                            <div class="slot-empty" id="villa-video-empty">
+                                <i class="ph ph-video-camera" style="font-size:1.6rem; color:#CBD5E1;"></i>
+                            </div>
+                            <video id="villa-video-preview" muted style="display:none; width:100%; height:100%; object-fit:cover;"></video>
+                            <div id="villa-video-uploading" style="display:none; position:absolute; inset:0; background:rgba(255,255,255,.85); flex-direction:column; align-items:center; justify-content:center; gap:6px;">
+                                <div style="width:70%; height:3px; background:var(--border); border-radius:2px; overflow:hidden;">
+                                    <div id="villa-video-bar" style="height:100%; background:var(--orange); width:0%; transition:width .3s;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <button type="button" class="btn-view" onclick="AdminApp.openVillaVideoPicker()">
+                                <i class="ph ph-upload-simple"></i> Tải video lên
+                            </button>
+                            <button type="button" class="btn-view" style="margin-left:8px; color:#dc2626;" onclick="AdminApp.clearVillaVideo()">
+                                <i class="ph ph-trash"></i> Xóa
+                            </button>
+                            <p style="margin:7px 0 0; font-size:0.74rem; color:var(--text-muted);">MP4/MOV/WebM, tối đa 50MB.</p>
+                        </div>
+                    </div>
+                    <input type="hidden" id="villa-video">
+                </div>
+
                 <div class="mf-group">
                     <label class="mf-label">Trạng thái</label>
                     <select id="villa-status" class="mf-select">

@@ -8,7 +8,7 @@ class VillaListing extends Model
 {
     protected $fillable = [
         'slug', 'name', 'location', 'location_desc',
-        'beds', 'guests', 'description', 'image', 'gallery', 'status',
+        'beds', 'guests', 'description', 'image', 'gallery', 'video', 'status',
     ];
 
     protected $casts = [
