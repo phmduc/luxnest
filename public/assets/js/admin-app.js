@@ -1014,9 +1014,10 @@
         this.dataset.manual = this.value ? '1' : '';
     });
 
-    // ── Gallery: 5 slots ──────────────────────────────────────────
+    // ── Gallery: 10 slots ─────────────────────────────────────────
 
-    let villaGallerySlots = [null, null, null, null, null];
+    const VILLA_GALLERY_SIZE = 10;
+    let villaGallerySlots = new Array(VILLA_GALLERY_SIZE).fill(null);
     let activeVillaSlot   = 0;
 
     function getVillaSlotEl(idx) {
@@ -1048,18 +1049,18 @@
     }
 
     function resetVillaGallery() {
-        villaGallerySlots = [null, null, null, null, null];
-        for (let i = 0; i < 5; i++) renderVillaSlot(i);
+        villaGallerySlots = new Array(VILLA_GALLERY_SIZE).fill(null);
+        for (let i = 0; i < VILLA_GALLERY_SIZE; i++) renderVillaSlot(i);
         const hiddenImg = document.getElementById('villa-image');
         if (hiddenImg) hiddenImg.value = '';
     }
 
     function loadGalleryFromVilla(villa) {
-        villaGallerySlots = [null, null, null, null, null];
+        villaGallerySlots = new Array(VILLA_GALLERY_SIZE).fill(null);
         if (villa.image) villaGallerySlots[0] = villa.image;
         const extra = Array.isArray(villa.gallery) ? villa.gallery : [];
-        extra.forEach((url, i) => { if (i + 1 < 5) villaGallerySlots[i + 1] = url; });
-        for (let i = 0; i < 5; i++) renderVillaSlot(i);
+        extra.forEach((url, i) => { if (i + 1 < VILLA_GALLERY_SIZE) villaGallerySlots[i + 1] = url; });
+        for (let i = 0; i < VILLA_GALLERY_SIZE; i++) renderVillaSlot(i);
     }
 
     function collectVillaGallery() {

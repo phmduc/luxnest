@@ -421,7 +421,7 @@ class AdminDashboardController extends Controller
             'guests'        => 'required|string|max:50',
             'description'   => 'nullable|string',
             'image'         => 'nullable|string|max:1000',
-            'gallery'       => 'nullable|array|max:5',
+            'gallery'       => 'nullable|array|max:9',
             'gallery.*'     => 'string|max:1000',
             'status'        => 'required|in:active,inactive',
         ]);
@@ -444,7 +444,7 @@ class AdminDashboardController extends Controller
             'guests'        => 'required|string|max:50',
             'description'   => 'nullable|string',
             'image'         => 'nullable|string|max:1000',
-            'gallery'       => 'nullable|array|max:5',
+            'gallery'       => 'nullable|array|max:9',
             'gallery.*'     => 'string|max:1000',
             'status'        => 'required|in:active,inactive',
         ]);

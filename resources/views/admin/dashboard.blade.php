@@ -1051,16 +1051,16 @@
                 <div class="mf-group" style="grid-column:1/-1;">
                     <label class="mf-label">
                         Ảnh villa
-                        <span style="font-weight:400; font-size:0.75rem; text-transform:none; letter-spacing:0;"> — tối đa 5 tấm, tấm đầu là ảnh đại diện</span>
+                        <span style="font-weight:400; font-size:0.75rem; text-transform:none; letter-spacing:0;"> — tối đa 10 tấm, tấm đầu là ảnh đại diện</span>
                     </label>
 
                     <input type="file" id="villa-file-input" accept="image/*" style="display:none">
 
-                    <div id="villa-gallery-grid" style="display:grid; grid-template-columns:1fr repeat(4,72px); gap:8px; align-items:start;">
+                    <div id="villa-gallery-grid" style="display:grid; grid-template-columns:repeat(5,72px); gap:8px; align-items:start;">
 
                         {{-- Slot 0: main --}}
                         <div class="villa-img-slot villa-img-slot--main" data-slot="0"
-                             style="border:2px dashed var(--border-strong); border-radius:11px; overflow:hidden; aspect-ratio:4/3; position:relative; cursor:pointer; background:#FAFAFA; display:flex; flex-direction:column; align-items:center; justify-content:center; transition:border-color .2s;"
+                             style="grid-column:1/-1; height:160px; border:2px dashed var(--border-strong); border-radius:11px; overflow:hidden; position:relative; cursor:pointer; background:#FAFAFA; display:flex; flex-direction:column; align-items:center; justify-content:center; transition:border-color .2s;"
                              onclick="AdminApp.openVillaSlotPicker(0)"
                              ondragover="event.preventDefault(); this.style.borderColor='var(--orange)'"
                              ondragleave="this.style.borderColor='var(--border-strong)'"
@@ -1088,8 +1088,8 @@
                             </div>
                         </div>
 
-                        {{-- Slots 1–4 --}}
-                        @for($s = 1; $s <= 4; $s++)
+                        {{-- Slots 1–9 --}}
+                        @for($s = 1; $s <= 9; $s++)
                         <div class="villa-img-slot" data-slot="{{ $s }}"
                              style="border:2px dashed var(--border-strong); border-radius:9px; overflow:hidden; aspect-ratio:1; position:relative; cursor:pointer; background:#FAFAFA; display:flex; flex-direction:column; align-items:center; justify-content:center; transition:border-color .2s;"
                              onclick="AdminApp.openVillaSlotPicker({{ $s }})"
