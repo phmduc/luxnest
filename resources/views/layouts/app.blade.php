@@ -37,8 +37,8 @@
                         <img src="{{ $settings->logo }}" alt="{{ $settings->site_name }}" class="lx-header__logo-img">
                     @else
                         <span class="lx-header__logo-icon">🏡</span>
+                        <span class="lx-header__logo-text">{{ $settings->site_name }}</span>
                     @endif
-                    <span class="lx-header__logo-text">{{ $settings->site_name }}</span>
                 </a>
 
                 <!-- Mobile Menu (Collapsible) -->
