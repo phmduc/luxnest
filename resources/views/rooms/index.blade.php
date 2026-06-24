@@ -3,7 +3,7 @@
 @section('title', 'Khách sạn tại ' . $keyword . ' - LuxNest')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/rooms-archive.css') }}">
+<link rel="stylesheet" href="{{ asset_v('assets/css/rooms-archive.css') }}">
 <style>
 /* ── Search strip ── */
 .ra-search-strip {

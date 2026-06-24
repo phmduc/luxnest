@@ -118,6 +118,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,employee'])->group(funct
         Route::delete('/rooms/{id}', [AdminDashboardController::class, 'destroyRoom']);
         Route::patch('/rooms/{id}/status', [AdminDashboardController::class, 'toggleRoomStatus']);
         Route::post('/rooms/upload-image', [AdminDashboardController::class, 'uploadRoomImage']);
+        Route::post('/rooms/upload-video', [AdminDashboardController::class, 'uploadRoomVideo']);
 
         // Villa listings management
         Route::get('/villas', [AdminDashboardController::class, 'getVillas']);

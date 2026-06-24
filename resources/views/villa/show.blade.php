@@ -3,8 +3,8 @@
 @section('title', $villa->name . ' - LuxNest')
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('assets/css/hotel-detail.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/page-villa.css') }}">
+    <link rel="stylesheet" href="{{ asset_v('assets/css/hotel-detail.css') }}">
+    <link rel="stylesheet" href="{{ asset_v('assets/css/page-villa.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css" />
     <style>
     /* ── Policy grid responsive ── */
@@ -53,7 +53,11 @@
     @if($hasVideo || count($gallery) > 0)
     <div class="hd-gallery lx-container">
         <div class="hd-gallery__main">
-            @if($hasVideo)
+            @if($hasVideo && $villa->isYoutubeVideo())
+                <iframe src="{{ $villa->youtube_embed_url }}"
+                        style="width:100%;height:100%;display:block;border:0;"
+                        allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+            @elseif($hasVideo)
                 <video src="{{ $villa->video }}" autoplay muted loop playsinline controls
                        style="width:100%;height:100%;object-fit:cover;display:block;background:#000;"></video>
             @else

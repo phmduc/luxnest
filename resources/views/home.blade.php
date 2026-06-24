@@ -4,7 +4,7 @@
 @section('main_class', 'lx-main--no-padding')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}">
+<link rel="stylesheet" href="{{ asset_v('assets/css/home.css') }}">
 @endpush
 
 @section('content')
@@ -14,7 +14,7 @@
      ============================================================ --}}
 <section class="hero">
     <div class="hero__bg">
-        <img src="{{ asset('assets/images/hero-bg.jpg') }}" alt="LuxNest Hero" class="hero__img" onerror="this.src='https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&q=80'">
+        <img src="{{ asset_v('assets/images/hero-bg.jpg') }}" alt="LuxNest Hero" class="hero__img" onerror="this.src='https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&q=80'">
         <div class="hero__overlay"></div>
     </div>
 

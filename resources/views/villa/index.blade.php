@@ -4,7 +4,7 @@
 @section('main_class', 'lx-main--no-padding')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/page-villa.css') }}">
+<link rel="stylesheet" href="{{ asset_v('assets/css/page-villa.css') }}">
 @endpush
 
 @section('content')

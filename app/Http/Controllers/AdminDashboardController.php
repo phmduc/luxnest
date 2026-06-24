@@ -319,8 +319,9 @@ class AdminDashboardController extends Controller
             'price'              => 'required|integer|min:0',
             'regular_price'      => 'nullable|integer|min:0',
             'image'              => 'nullable|string|max:1000',
-            'gallery'            => 'nullable|array|max:5',
+            'gallery'            => 'nullable|array|max:9',
             'gallery.*'          => 'string|max:1000',
+            'video'              => 'nullable|string|max:1000',
             'amenities'          => 'nullable|array',
             'status'             => 'required|in:active,inactive',
             'gohost_room_type_id'=> 'nullable|string|max:255',
@@ -344,8 +345,9 @@ class AdminDashboardController extends Controller
             'price'              => 'required|integer|min:0',
             'regular_price'      => 'nullable|integer|min:0',
             'image'              => 'nullable|string|max:1000',
-            'gallery'            => 'nullable|array|max:5',
+            'gallery'            => 'nullable|array|max:9',
             'gallery.*'          => 'string|max:1000',
+            'video'              => 'nullable|string|max:1000',
             'amenities'          => 'nullable|array',
             'status'             => 'required|in:active,inactive',
             'gohost_room_type_id'=> 'nullable|string|max:255',
@@ -380,6 +382,18 @@ class AdminDashboardController extends Controller
         ]);
 
         $path = $request->file('image')->store('rooms', 'public');
+        $url  = asset('storage/' . $path);
+
+        return response()->json(['success' => true, 'url' => $url, 'path' => $path]);
+    }
+
+    public function uploadRoomVideo(Request $request): JsonResponse
+    {
+        $request->validate([
+            'video' => 'required|mimetypes:video/mp4,video/quicktime,video/webm|max:51200',
+        ]);
+
+        $path = $request->file('video')->store('rooms/videos', 'public');
         $url  = asset('storage/' . $path);
 
         return response()->json(['success' => true, 'url' => $url, 'path' => $path]);

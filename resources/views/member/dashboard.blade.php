@@ -211,6 +211,6 @@
 @endpush
 
 @push('scripts')
-<script src="{{ asset('assets/js/member-app.js') }}"></script>
+<script src="{{ asset_v('assets/js/member-app.js') }}"></script>
 @endpush
 @endsection

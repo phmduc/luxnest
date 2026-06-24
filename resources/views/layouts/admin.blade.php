@@ -12,7 +12,7 @@
 
     <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
 
-    <link rel="stylesheet" href="{{ asset('assets/css/admin-dashboard.css') }}">
+    <link rel="stylesheet" href="{{ asset_v('assets/css/admin-dashboard.css') }}">
 
     <style>
         html, body { height: 100%; }

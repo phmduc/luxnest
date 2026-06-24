@@ -3,7 +3,7 @@
 @section('title', $hotel['name'] . ' - LuxNest')
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('assets/css/hotel-detail.css') }}">
+    <link rel="stylesheet" href="{{ asset_v('assets/css/hotel-detail.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css" />
     <style>
     /* ── Policy grid responsive ── */
@@ -98,21 +98,34 @@
     </div>
 
     {{-- GALLERY --}}
+    @php
+        $hasVideo    = !empty($room->video);
+        $thumbImages = $hasVideo ? $hotel['images'] : array_slice($hotel['images'], 1);
+    @endphp
     <div class="hd-gallery lx-container">
         <div class="hd-gallery__main">
-            <a href="{{ $hotel['images'][0] ?? '' }}" data-fancybox="gallery" data-caption="{{ $hotel['name'] }}">
-                <img src="{{ $hotel['images'][0] ?? '' }}" alt="{{ $hotel['name'] }}">
-            </a>
+            @if($hasVideo && $room->isYoutubeVideo())
+                <iframe src="{{ $room->youtube_embed_url }}"
+                        style="width:100%;height:100%;display:block;border:0;"
+                        allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+            @elseif($hasVideo)
+                <video src="{{ $room->video }}" autoplay muted loop playsinline controls
+                       style="width:100%;height:100%;object-fit:cover;display:block;background:#000;"></video>
+            @else
+                <a href="{{ $hotel['images'][0] ?? '' }}" data-fancybox="gallery" data-caption="{{ $hotel['name'] }}">
+                    <img src="{{ $hotel['images'][0] ?? '' }}" alt="{{ $hotel['name'] }}">
+                </a>
+            @endif
         </div>
-        @if(count($hotel['images']) > 1)
+        @if(count($thumbImages) > 0)
         <div class="hd-gallery__grid">
-            @foreach(array_slice($hotel['images'], 1, 4) as $idx => $img)
+            @foreach(array_slice($thumbImages, 0, 4) as $idx => $img)
                 <div class="hd-gallery__item @if($idx == 3) hd-gallery__item--last @endif">
-                    <a href="{{ $img }}" data-fancybox="gallery" data-caption="{{ $hotel['name'] }} - Ảnh {{ $idx + 2 }}">
-                        <img src="{{ $img }}" alt="Gallery {{ $idx + 2 }}">
-                        @if($idx == 3 && count($hotel['images']) > 5)
+                    <a href="{{ $img }}" data-fancybox="gallery" data-caption="{{ $hotel['name'] }} - Ảnh {{ $idx + 1 }}">
+                        <img src="{{ $img }}" alt="Gallery {{ $idx + 1 }}">
+                        @if($idx == 3 && count($thumbImages) > 4)
                             <div class="hd-gallery__more">
-                                <span>+{{ count($hotel['images']) - 5 }} Ảnh</span>
+                                <span>+{{ count($thumbImages) - 4 }} Ảnh</span>
                             </div>
                         @endif
                     </a>
@@ -122,9 +135,9 @@
         @endif
 
         {{-- Hidden links so remaining images are reachable via lightbox slide --}}
-        @if(count($hotel['images']) > 5)
-            @foreach(array_slice($hotel['images'], 5) as $idx => $img)
-                <a href="{{ $img }}" data-fancybox="gallery" data-caption="{{ $hotel['name'] }} - Ảnh {{ $idx + 6 }}" style="display:none;"></a>
+        @if(count($thumbImages) > 4)
+            @foreach(array_slice($thumbImages, 4) as $idx => $img)
+                <a href="{{ $img }}" data-fancybox="gallery" data-caption="{{ $hotel['name'] }} - Ảnh {{ $idx + 5 }}" style="display:none;"></a>
             @endforeach
         @endif
     </div>

@@ -645,10 +645,11 @@
         this.dataset.manual = this.value ? '1' : '';
     });
 
-    // ── Gallery: 5 slots ──────────────────────────────────────────
+    // ── Gallery: 10 slots ─────────────────────────────────────────
 
-    // In-memory state: array of 5 URLs (null = empty)
-    let gallerySlots = [null, null, null, null, null];
+    const ROOM_GALLERY_SIZE = 10;
+    // In-memory state: array of 10 URLs (null = empty)
+    let gallerySlots = new Array(ROOM_GALLERY_SIZE).fill(null);
     let activeSlot   = 0; // which slot the file picker targets
 
     function getSlotEl(idx) {
@@ -680,18 +681,18 @@
     }
 
     function resetGallery() {
-        gallerySlots = [null, null, null, null, null];
-        for (let i = 0; i < 5; i++) renderSlot(i);
+        gallerySlots = new Array(ROOM_GALLERY_SIZE).fill(null);
+        for (let i = 0; i < ROOM_GALLERY_SIZE; i++) renderSlot(i);
         const hiddenImg = document.getElementById('room-image');
         if (hiddenImg) hiddenImg.value = '';
     }
 
     function loadGalleryFromRoom(room) {
-        gallerySlots = [null, null, null, null, null];
+        gallerySlots = new Array(ROOM_GALLERY_SIZE).fill(null);
         if (room.image)   gallerySlots[0] = room.image;
         const extra = Array.isArray(room.gallery) ? room.gallery : [];
-        extra.forEach((url, i) => { if (i + 1 < 5) gallerySlots[i + 1] = url; });
-        for (let i = 0; i < 5; i++) renderSlot(i);
+        extra.forEach((url, i) => { if (i + 1 < ROOM_GALLERY_SIZE) gallerySlots[i + 1] = url; });
+        for (let i = 0; i < ROOM_GALLERY_SIZE; i++) renderSlot(i);
     }
 
     function collectGallery() {
@@ -783,6 +784,122 @@
     function handleRoomDrop() {}
     function clearRoomPreview() { clearSlot(0); }
 
+    // ── Video upload ──────────────────────────────────────────────
+
+    function renderRoomVideo() {
+        const url     = document.getElementById('room-video')?.value || '';
+        const empty   = document.getElementById('room-video-empty');
+        const preview = document.getElementById('room-video-preview');
+        if (!empty || !preview) return;
+
+        if (url) {
+            preview.src           = url;
+            preview.style.display = 'block';
+            empty.style.display   = 'none';
+        } else {
+            preview.removeAttribute('src');
+            preview.style.display = 'none';
+            empty.style.display   = 'flex';
+        }
+    }
+
+    function resetRoomVideo() {
+        const hi = document.getElementById('room-video');
+        if (hi) hi.value = '';
+        const yt = document.getElementById('room-video-youtube-url');
+        if (yt) yt.value = '';
+        renderRoomVideo();
+    }
+
+    function setRoomVideoModeUI(mode) {
+        const uploadBlock  = document.getElementById('room-video-upload-block');
+        const youtubeBlock = document.getElementById('room-video-youtube-block');
+        if (uploadBlock)  uploadBlock.style.display  = mode === 'youtube' ? 'none' : 'block';
+        if (youtubeBlock) youtubeBlock.style.display = mode === 'youtube' ? 'block' : 'none';
+        const radio = document.getElementById('room-video-mode-' + mode);
+        if (radio) radio.checked = true;
+    }
+
+    function switchRoomVideoMode(mode) {
+        setRoomVideoModeUI(mode);
+        resetRoomVideo();
+    }
+
+    function loadRoomVideo(room) {
+        const hi  = document.getElementById('room-video');
+        const url = room.video || '';
+        if (hi) hi.value = url;
+
+        const isYoutube = /youtube\.com|youtu\.be/i.test(url);
+        if (isYoutube) {
+            setRoomVideoModeUI('youtube');
+            const yt = document.getElementById('room-video-youtube-url');
+            if (yt) yt.value = url;
+        } else {
+            setRoomVideoModeUI('upload');
+            renderRoomVideo();
+        }
+    }
+
+    function openRoomVideoPicker() {
+        const fi = document.getElementById('room-video-input');
+        if (fi) { fi.value = ''; fi.click(); }
+    }
+
+    function clearRoomVideo() {
+        resetRoomVideo();
+    }
+
+    document.getElementById('room-video-youtube-url')?.addEventListener('input', function () {
+        const hi = document.getElementById('room-video');
+        if (hi) hi.value = this.value.trim();
+    });
+
+    document.getElementById('room-video-input')?.addEventListener('change', async function () {
+        const file = this.files[0];
+        if (!file) return;
+
+        const uploading = document.getElementById('room-video-uploading');
+        const bar       = document.getElementById('room-video-bar');
+        if (uploading) uploading.style.display = 'flex';
+        if (bar)       bar.style.width = '0%';
+
+        let pct = 0;
+        const ticker = setInterval(() => {
+            pct = Math.min(pct + 8, 88);
+            if (bar) bar.style.width = pct + '%';
+        }, 150);
+
+        const form = new FormData();
+        form.append('video', file);
+
+        try {
+            const res = await fetch(ADMIN_BASE + '/rooms/upload-video', {
+                method:  'POST',
+                headers: { 'X-CSRF-TOKEN': csrf() },
+                body:    form,
+            }).then(r => r.json());
+
+            clearInterval(ticker);
+            if (bar) bar.style.width = '100%';
+
+            if (res.success) {
+                document.getElementById('room-video').value = res.url;
+                renderRoomVideo();
+            } else {
+                alert('Upload video thất bại: ' + (res.message || 'Lỗi'));
+            }
+        } catch {
+            clearInterval(ticker);
+            alert('Lỗi kết nối khi tải video.');
+        } finally {
+            setTimeout(() => {
+                if (uploading) uploading.style.display = 'none';
+                if (bar)       bar.style.width = '0%';
+            }, 500);
+        }
+    });
+
     function openRoomModal(room) {
         const modal = document.getElementById('room-modal');
         const title = document.getElementById('room-modal-title');
@@ -799,8 +916,12 @@
         document.getElementById('room-branch').value = 'Hotel';
         document.getElementById('room-status').value = 'active';
         resetGallery();
+        resetRoomVideo();
+        setRoomVideoModeUI('upload');
         const fileInput = document.getElementById('room-file-input');
         if (fileInput) fileInput.value = '';
+        const videoInput = document.getElementById('room-video-input');
+        if (videoInput) videoInput.value = '';
         const errEl = document.getElementById('room-form-error');
         if (errEl) errEl.style.display = 'none';
 
@@ -821,6 +942,7 @@
             document.getElementById('room-status').value        = room.status         || 'active';
             document.getElementById('room-description').value   = room.description    || '';
             loadGalleryFromRoom(room);
+            loadRoomVideo(room);
         } else {
             title.textContent = 'Thêm phòng mới';
         }
@@ -853,6 +975,7 @@
             regular_price:       parseInt(document.getElementById('room-regular-price').value) || null,
             image,
             gallery,
+            video:               document.getElementById('room-video').value || null,
             amenities,
             gohost_room_type_id: document.getElementById('room-gohost-id').value || null,
             status:              document.getElementById('room-status').value,
@@ -1167,13 +1290,39 @@
     function resetVillaVideo() {
         const hi = document.getElementById('villa-video');
         if (hi) hi.value = '';
+        const yt = document.getElementById('villa-video-youtube-url');
+        if (yt) yt.value = '';
         renderVillaVideo();
     }
 
+    function setVillaVideoModeUI(mode) {
+        const uploadBlock  = document.getElementById('villa-video-upload-block');
+        const youtubeBlock = document.getElementById('villa-video-youtube-block');
+        if (uploadBlock)  uploadBlock.style.display  = mode === 'youtube' ? 'none' : 'block';
+        if (youtubeBlock) youtubeBlock.style.display = mode === 'youtube' ? 'block' : 'none';
+        const radio = document.getElementById('villa-video-mode-' + mode);
+        if (radio) radio.checked = true;
+    }
+
+    function switchVillaVideoMode(mode) {
+        setVillaVideoModeUI(mode);
+        resetVillaVideo();
+    }
+
     function loadVillaVideo(villa) {
-        const hi = document.getElementById('villa-video');
-        if (hi) hi.value = villa.video || '';
-        renderVillaVideo();
+        const hi  = document.getElementById('villa-video');
+        const url = villa.video || '';
+        if (hi) hi.value = url;
+
+        const isYoutube = /youtube\.com|youtu\.be/i.test(url);
+        if (isYoutube) {
+            setVillaVideoModeUI('youtube');
+            const yt = document.getElementById('villa-video-youtube-url');
+            if (yt) yt.value = url;
+        } else {
+            setVillaVideoModeUI('upload');
+            renderVillaVideo();
+        }
     }
 
     function openVillaVideoPicker() {
@@ -1184,6 +1333,11 @@
     function clearVillaVideo() {
         resetVillaVideo();
     }
+
+    document.getElementById('villa-video-youtube-url')?.addEventListener('input', function () {
+        const hi = document.getElementById('villa-video');
+        if (hi) hi.value = this.value.trim();
+    });
 
     document.getElementById('villa-video-input')?.addEventListener('change', async function () {
         const file = this.files[0];
@@ -1246,6 +1400,7 @@
         document.getElementById('villa-status').value   = 'active';
         resetVillaGallery();
         resetVillaVideo();
+        setVillaVideoModeUI('upload');
         const fileInput = document.getElementById('villa-file-input');
         if (fileInput) fileInput.value = '';
         const videoInput = document.getElementById('villa-video-input');
@@ -1960,6 +2115,9 @@
         clearSlot,
         handleRoomDrop,
         clearRoomImage: clearRoomPreview,
+        openRoomVideoPicker,
+        clearRoomVideo,
+        switchRoomVideoMode,
         // Villas
         loadVillas,
         openVillaModal,
@@ -1970,6 +2128,7 @@
         clearVillaSlot,
         openVillaVideoPicker,
         clearVillaVideo,
+        switchVillaVideoMode,
         // Settings
         loadSettings,
         openSettingsLogoPicker,

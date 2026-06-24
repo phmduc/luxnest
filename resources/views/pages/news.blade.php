@@ -3,7 +3,7 @@
 @section('title', 'Tin tức - ' . $settings->site_name)
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/pages.css') }}">
+<link rel="stylesheet" href="{{ asset_v('assets/css/pages.css') }}">
 @endpush
 
 @section('content')

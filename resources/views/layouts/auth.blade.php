@@ -11,7 +11,7 @@
 
     <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
 
-    <link rel="stylesheet" href="{{ asset('assets/css/auth.css') }}">
+    <link rel="stylesheet" href="{{ asset_v('assets/css/auth.css') }}">
 </head>
 <body class="auth-body">
 

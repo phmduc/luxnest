@@ -109,4 +109,4 @@
 window.CHAT_URL   = '{{ route("chat.send") }}';
 window.CSRF_TOKEN = '{{ csrf_token() }}';
 </script>
-<script src="{{ asset('assets/js/ai-chat.js') }}"></script>
+<script src="{{ asset_v('assets/js/ai-chat.js') }}"></script>

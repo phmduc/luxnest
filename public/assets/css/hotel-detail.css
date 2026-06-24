@@ -104,6 +104,7 @@
     gap: 10px;
     padding: 0 20px 24px;
     height: 480px;
+    overflow: hidden;
 }
 
 .hd-gallery__main,
@@ -112,6 +113,8 @@
     overflow: hidden;
     position: relative;
     cursor: pointer;
+    min-height: 0;
+    min-width: 0;
 }
 .hd-gallery__main > a,
 .hd-gallery__item > a {
@@ -136,6 +139,8 @@
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr 1fr;
     gap: 10px;
+    min-height: 0;
+    overflow: hidden;
 }
 
 .hd-gallery__more {

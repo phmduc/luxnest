@@ -903,16 +903,16 @@
                 <div class="mf-group" style="grid-column:1/-1;">
                     <label class="mf-label">
                         Ảnh phòng
-                        <span style="font-weight:400; font-size:0.75rem; text-transform:none; letter-spacing:0;"> — tối đa 5 tấm, tấm đầu là ảnh đại diện</span>
+                        <span style="font-weight:400; font-size:0.75rem; text-transform:none; letter-spacing:0;"> — tối đa 10 tấm, tấm đầu là ảnh đại diện</span>
                     </label>
 
                     <input type="file" id="room-file-input" accept="image/*" style="display:none">
 
-                    <div id="room-gallery-grid" style="display:grid; grid-template-columns:1fr repeat(4,72px); gap:8px; align-items:start;">
+                    <div id="room-gallery-grid" style="display:grid; grid-template-columns:repeat(5,72px); gap:8px; align-items:start;">
 
                         {{-- Slot 0: main --}}
                         <div class="img-slot img-slot--main" data-slot="0"
-                             style="border:2px dashed var(--border-strong); border-radius:11px; overflow:hidden; aspect-ratio:4/3; position:relative; cursor:pointer; background:#FAFAFA; display:flex; flex-direction:column; align-items:center; justify-content:center; transition:border-color .2s;"
+                             style="grid-column:1/-1; height:160px; border:2px dashed var(--border-strong); border-radius:11px; overflow:hidden; position:relative; cursor:pointer; background:#FAFAFA; display:flex; flex-direction:column; align-items:center; justify-content:center; transition:border-color .2s;"
                              onclick="AdminApp.openSlotPicker(0)"
                              ondragover="event.preventDefault(); this.style.borderColor='var(--orange)'"
                              ondragleave="this.style.borderColor='var(--border-strong)'"
@@ -940,8 +940,8 @@
                             </div>
                         </div>
 
-                        {{-- Slots 1–4 --}}
-                        @for($s = 1; $s <= 4; $s++)
+                        {{-- Slots 1–9 --}}
+                        @for($s = 1; $s <= 9; $s++)
                         <div class="img-slot" data-slot="{{ $s }}"
                              style="border:2px dashed var(--border-strong); border-radius:9px; overflow:hidden; aspect-ratio:1; position:relative; cursor:pointer; background:#FAFAFA; display:flex; flex-direction:column; align-items:center; justify-content:center; transition:border-color .2s;"
                              onclick="AdminApp.openSlotPicker({{ $s }})"
@@ -975,6 +975,60 @@
                         <i class="ph ph-info"></i> Click hoặc kéo thả ảnh vào ô. JPG/PNG/WebP, tối đa 4MB mỗi tấm.
                     </p>
                     <input type="hidden" id="room-image">
+                </div>
+
+                {{-- Video --}}
+                <div class="mf-group" style="grid-column:1/-1;">
+                    <label class="mf-label">
+                        Video phòng
+                        <span style="font-weight:400; font-size:0.75rem; text-transform:none; letter-spacing:0;"> — tuỳ chọn, hiển thị đầu tiên ở trang chi tiết (tự động phát)</span>
+                    </label>
+
+                    <div style="display:flex; gap:18px; margin-bottom:12px;">
+                        <label style="display:flex; align-items:center; gap:6px; font-size:0.85rem; cursor:pointer;">
+                            <input type="radio" name="room-video-mode" id="room-video-mode-upload" value="upload" checked onchange="AdminApp.switchRoomVideoMode('upload')">
+                            Tải video lên
+                        </label>
+                        <label style="display:flex; align-items:center; gap:6px; font-size:0.85rem; cursor:pointer;">
+                            <input type="radio" name="room-video-mode" id="room-video-mode-youtube" value="youtube" onchange="AdminApp.switchRoomVideoMode('youtube')">
+                            Nhúng YouTube
+                        </label>
+                    </div>
+
+                    <div id="room-video-upload-block">
+                        <input type="file" id="room-video-input" accept="video/mp4,video/quicktime,video/webm" style="display:none">
+                        <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+                            <div id="room-video-slot"
+                                 style="width:160px; height:90px; border:2px dashed var(--border-strong); border-radius:11px; overflow:hidden; position:relative; cursor:pointer; background:#FAFAFA; display:flex; align-items:center; justify-content:center; flex-shrink:0;"
+                                 onclick="AdminApp.openRoomVideoPicker()">
+                                <div class="slot-empty" id="room-video-empty">
+                                    <i class="ph ph-video-camera" style="font-size:1.6rem; color:#CBD5E1;"></i>
+                                </div>
+                                <video id="room-video-preview" muted style="display:none; width:100%; height:100%; object-fit:cover;"></video>
+                                <div id="room-video-uploading" style="display:none; position:absolute; inset:0; background:rgba(255,255,255,.85); flex-direction:column; align-items:center; justify-content:center; gap:6px;">
+                                    <div style="width:70%; height:3px; background:var(--border); border-radius:2px; overflow:hidden;">
+                                        <div id="room-video-bar" style="height:100%; background:var(--orange); width:0%; transition:width .3s;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <button type="button" class="btn-view" onclick="AdminApp.openRoomVideoPicker()">
+                                    <i class="ph ph-upload-simple"></i> Tải video lên
+                                </button>
+                                <button type="button" class="btn-view" style="margin-left:8px; color:#dc2626;" onclick="AdminApp.clearRoomVideo()">
+                                    <i class="ph ph-trash"></i> Xóa
+                                </button>
+                                <p style="margin:7px 0 0; font-size:0.74rem; color:var(--text-muted);">MP4/MOV/WebM, tối đa 50MB.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="room-video-youtube-block" style="display:none;">
+                        <input type="text" id="room-video-youtube-url" class="mf-input" placeholder="https://www.youtube.com/watch?v=...">
+                        <p style="margin:7px 0 0; font-size:0.74rem; color:var(--text-muted);">Dán link YouTube, video sẽ tự động phát ở trang chi tiết.</p>
+                    </div>
+
+                    <input type="hidden" id="room-video">
                 </div>
 
                 <div class="mf-group" style="grid-column:1/-1;">
@@ -1131,31 +1185,51 @@
                         Video villa
                         <span style="font-weight:400; font-size:0.75rem; text-transform:none; letter-spacing:0;"> — tuỳ chọn, hiển thị đầu tiên ở trang chi tiết (tự động phát)</span>
                     </label>
-                    <input type="file" id="villa-video-input" accept="video/mp4,video/quicktime,video/webm" style="display:none">
-                    <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
-                        <div id="villa-video-slot"
-                             style="width:160px; height:90px; border:2px dashed var(--border-strong); border-radius:11px; overflow:hidden; position:relative; cursor:pointer; background:#FAFAFA; display:flex; align-items:center; justify-content:center; flex-shrink:0;"
-                             onclick="AdminApp.openVillaVideoPicker()">
-                            <div class="slot-empty" id="villa-video-empty">
-                                <i class="ph ph-video-camera" style="font-size:1.6rem; color:#CBD5E1;"></i>
-                            </div>
-                            <video id="villa-video-preview" muted style="display:none; width:100%; height:100%; object-fit:cover;"></video>
-                            <div id="villa-video-uploading" style="display:none; position:absolute; inset:0; background:rgba(255,255,255,.85); flex-direction:column; align-items:center; justify-content:center; gap:6px;">
-                                <div style="width:70%; height:3px; background:var(--border); border-radius:2px; overflow:hidden;">
-                                    <div id="villa-video-bar" style="height:100%; background:var(--orange); width:0%; transition:width .3s;"></div>
+
+                    <div style="display:flex; gap:18px; margin-bottom:12px;">
+                        <label style="display:flex; align-items:center; gap:6px; font-size:0.85rem; cursor:pointer;">
+                            <input type="radio" name="villa-video-mode" id="villa-video-mode-upload" value="upload" checked onchange="AdminApp.switchVillaVideoMode('upload')">
+                            Tải video lên
+                        </label>
+                        <label style="display:flex; align-items:center; gap:6px; font-size:0.85rem; cursor:pointer;">
+                            <input type="radio" name="villa-video-mode" id="villa-video-mode-youtube" value="youtube" onchange="AdminApp.switchVillaVideoMode('youtube')">
+                            Nhúng YouTube
+                        </label>
+                    </div>
+
+                    <div id="villa-video-upload-block">
+                        <input type="file" id="villa-video-input" accept="video/mp4,video/quicktime,video/webm" style="display:none">
+                        <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+                            <div id="villa-video-slot"
+                                 style="width:160px; height:90px; border:2px dashed var(--border-strong); border-radius:11px; overflow:hidden; position:relative; cursor:pointer; background:#FAFAFA; display:flex; align-items:center; justify-content:center; flex-shrink:0;"
+                                 onclick="AdminApp.openVillaVideoPicker()">
+                                <div class="slot-empty" id="villa-video-empty">
+                                    <i class="ph ph-video-camera" style="font-size:1.6rem; color:#CBD5E1;"></i>
+                                </div>
+                                <video id="villa-video-preview" muted style="display:none; width:100%; height:100%; object-fit:cover;"></video>
+                                <div id="villa-video-uploading" style="display:none; position:absolute; inset:0; background:rgba(255,255,255,.85); flex-direction:column; align-items:center; justify-content:center; gap:6px;">
+                                    <div style="width:70%; height:3px; background:var(--border); border-radius:2px; overflow:hidden;">
+                                        <div id="villa-video-bar" style="height:100%; background:var(--orange); width:0%; transition:width .3s;"></div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div>
-                            <button type="button" class="btn-view" onclick="AdminApp.openVillaVideoPicker()">
-                                <i class="ph ph-upload-simple"></i> Tải video lên
-                            </button>
-                            <button type="button" class="btn-view" style="margin-left:8px; color:#dc2626;" onclick="AdminApp.clearVillaVideo()">
-                                <i class="ph ph-trash"></i> Xóa
-                            </button>
-                            <p style="margin:7px 0 0; font-size:0.74rem; color:var(--text-muted);">MP4/MOV/WebM, tối đa 50MB.</p>
+                            <div>
+                                <button type="button" class="btn-view" onclick="AdminApp.openVillaVideoPicker()">
+                                    <i class="ph ph-upload-simple"></i> Tải video lên
+                                </button>
+                                <button type="button" class="btn-view" style="margin-left:8px; color:#dc2626;" onclick="AdminApp.clearVillaVideo()">
+                                    <i class="ph ph-trash"></i> Xóa
+                                </button>
+                                <p style="margin:7px 0 0; font-size:0.74rem; color:var(--text-muted);">MP4/MOV/WebM, tối đa 50MB.</p>
+                            </div>
                         </div>
                     </div>
+
+                    <div id="villa-video-youtube-block" style="display:none;">
+                        <input type="text" id="villa-video-youtube-url" class="mf-input" placeholder="https://www.youtube.com/watch?v=...">
+                        <p style="margin:7px 0 0; font-size:0.74rem; color:var(--text-muted);">Dán link YouTube, video sẽ tự động phát ở trang chi tiết.</p>
+                    </div>
+
                     <input type="hidden" id="villa-video">
                 </div>
 
@@ -1320,7 +1394,7 @@
 @endif
 
 @push('scripts')
-<script src="{{ asset('assets/js/admin-app.js') }}"></script>
+<script src="{{ asset_v('assets/js/admin-app.js') }}"></script>
 <script>
 (function () {
     // ── QR Check-in modal ──────────────────────────────────────

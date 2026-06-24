@@ -18,9 +18,9 @@
     <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js"></script>
 
     <!-- Global CSS -->
-    <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/header.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/footer.css') }}">
+    <link rel="stylesheet" href="{{ asset_v('assets/css/style.css') }}">
+    <link rel="stylesheet" href="{{ asset_v('assets/css/header.css') }}">
+    <link rel="stylesheet" href="{{ asset_v('assets/css/footer.css') }}">
 
     @stack('styles')
 </head>
