@@ -214,8 +214,8 @@
         @php
         $branchMeta = [
             'Hotel'     => ['logo' => '🏨', 'tag' => 'Khách sạn',  'sub' => 'Không gian tinh tế, dịch vụ chuyên nghiệp', 'bg' => '#1a1a1a', 'link' => route('rooms.index', ['keyword' => 'Hotel'])],
-            'Villa'     => ['logo' => '🏡', 'tag' => 'Villa',       'sub' => 'Riêng tư, sang trọng giữa thiên nhiên',      'bg' => '#7c3aed', 'link' => route('villa.index', ['location' => 'Đà Lạt'])],
-            'Residence' => ['logo' => '🏢', 'tag' => 'Căn hộ',      'sub' => 'Tiện nghi như nhà, đẳng cấp resort',         'bg' => '#0f766e', 'link' => route('rooms.index', ['keyword' => 'Residence'])],
+            'Villa'     => ['logo' => '🏡', 'tag' => 'Villa',       'sub' => 'Riêng tư, sang trọng giữa thiên nhiên',      'bg' => '#1a1a1a', 'link' => route('villa.index', ['location' => 'Đà Lạt'])],
+            'Residence' => ['logo' => '🏢', 'tag' => 'Căn hộ',      'sub' => 'Tiện nghi như nhà, đẳng cấp resort',         'bg' => '#1a1a1a', 'link' => route('rooms.index', ['keyword' => 'Residence'])],
         ];
         @endphp
         <div class="brand-grid">
