@@ -48,7 +48,7 @@ class BookingController extends Controller
             'guests'          => 'integer|min:1',
             'first_name'      => 'required|string|max:100',
             'last_name'       => 'required|string|max:100',
-            'email'           => 'required|email',
+            'email'           => 'required|email:rfc,dns',
             'phone'           => 'required|string|max:20',
             'special_request' => 'nullable|string|max:1000',
         ]);
