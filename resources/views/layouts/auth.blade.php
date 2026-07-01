@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'LuxNest')</title>
+    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,7 +19,9 @@
     <div class="auth-wrapper">
         <div class="auth-card">
             <div class="auth-logo">
-                <a href="{{ url('/') }}">🏡 LuxNest</a>
+                <a href="{{ url('/') }}">
+                    <img src="{{ asset('favicon.png') }}" alt="LuxNest" style="height:72px; width:auto; display:block; margin:0 auto;">
+                </a>
             </div>
 
             @yield('content')
