@@ -7,7 +7,7 @@
     <title>@yield('title', 'LuxNest - Hệ thống đặt phòng')</title>
 
     @php
-        $defaultOgImage = $settings->logo ?: asset('promo-banner.png');
+        $defaultOgImage = $settings->og_image ?: $settings->logo ?: asset('promo-banner.png');
         $defaultOgDesc  = $settings->footer_description ?: 'Trải nghiệm lưu trú đẳng cấp tại những điểm đến đẹp nhất Việt Nam.';
         $defaultOgTitle = $settings->site_name . ' - Đặt phòng khách sạn, villa & homestay tốt nhất';
     @endphp

@@ -571,6 +571,7 @@ class AdminDashboardController extends Controller
         $validated = $request->validate([
             'site_name'          => 'required|string|max:255',
             'logo'               => 'nullable|string|max:1000',
+            'og_image'           => 'nullable|string|max:1000',
             'hotline'            => 'nullable|string|max:50',
             'email'              => 'nullable|email|max:255',
             'address'            => 'nullable|string|max:500',
@@ -591,6 +592,18 @@ class AdminDashboardController extends Controller
     {
         $request->validate([
             'image' => 'required|image|mimes:jpeg,png,jpg,webp,svg|max:2048',
+        ]);
+
+        $path = $request->file('image')->store('settings', 'public');
+        $url  = asset('storage/' . $path);
+
+        return response()->json(['success' => true, 'url' => $url, 'path' => $path]);
+    }
+
+    public function uploadSettingsOgImage(Request $request): JsonResponse
+    {
+        $request->validate([
+            'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:4096',
         ]);
 
         $path = $request->file('image')->store('settings', 'public');

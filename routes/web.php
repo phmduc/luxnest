@@ -134,6 +134,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,employee'])->group(funct
         Route::get('/settings', [AdminDashboardController::class, 'getSettings']);
         Route::post('/settings', [AdminDashboardController::class, 'updateSettings']);
         Route::post('/settings/upload-logo', [AdminDashboardController::class, 'uploadSettingsLogo']);
+        Route::post('/settings/upload-og-image', [AdminDashboardController::class, 'uploadSettingsOgImage']);
 
         // News management
         Route::get('/news', [AdminDashboardController::class, 'getNews']);

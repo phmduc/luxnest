@@ -403,6 +403,39 @@
                         </div>
 
                         <div class="mf-group" style="grid-column:1/-1;">
+                            <label class="mf-label">Ảnh OG (share link)
+                                <span style="font-weight:400;font-size:0.75rem;text-transform:none;letter-spacing:0;">— khuyến nghị 1200×630px, dùng khi share link lên Zalo/Facebook</span>
+                            </label>
+                            <input type="file" id="settings-og-input" accept="image/jpeg,image/png,image/webp" style="display:none">
+                            <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+                                <div id="settings-og-slot"
+                                     style="width:200px; height:105px; border:2px dashed var(--border-strong); border-radius:11px; overflow:hidden; position:relative; cursor:pointer; background:#FAFAFA; display:flex; align-items:center; justify-content:center; flex-shrink:0;"
+                                     onclick="AdminApp.openSettingsOgPicker()">
+                                    <div class="slot-empty" id="settings-og-empty">
+                                        <i class="ph ph-image" style="font-size:1.6rem; color:#CBD5E1;"></i>
+                                        <span style="font-size:0.7rem;color:#94a3b8;margin-top:4px;display:block;">1200×630px</span>
+                                    </div>
+                                    <img id="settings-og-preview" style="display:none; width:100%; height:100%; object-fit:cover;">
+                                    <div id="settings-og-uploading" style="display:none; position:absolute; inset:0; background:rgba(255,255,255,.85); flex-direction:column; align-items:center; justify-content:center; gap:6px;">
+                                        <div style="width:70%; height:3px; background:var(--border); border-radius:2px; overflow:hidden;">
+                                            <div id="settings-og-bar" style="height:100%; background:var(--orange); width:0%; transition:width .3s;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <button type="button" class="btn-view" onclick="AdminApp.openSettingsOgPicker()">
+                                        <i class="ph ph-upload-simple"></i> Tải ảnh lên
+                                    </button>
+                                    <button type="button" class="btn-view" style="margin-left:8px; color:#dc2626;" onclick="AdminApp.clearSettingsOg()">
+                                        <i class="ph ph-trash"></i> Xóa
+                                    </button>
+                                    <p style="margin:7px 0 0; font-size:0.74rem; color:var(--text-muted);">JPG/PNG/WebP, tối đa 4MB. Tỉ lệ 1.91:1 (1200×630).</p>
+                                </div>
+                            </div>
+                            <input type="hidden" id="settings-og-image">
+                        </div>
+
+                        <div class="mf-group" style="grid-column:1/-1;">
                             <label class="mf-label">Tên doanh nghiệp</label>
                             <input type="text" id="settings-site-name" class="mf-input" placeholder="LuxNest">
                         </div>

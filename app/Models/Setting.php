@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Cache;
 class Setting extends Model
 {
     protected $fillable = [
-        'site_name', 'logo', 'hotline', 'email', 'address', 'map_link',
+        'site_name', 'logo', 'og_image', 'hotline', 'email', 'address', 'map_link',
         'facebook_url', 'instagram_url', 'youtube_url', 'footer_description',
     ];
 

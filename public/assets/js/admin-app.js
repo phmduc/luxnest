@@ -1539,7 +1539,55 @@
         document.getElementById('settings-footer-desc').value = s.footer_description || '';
         document.getElementById('settings-logo').value        = s.logo || '';
         renderSettingsLogo(s.logo || '');
+        document.getElementById('settings-og-image').value    = s.og_image || '';
+        renderSettingsOg(s.og_image || '');
     }
+
+    function renderSettingsOg(url) {
+        const empty   = document.getElementById('settings-og-empty');
+        const preview = document.getElementById('settings-og-preview');
+        if (!empty || !preview) return;
+        if (url) {
+            preview.src = url; preview.style.display = 'block'; empty.style.display = 'none';
+        } else {
+            preview.style.display = 'none'; empty.style.display = 'flex';
+        }
+    }
+
+    function openSettingsOgPicker() {
+        const fi = document.getElementById('settings-og-input');
+        if (fi) { fi.value = ''; fi.click(); }
+    }
+
+    function clearSettingsOg() {
+        document.getElementById('settings-og-image').value = '';
+        renderSettingsOg('');
+    }
+
+    document.getElementById('settings-og-input')?.addEventListener('change', async function () {
+        const file = this.files[0];
+        if (!file) return;
+        const uploading = document.getElementById('settings-og-uploading');
+        const bar       = document.getElementById('settings-og-bar');
+        if (uploading) uploading.style.display = 'flex';
+        if (bar) bar.style.width = '0%';
+        let pct = 0;
+        const ticker = setInterval(() => { pct = Math.min(pct + 10, 85); if (bar) bar.style.width = pct + '%'; }, 120);
+        try {
+            const fd = new FormData();
+            fd.append('image', file);
+            fd.append('_token', csrf());
+            const r = await fetch(ADMIN_BASE + '/settings/upload-og-image', { method: 'POST', body: fd });
+            const res = await r.json();
+            clearInterval(ticker);
+            if (bar) bar.style.width = '100%';
+            if (res.success) {
+                document.getElementById('settings-og-image').value = res.url;
+                renderSettingsOg(res.url);
+            } else { alert('Lỗi: ' + (res.message || 'Tải ảnh thất bại.')); }
+        } catch { clearInterval(ticker); alert('Lỗi kết nối khi tải ảnh.'); }
+        finally { setTimeout(() => { if (uploading) uploading.style.display = 'none'; if (bar) bar.style.width = '0%'; }, 500); }
+    });
 
     function openSettingsLogoPicker() {
         const fi = document.getElementById('settings-logo-input');
@@ -1608,6 +1656,7 @@
         const payload = {
             site_name:          document.getElementById('settings-site-name').value.trim(),
             logo:               document.getElementById('settings-logo').value.trim() || null,
+            og_image:           document.getElementById('settings-og-image').value.trim() || null,
             hotline:            document.getElementById('settings-hotline').value.trim() || null,
             email:              document.getElementById('settings-email').value.trim() || null,
             address:            document.getElementById('settings-address').value.trim() || null,
@@ -2151,6 +2200,8 @@
         loadSettings,
         openSettingsLogoPicker,
         clearSettingsLogo,
+        openSettingsOgPicker,
+        clearSettingsOg,
         // News
         openNewsModal,
         deleteNews,
