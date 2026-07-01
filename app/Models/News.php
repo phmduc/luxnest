@@ -9,7 +9,7 @@ class News extends Model
     protected $table = 'news';
 
     protected $fillable = [
-        'title', 'excerpt', 'content', 'tag', 'image', 'published_at', 'status',
+        'title', 'slug', 'excerpt', 'content', 'tag', 'image', 'published_at', 'status',
     ];
 
     protected $casts = [

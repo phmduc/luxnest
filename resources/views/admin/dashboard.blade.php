@@ -1275,6 +1275,11 @@
                     <input type="text" id="news-title" class="mf-input" placeholder="VD: LuxNest khai trương villa mới">
                 </div>
 
+                <div class="mf-group" style="grid-column:1/-1;">
+                    <label class="mf-label">Slug (đường dẫn) <span style="font-weight:400;font-size:0.75rem;text-transform:none;letter-spacing:0;">— tự động tạo từ tiêu đề</span></label>
+                    <input type="text" id="news-slug" class="mf-input" placeholder="vd: luxnest-khai-truong-villa-moi">
+                </div>
+
                 {{-- Image --}}
                 <div class="mf-group" style="grid-column:1/-1;">
                     <label class="mf-label">

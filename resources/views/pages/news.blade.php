@@ -24,21 +24,24 @@
         @else
         <div class="pg-news-grid">
             @foreach($articles as $article)
-            <article class="pg-news-card">
-                @if($article->image)
-                <div class="pg-news-card__thumb pg-news-card__thumb--img" style="background-image:url('{{ $article->image }}');"></div>
-                @else
-                <div class="pg-news-card__thumb">📰</div>
-                @endif
-                <div class="pg-news-card__body">
-                    @if($article->tag)
-                    <span class="pg-news-card__tag">{{ $article->tag }}</span>
+            <a href="{{ $article->slug ? route('news.show', $article->slug) : '#' }}"
+               style="text-decoration:none; color:inherit;">
+                <article class="pg-news-card">
+                    @if($article->image)
+                    <div class="pg-news-card__thumb pg-news-card__thumb--img" style="background-image:url('{{ $article->image }}');"></div>
+                    @else
+                    <div class="pg-news-card__thumb">📰</div>
                     @endif
-                    <h3 class="pg-news-card__title">{{ $article->title }}</h3>
-                    <p class="pg-news-card__excerpt">{{ $article->excerpt }}</p>
-                    <span class="pg-news-card__date">{{ $article->published_at?->format('d/m/Y') }}</span>
-                </div>
-            </article>
+                    <div class="pg-news-card__body">
+                        @if($article->tag)
+                        <span class="pg-news-card__tag">{{ $article->tag }}</span>
+                        @endif
+                        <h3 class="pg-news-card__title">{{ $article->title }}</h3>
+                        <p class="pg-news-card__excerpt">{{ $article->excerpt }}</p>
+                        <span class="pg-news-card__date">{{ $article->published_at?->format('d/m/Y') }}</span>
+                    </div>
+                </article>
+            </a>
             @endforeach
         </div>
 

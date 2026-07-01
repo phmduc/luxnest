@@ -1804,10 +1804,12 @@
         const title = document.getElementById('news-modal-title');
         if (!modal) return;
 
-        ['news-id','news-title','news-tag','news-published-at','news-excerpt','news-content','news-image'].forEach(id => {
+        ['news-id','news-title','news-slug','news-tag','news-published-at','news-excerpt','news-content','news-image'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.value = '';
         });
+        const newsSlugEl = document.getElementById('news-slug');
+        if (newsSlugEl) delete newsSlugEl.dataset.manual;
         document.getElementById('news-status').value = 'active';
         renderNewsImage('');
         const fileInput = document.getElementById('news-file-input');
@@ -1819,6 +1821,8 @@
             title.textContent = 'Sửa bài viết';
             document.getElementById('news-id').value           = article.id;
             document.getElementById('news-title').value        = article.title || '';
+            document.getElementById('news-slug').value         = article.slug || '';
+            if (article.slug) document.getElementById('news-slug').dataset.manual = '1';
             document.getElementById('news-tag').value          = article.tag || '';
             document.getElementById('news-published-at').value = article.published_at ? String(article.published_at).slice(0, 10) : '';
             document.getElementById('news-excerpt').value      = article.excerpt || '';
@@ -1844,6 +1848,7 @@
 
         const payload = {
             title:        document.getElementById('news-title').value,
+            slug:         document.getElementById('news-slug').value || null,
             tag:          document.getElementById('news-tag').value || null,
             published_at: document.getElementById('news-published-at').value || null,
             excerpt:      document.getElementById('news-excerpt').value || null,
@@ -1890,6 +1895,19 @@
     document.getElementById('news-modal-cancel')?.addEventListener('click', closeNewsModal);
     document.getElementById('news-modal')?.addEventListener('click', function (e) {
         if (e.target === this) closeNewsModal();
+    });
+
+    document.getElementById('news-title')?.addEventListener('input', function () {
+        const slugEl = document.getElementById('news-slug');
+        if (!slugEl || slugEl.dataset.manual) return;
+        slugEl.value = this.value
+            .toLowerCase()
+            .normalize('NFD').replace(/[̀-ͯ]/g, '')
+            .replace(/đ/g, 'd').replace(/[^a-z0-9\s-]/g, '')
+            .trim().replace(/\s+/g, '-');
+    });
+    document.getElementById('news-slug')?.addEventListener('input', function () {
+        this.dataset.manual = this.value ? '1' : '';
     });
 
     // ---------------------------------------------------------------

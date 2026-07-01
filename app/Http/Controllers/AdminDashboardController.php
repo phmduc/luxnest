@@ -625,6 +625,7 @@ class AdminDashboardController extends Controller
     {
         $validated = $request->validate([
             'title'        => 'required|string|max:255',
+            'slug'         => 'nullable|string|max:255|unique:news,slug',
             'excerpt'      => 'nullable|string|max:1000',
             'content'      => 'nullable|string',
             'tag'          => 'nullable|string|max:100',
@@ -634,6 +635,7 @@ class AdminDashboardController extends Controller
         ]);
 
         $validated['published_at'] = $validated['published_at'] ?? now()->toDateString();
+        $validated['slug']         = $this->uniqueNewsSlug($validated['slug'] ?? null, $validated['title']);
 
         $news = News::create($validated);
 
@@ -646,6 +648,7 @@ class AdminDashboardController extends Controller
 
         $validated = $request->validate([
             'title'        => 'required|string|max:255',
+            'slug'         => 'nullable|string|max:255|unique:news,slug,' . $id,
             'excerpt'      => 'nullable|string|max:1000',
             'content'      => 'nullable|string',
             'tag'          => 'nullable|string|max:100',
@@ -655,10 +658,27 @@ class AdminDashboardController extends Controller
         ]);
 
         $validated['published_at'] = $validated['published_at'] ?? now()->toDateString();
+        $validated['slug']         = $this->uniqueNewsSlug($validated['slug'] ?? null, $validated['title'], $id);
 
         $news->update($validated);
 
         return response()->json(['success' => true, 'data' => $news]);
+    }
+
+    private function uniqueNewsSlug(?string $slug, string $title, ?int $excludeId = null): string
+    {
+        $base = $slug ? \Illuminate\Support\Str::slug($slug) : \Illuminate\Support\Str::slug($title);
+        if (!$base) $base = 'bai-viet';
+        $candidate = $base;
+        $i = 2;
+        while (
+            \App\Models\News::where('slug', $candidate)
+                ->when($excludeId, fn($q) => $q->where('id', '!=', $excludeId))
+                ->exists()
+        ) {
+            $candidate = $base . '-' . $i++;
+        }
+        return $candidate;
     }
 
     public function destroyNews(int $id): JsonResponse

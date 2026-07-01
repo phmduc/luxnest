@@ -50,4 +50,17 @@ class PageController extends Controller
 
         return view('pages.news', compact('articles'));
     }
+
+    public function newsShow(string $slug)
+    {
+        $article = News::where('slug', $slug)->where('status', 'active')->firstOrFail();
+
+        $related = News::where('status', 'active')
+            ->where('id', '!=', $article->id)
+            ->orderByDesc('published_at')
+            ->limit(3)
+            ->get();
+
+        return view('pages.news-show', compact('article', 'related'));
+    }
 }
