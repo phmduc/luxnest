@@ -2,6 +2,17 @@
 
 @section('title', $villa->name . ' - LuxNest')
 
+@php
+    $ogDesc  = $villa->description
+        ? mb_substr(strip_tags($villa->description), 0, 160)
+        : 'Villa ' . $villa->name . ' tại ' . $villa->location . ' — Đặt villa cao cấp tại LuxNest.';
+    $ogImage = $gallery[0] ?? '';
+@endphp
+@section('meta_description', $ogDesc)
+@section('og_title',       $villa->name . ' - LuxNest')
+@section('og_description', $ogDesc)
+@section('og_image',       $ogImage)
+
 @push('styles')
     <link rel="stylesheet" href="{{ asset_v('assets/css/hotel-detail.css') }}">
     <link rel="stylesheet" href="{{ asset_v('assets/css/page-villa.css') }}">

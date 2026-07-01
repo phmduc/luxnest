@@ -6,6 +6,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'LuxNest - Hệ thống đặt phòng')</title>
 
+    @php
+        $defaultOgImage = $settings->logo ?: asset('promo-banner.png');
+        $defaultOgDesc  = $settings->footer_description ?: 'Trải nghiệm lưu trú đẳng cấp tại những điểm đến đẹp nhất Việt Nam.';
+        $defaultOgTitle = $settings->site_name . ' - Đặt phòng khách sạn, villa & homestay tốt nhất';
+    @endphp
+
+    <!-- SEO -->
+    <meta name="description" content="@yield('meta_description', $defaultOgDesc)">
+
+    <!-- Open Graph -->
+    <meta property="og:type"        content="website">
+    <meta property="og:site_name"   content="{{ $settings->site_name }}">
+    <meta property="og:title"       content="@yield('og_title', $defaultOgTitle)">
+    <meta property="og:description" content="@yield('og_description', $defaultOgDesc)">
+    <meta property="og:url"         content="{{ url()->current() }}">
+    <meta property="og:image"       content="@yield('og_image', $defaultOgImage)">
+    <meta property="og:locale"      content="vi_VN">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card"        content="summary_large_image">
+    <meta name="twitter:title"       content="@yield('og_title', $defaultOgTitle)">
+    <meta name="twitter:description" content="@yield('og_description', $defaultOgDesc)">
+    <meta name="twitter:image"       content="@yield('og_image', $defaultOgImage)">
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

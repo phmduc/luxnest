@@ -2,6 +2,15 @@
 
 @section('title', $hotel['name'] . ' - LuxNest')
 
+@php
+    $ogDesc  = mb_substr(strip_tags($hotel['description'] ?? ''), 0, 160);
+    $ogImage = $hotel['images'][0] ?? '';
+@endphp
+@section('meta_description', $ogDesc)
+@section('og_title',       $hotel['name'] . ' - LuxNest')
+@section('og_description', $ogDesc)
+@section('og_image',       $ogImage)
+
 @push('styles')
     <link rel="stylesheet" href="{{ asset_v('assets/css/hotel-detail.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css" />
