@@ -126,14 +126,31 @@ document.addEventListener('DOMContentLoaded', function () {
     const success = document.getElementById('contact-success');
     const btn     = document.getElementById('contact-submit-btn');
 
-    form.addEventListener('submit', function (e) {
+    form.addEventListener('submit', async function (e) {
         e.preventDefault();
         btn.disabled    = true;
         btn.textContent = 'Đang gửi...';
-        setTimeout(function () {
-            form.style.display    = 'none';
-            success.style.display = 'flex';
-        }, 800);
+        const body = new URLSearchParams(new FormData(form));
+        try {
+            const res = await fetch('{{ route("contact.submit") }}', {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                body,
+            });
+            const json = await res.json();
+            if (json.success) {
+                form.style.display    = 'none';
+                success.style.display = 'flex';
+            } else {
+                alert(json.message || 'Có lỗi xảy ra, vui lòng thử lại.');
+                btn.disabled    = false;
+                btn.textContent = 'Gửi liên hệ';
+            }
+        } catch {
+            alert('Lỗi kết nối, vui lòng thử lại.');
+            btn.disabled    = false;
+            btn.textContent = 'Gửi liên hệ';
+        }
     });
 });
 </script>

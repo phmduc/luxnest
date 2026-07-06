@@ -29,7 +29,10 @@ Route::get('/thue-xe', [CarRentalController::class, 'index'])->name('car-rental.
 Route::get('/gioi-thieu', [PageController::class, 'about'])->name('about.index');
 Route::get('/cau-hoi-thuong-gap', [PageController::class, 'faq'])->name('faq.index');
 Route::get('/hop-tac', [PageController::class, 'partner'])->name('partner.index');
+Route::post('/hop-tac', [PageController::class, 'partnerSubmit'])->name('partner.submit');
 Route::get('/lien-he', [PageController::class, 'contact'])->name('contact.index');
+Route::post('/lien-he', [PageController::class, 'contactSubmit'])->name('contact.submit');
+Route::post('/thue-xe/inquiry', [PageController::class, 'carRentalSubmit'])->name('car-rental.submit');
 Route::get('/tin-tuc', [PageController::class, 'news'])->name('news.index');
 Route::get('/tin-tuc/{slug}', [PageController::class, 'newsShow'])->name('news.show');
 

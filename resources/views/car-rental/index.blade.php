@@ -288,14 +288,31 @@ document.addEventListener('DOMContentLoaded', function () {
     const success = document.getElementById('cr-success');
     const btn     = document.getElementById('cr-submit-btn');
 
-    form.addEventListener('submit', function (e) {
+    form.addEventListener('submit', async function (e) {
         e.preventDefault();
         btn.disabled    = true;
         btn.textContent = 'Đang gửi...';
-        setTimeout(function () {
-            form.style.display    = 'none';
-            success.style.display = 'flex';
-        }, 800);
+        const body = new URLSearchParams(new FormData(form));
+        try {
+            const res = await fetch('{{ route("car-rental.submit") }}', {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                body,
+            });
+            const json = await res.json();
+            if (json.success) {
+                form.style.display    = 'none';
+                success.style.display = 'flex';
+            } else {
+                alert(json.message || 'Có lỗi xảy ra, vui lòng thử lại.');
+                btn.disabled    = false;
+                btn.textContent = 'Gửi yêu cầu thuê xe';
+            }
+        } catch {
+            alert('Lỗi kết nối, vui lòng thử lại.');
+            btn.disabled    = false;
+            btn.textContent = 'Gửi yêu cầu thuê xe';
+        }
     });
 
     // Show popup if redirected from booking success
