@@ -145,19 +145,19 @@
                     <div class="lx-footer__col">
                         <h4 class="lx-footer__heading">Khám phá</h4>
                         <ul class="lx-footer__list">
-                            <li><a href="#">Khách sạn</a></li>
-                            <li><a href="#">Villa & Resort</a></li>
-                            <li><a href="#">Căn hộ cho thuê</a></li>
-                            <li><a href="#">Chỗ ở trong ngày</a></li>
+                            <li><a href="{{ route('rooms.index') }}">Khách sạn</a></li>
+                            <li><a href="{{ route('villa.index') }}">Villa & Resort</a></li>
+                            <li><a href="{{ route('rooms.index') }}">Căn hộ cho thuê</a></li>
+                            <li><a href="{{ route('car-rental.index') }}">Thuê xe & Tour</a></li>
                         </ul>
                     </div>
                     <div class="lx-footer__col">
                         <h4 class="lx-footer__heading">Hỗ trợ</h4>
                         <ul class="lx-footer__list">
-                            <li><a href="#">Trung tâm hỗ trợ</a></li>
-                            <li><a href="#">Chính sách hoàn tiền</a></li>
-                            <li><a href="#">Điều khoản sử dụng</a></li>
-                            <li><a href="#">Chính sách bảo mật</a></li>
+                            <li><a href="{{ route('faq.index') }}">Câu hỏi thường gặp</a></li>
+                            <li><a href="{{ route('contact.index') }}">Liên hệ hỗ trợ</a></li>
+                            <li><a href="{{ route('about.index') }}">Điều khoản sử dụng</a></li>
+                            <li><a href="{{ route('about.index') }}">Chính sách bảo mật</a></li>
                         </ul>
                     </div>
                     <div class="lx-footer__col">
@@ -188,8 +188,8 @@
             <div class="lx-container">
                 <span>© {{ date('Y') }} {{ $settings->site_name }}. All rights reserved.</span>
                 <div class="lx-footer__bottom-links">
-                    <a href="#">Bảo mật</a>
-                    <a href="#">Điều khoản</a>
+                    <a href="{{ route('about.index') }}">Bảo mật</a>
+                    <a href="{{ route('about.index') }}">Điều khoản</a>
                     <a href="#">Cookie</a>
                 </div>
             </div>

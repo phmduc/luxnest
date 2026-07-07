@@ -51,8 +51,8 @@
             </p>
         </div>
         <div class="hd-header__right">
-            <button class="hd-action-btn"><i class="fa-regular fa-heart"></i> Lưu</button>
-            <button class="hd-action-btn"><i class="fa-solid fa-share-nodes"></i> Chia sẻ</button>
+            <button class="hd-action-btn" id="btn-save" onclick="toggleSave(this,'villa-{{ $villa->slug }}')"><i class="fa-regular fa-heart"></i> Lưu</button>
+            <button class="hd-action-btn" onclick="sharePage()"><i class="fa-solid fa-share-nodes"></i> Chia sẻ</button>
         </div>
     </div>
 
@@ -349,7 +349,54 @@ document.addEventListener('DOMContentLoaded', function() {
             Thumbs: { type: 'classic' },
         });
     }
+
+    // Init save state
+    const saveBtn = document.getElementById('btn-save');
+    const slug    = saveBtn ? saveBtn.getAttribute('onclick').match(/'([^']+)'/g)?.[1]?.replace(/'/g,'') : null;
+    if (slug && JSON.parse(localStorage.getItem('lx_saved')||'[]').includes(slug)) {
+        saveBtn.innerHTML = '<i class="fa-solid fa-heart" style="color:#ef4444"></i> Đã lưu';
+    }
 });
+
+function toggleSave(btn, slug) {
+    const saved = JSON.parse(localStorage.getItem('lx_saved') || '[]');
+    const idx   = saved.indexOf(slug);
+    if (idx > -1) {
+        saved.splice(idx, 1);
+        btn.innerHTML = '<i class="fa-regular fa-heart"></i> Lưu';
+        showToast('Đã bỏ lưu');
+    } else {
+        saved.push(slug);
+        btn.innerHTML = '<i class="fa-solid fa-heart" style="color:#ef4444"></i> Đã lưu';
+        showToast('Đã lưu!');
+    }
+    localStorage.setItem('lx_saved', JSON.stringify(saved));
+}
+
+async function sharePage() {
+    const url   = window.location.href;
+    const title = document.title;
+    if (navigator.share) {
+        try { await navigator.share({ title, url }); } catch {}
+    } else {
+        await navigator.clipboard.writeText(url);
+        showToast('Đã copy link!');
+    }
+}
+
+function showToast(msg) {
+    let t = document.getElementById('lx-toast');
+    if (!t) {
+        t = document.createElement('div');
+        t.id = 'lx-toast';
+        t.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 22px;border-radius:99px;font-size:.9rem;font-weight:600;z-index:9999;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap;';
+        document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.style.opacity = '1';
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.style.opacity = '0', 2200);
+}
 </script>
 @endpush
 
