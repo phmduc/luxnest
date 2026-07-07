@@ -352,7 +352,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Init save state
     const saveBtn = document.getElementById('btn-save');
-    const slug    = saveBtn ? saveBtn.getAttribute('onclick').match(/'([^']+)'/g)?.[1]?.replace(/'/g,'') : null;
+    const slug    = saveBtn ? saveBtn.getAttribute('onclick').match(/'([^']+)'/)?.[1] : null;
     if (slug && JSON.parse(localStorage.getItem('lx_saved')||'[]').includes(slug)) {
         saveBtn.innerHTML = '<i class="fa-solid fa-heart" style="color:#ef4444"></i> Đã lưu';
     }
