@@ -94,6 +94,8 @@
 .ai-room-price span{font-size:.7rem;font-weight:400;color:#999}
 .ai-room-book{display:inline-flex;align-items:center;gap:4px;margin-top:5px;padding:5px 10px;background:#996d4e;color:#fff !important;border-radius:8px;font-size:.76rem;font-weight:600;text-decoration:none !important;transition:background .2s;align-self:flex-start}
 .ai-room-book:hover{background:#7a573e}
+.ai-see-more-btn{display:flex;align-items:center;gap:6px;margin-top:4px;padding:8px 14px;background:#f5f0eb;color:#996d4e;border:1.5px solid #e8ddd4;border-radius:10px;font-size:.8rem;font-weight:700;cursor:pointer;transition:all .2s;font-family:inherit;width:fit-content}
+.ai-see-more-btn:hover{background:#ede4da;border-color:#c9a07a}
 .ai-input-area{padding:16px 20px;background:#fff;border-top:1px solid rgba(0,0,0,.05);display:flex;gap:10px;align-items:center}
 #luxnest-ai-input{flex:1;border:1.5px solid #f0f0f0;border-radius:14px;padding:11px 16px;font-size:.92rem;outline:none;transition:all .3s;background:#f9f9f9;font-family:inherit}
 #luxnest-ai-input:focus{background:#fff;border-color:#996d4e;box-shadow:0 0 0 3px rgba(153, 109, 78,.1)}

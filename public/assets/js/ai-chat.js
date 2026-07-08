@@ -184,23 +184,42 @@
         scrollBottom();
     }
 
+    function buildRoomCardHtml(r, roomsUrl) {
+        const bookUrl = roomsUrl ? r.url + (r.url.includes('?') ? '&' : '?') + 'from_chat=1' : r.url;
+        return `
+        <div class="ai-room-card">
+            ${r.image ? `<div class="ai-room-img" style="background-image:url('${r.image}')"></div>` : ''}
+            <div class="ai-room-info">
+                <div class="ai-room-name">${esc(r.name)}</div>
+                <div class="ai-room-branch"><i class="ph ph-map-pin"></i> ${esc(r.branch)}</div>
+                <div class="ai-room-price">${esc(r.price)} VNĐ<span>/đêm</span></div>
+                <a href="${bookUrl}" class="ai-room-book">Đặt ngay <i class="ph ph-arrow-right"></i></a>
+            </div>
+        </div>`;
+    }
+
     function appendRoomCards(rooms, roomsUrl) {
-        let html = '<div class="ai-room-cards">';
-        rooms.forEach(r => {
-            const bookUrl = roomsUrl ? r.url + (r.url.includes('?') ? '&' : '?') + 'from_chat=1' : r.url;
-            html += `
-            <div class="ai-room-card">
-                ${r.image ? `<div class="ai-room-img" style="background-image:url('${r.image}')"></div>` : ''}
-                <div class="ai-room-info">
-                    <div class="ai-room-name">${esc(r.name)}</div>
-                    <div class="ai-room-branch"><i class="ph ph-map-pin"></i> ${esc(r.branch)}</div>
-                    <div class="ai-room-price">${esc(r.price)} VNĐ<span>/đêm</span></div>
-                    <a href="${bookUrl}" class="ai-room-book">Đặt ngay <i class="ph ph-arrow-right"></i></a>
-                </div>
-            </div>`;
-        });
-        html += '</div>';
-        messages.insertAdjacentHTML('beforeend', html);
+        const LIMIT  = 4;
+        const first  = rooms.slice(0, LIMIT);
+        const rest   = rooms.slice(LIMIT);
+
+        const wrap = document.createElement('div');
+        wrap.className = 'ai-room-cards';
+        first.forEach(r => wrap.insertAdjacentHTML('beforeend', buildRoomCardHtml(r, roomsUrl)));
+
+        if (rest.length > 0) {
+            const btn = document.createElement('button');
+            btn.className = 'ai-see-more-btn';
+            btn.innerHTML = `<i class="ph ph-caret-down"></i> Xem thêm ${rest.length} phòng`;
+            btn.addEventListener('click', function () {
+                rest.forEach(r => wrap.insertAdjacentHTML('beforeend', buildRoomCardHtml(r, roomsUrl)));
+                btn.remove();
+                scrollBottom();
+            });
+            wrap.appendChild(btn);
+        }
+
+        messages.appendChild(wrap);
         scrollBottom();
     }
 

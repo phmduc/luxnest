@@ -86,7 +86,7 @@ class ChatController extends Controller
                 $context = "TÌNH TRẠNG: HẾT PHÒNG cho ngày khách yêu cầu. Hãy xin lỗi khách lịch sự. KHÔNG gạ hỏi đổi ngày.";
             }
         } else {
-            $fallback = array_slice(array_values($rooms), 0, 4);
+            $fallback = array_values($rooms);
             $context  = "DANH SÁCH HẠNG PHÒNG:\n";
             foreach ($fallback as $p) {
                 $context .= "• {$p['name']} — từ {$p['price']} VNĐ/đêm\n";
@@ -159,7 +159,7 @@ class ChatController extends Controller
         return response()->json([
             'success'         => true,
             'reply'           => $reply,
-            'suggested_rooms' => array_slice($suggestedRooms, 0, 4),
+            'suggested_rooms' => $suggestedRooms,
             'rooms_url'       => $roomsUrl,
         ]);
     }
@@ -204,6 +204,6 @@ class ChatController extends Controller
         }, $rooms);
 
         usort($scored, fn($a, $b) => $b['score'] <=> $a['score']);
-        return array_slice(array_column($scored, 'data'), 0, 4);
+        return array_column($scored, 'data');
     }
 }
