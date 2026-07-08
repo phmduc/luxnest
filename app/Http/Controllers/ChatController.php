@@ -73,13 +73,16 @@ class ChatController extends Controller
             );
 
             $availableRooms = [];
-            $goHostMap = collect($rooms)->filter(fn($r) => $r['gohost_id'])->keyBy('gohost_id')->all();
+            // Group by gohost_id to support multiple DB rooms sharing the same GoHost room type
+            $goHostMap = collect($rooms)->filter(fn($r) => $r['gohost_id'])->groupBy('gohost_id')->all();
 
             if (!empty($result['data'])) {
                 foreach ($result['data'] as $item) {
                     $rtId = $item['room_types']['id'] ?? ($item['id'] ?? '');
                     if ($rtId && isset($goHostMap[$rtId])) {
-                        $availableRooms[] = $goHostMap[$rtId];
+                        foreach ($goHostMap[$rtId] as $room) {
+                            $availableRooms[] = $room;
+                        }
                     }
                 }
             }
