@@ -58,9 +58,24 @@ class ChatController extends Controller
             foreach (array_reverse(array_slice($history, -4)) as $msg) {
                 if (($msg['role'] ?? '') !== 'user') continue;
                 $userText = $msg['content'] ?? '';
-                if (empty($dates))    $dates  = $this->extractDates($userText);
-                if ($guests === 0)    $guests = $this->extractGuests($userText);
+                if (empty($dates))  $dates  = $this->extractDates($userText);
+                if ($guests === 0)  $guests = $this->extractGuests($userText);
                 if (!empty($dates) && $guests > 0) break;
+            }
+        }
+
+        // If check-in known but checkout missing, try to parse standalone day from current message
+        // e.g. "trả ngày 21", "đến 21", "21 tháng 7" when check-in month is already known
+        if (!empty($dates) && empty($dates['explicit'])) {
+            if (preg_match('/(?:đến|trả|checkout|out|ngày trả)[^\d]*(\d{1,2})(?!\s*[\/\-\d])/ui', $message, $dm)) {
+                $day     = (int) $dm[1];
+                $ciMonth = date('m', strtotime($dates['check_in']));
+                $ciYear  = date('Y', strtotime($dates['check_in']));
+                $co      = sprintf('%s-%s-%02d', $ciYear, $ciMonth, $day);
+                if ($day >= 1 && $day <= 31 && strtotime($co) > strtotime($dates['check_in'])) {
+                    $dates['check_out'] = $co;
+                    $dates['explicit']  = true;
+                }
             }
         }
 
