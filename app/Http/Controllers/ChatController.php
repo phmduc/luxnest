@@ -95,12 +95,12 @@ class ChatController extends Controller
                 $context = "TÌNH TRẠNG: HẾT PHÒNG cho ngày khách yêu cầu. Hãy xin lỗi khách lịch sự. KHÔNG gạ hỏi đổi ngày.";
             }
         } else {
-            $fallback = array_values($rooms);
-            $context  = "DANH SÁCH HẠNG PHÒNG:\n";
-            foreach ($fallback as $p) {
-                $context .= "• {$p['name']} — từ {$p['price']} VNĐ/đêm\n";
-            }
-            $context .= "\n[CHỈ THỊ]: Khách chưa cung cấp ngày đi và số người. Hỏi khách một cách thân thiện. KHÔNG tự báo còn phòng.";
+            $missing = [];
+            if (empty($dates))   $missing[] = 'ngày nhận phòng và ngày trả phòng';
+            if ($guests === 0)   $missing[] = 'số lượng khách';
+            $missingStr = implode(', ', $missing);
+            $context = "[CHỈ THỊ]: Khách chưa cung cấp đủ thông tin để kiểm tra phòng trống. Còn thiếu: {$missingStr}. "
+                     . "Hãy hỏi lại khách để lấy đủ thông tin. Hỏi tự nhiên, thân thiện. KHÔNG báo phòng hay giá lúc này.";
         }
 
         // ── System prompt ────────────────────────────────────────
