@@ -48,24 +48,41 @@ class ChatController extends Controller
             ]])->all();
 
         // ── Extract dates & guests from current message only ─────
-        // Only scan the current user message to avoid false positives
-        // from AI replies in history (e.g. AI mentioning "2 người" contaminates guests)
         $dates  = $this->extractDates($message);
         $guests = $this->extractGuests($message);
 
-        // Fall back to scanning recent user turns if current message has no info
-        if (empty($dates) || $guests === 0) {
+        // Track if current message has exactly 1 date (could be a checkout reply)
+        // e.g., AI asked "khi nào trả?" and user replied "21/7"
+        $currentSingleDate = (!empty($dates) && empty($dates['explicit'])) ? $dates['check_in'] : null;
+        $histDates = null;
+
+        // Fall back to scanning recent user turns for missing info
+        if (empty($dates) || $guests === 0 || $currentSingleDate !== null) {
             foreach (array_reverse(array_slice($history, -4)) as $msg) {
                 if (($msg['role'] ?? '') !== 'user') continue;
                 $userText = $msg['content'] ?? '';
-                if (empty($dates))  $dates  = $this->extractDates($userText);
-                if ($guests === 0)  $guests = $this->extractGuests($userText);
-                if (!empty($dates) && $guests > 0) break;
+                if (empty($dates)) {
+                    $dates = $this->extractDates($userText);
+                } elseif ($currentSingleDate !== null && $histDates === null) {
+                    // Collect the most recent prior date to pair as check-in
+                    $histDates = $this->extractDates($userText);
+                }
+                if ($guests === 0) $guests = $this->extractGuests($userText);
+                // When pairing checkout, scan all turns; otherwise exit early
+                if ($currentSingleDate === null && !empty($dates) && $guests > 0) break;
             }
         }
 
-        // If check-in known but checkout missing, try to parse standalone day from current message
-        // e.g. "trả ngày 21", "đến 21", "21 tháng 7" when check-in month is already known
+        // If current message = 1 date AND history has an earlier check-in → treat as checkout
+        if ($currentSingleDate !== null && !empty($histDates) && empty($dates['explicit'])) {
+            $histCI = $histDates['check_in'];
+            if (strtotime($currentSingleDate) > strtotime($histCI)) {
+                $dates = ['check_in' => $histCI, 'check_out' => $currentSingleDate, 'explicit' => true];
+            }
+        }
+
+        // If check-in known but checkout still missing, try standalone day keyword from current message
+        // e.g. "trả ngày 21", "đến 21"
         if (!empty($dates) && empty($dates['explicit'])) {
             if (preg_match('/(?:đến|trả|checkout|out|ngày trả)[^\d]*(\d{1,2})(?!\s*[\/\-\d])/ui', $message, $dm)) {
                 $day     = (int) $dm[1];
