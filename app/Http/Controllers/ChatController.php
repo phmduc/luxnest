@@ -88,12 +88,9 @@ class ChatController extends Controller
             }
 
             if (!empty($availableRooms)) {
-                $rag = $this->ragFilter($message, $availableRooms);
-                $context  = "[KẾT QUẢ TỪ HỆ THỐNG]: Các phòng còn trống:\n";
-                foreach ($rag as $p) {
-                    $context .= "• {$p['name']} — {$p['price']} VNĐ/đêm\n";
-                }
-                $context .= "\n=> HÃY BÁO NGAY KẾT QUẢ CHO KHÁCH. KHÔNG nói 'Để em kiểm tra' hay 'Đợi em'.";
+                $count    = count($availableRooms);
+                $context  = "[KẾT QUẢ TỪ HỆ THỐNG]: Còn {$count} phòng trống cho ngày khách yêu cầu. Danh sách thẻ phòng sẽ hiện tự động bên dưới tin nhắn của em.\n";
+                $context .= "=> Hãy thông báo ngắn gọn: 'Em tìm được {$count} phòng còn trống, Anh/Chị xem thẻ phòng bên dưới nhé!' rồi hỏi thêm nhu cầu nếu cần. KHÔNG liệt kê tên từng phòng.";
             } else {
                 $context = "TÌNH TRẠNG: HẾT PHÒNG cho ngày khách yêu cầu. Hãy xin lỗi khách lịch sự. KHÔNG gạ hỏi đổi ngày.";
             }
@@ -150,10 +147,12 @@ class ChatController extends Controller
         if ($guests > 0)                 $params['guests']   = $guests . ' người';
         $roomsUrl = url('/rooms') . (!empty($params) ? '?' . http_build_query($params) : '');
 
-        // ── Detect suggested room cards ──────────────────────────
+        // ── Suggested room cards ─────────────────────────────────
+        // If GoHost returned available rooms, show those directly.
+        // Otherwise scan AI reply for room names (fallback path).
         $suggestedRooms = [];
-        foreach ($rooms as $r) {
-            if (mb_stripos($reply, $r['name']) !== false) {
+        if (!empty($availableRooms)) {
+            foreach ($availableRooms as $r) {
                 $suggestedRooms[] = [
                     'id'     => $r['id'],
                     'name'   => $r['name'],
@@ -162,6 +161,19 @@ class ChatController extends Controller
                     'image'  => $r['image'],
                     'branch' => $r['branch'],
                 ];
+            }
+        } else {
+            foreach ($rooms as $r) {
+                if (mb_stripos($reply, $r['name']) !== false) {
+                    $suggestedRooms[] = [
+                        'id'     => $r['id'],
+                        'name'   => $r['name'],
+                        'price'  => $r['price'],
+                        'url'    => url('/hotel/' . $r['slug']),
+                        'image'  => $r['image'],
+                        'branch' => $r['branch'],
+                    ];
+                }
             }
         }
 
