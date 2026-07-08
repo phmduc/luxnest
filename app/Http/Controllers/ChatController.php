@@ -132,14 +132,11 @@ class ChatController extends Controller
         $showBookingLink = str_contains($reply, '[LINK_DAT_PHONG]');
         $reply = trim(str_replace('[LINK_DAT_PHONG]', '', $reply));
 
-        $roomsUrl = null;
-        if ($showBookingLink) {
-            $params = [];
-            if (!empty($dates['check_in']))  $params['checkin']  = $dates['check_in'];
-            if (!empty($dates['check_out'])) $params['checkout'] = $dates['check_out'];
-            if ($guests > 0)                 $params['guests']   = $guests . ' người';
-            $roomsUrl = url('/rooms') . (!empty($params) ? '?' . http_build_query($params) : '');
-        }
+        $params = [];
+        if (!empty($dates['check_in']))  $params['checkin']  = $dates['check_in'];
+        if (!empty($dates['check_out'])) $params['checkout'] = $dates['check_out'];
+        if ($guests > 0)                 $params['guests']   = $guests . ' người';
+        $roomsUrl = url('/rooms') . (!empty($params) ? '?' . http_build_query($params) : '');
 
         // ── Detect suggested room cards ──────────────────────────
         $suggestedRooms = [];
