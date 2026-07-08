@@ -160,6 +160,19 @@ class ChatController extends Controller
         $showBookingLink = str_contains($reply, '[LINK_DAT_PHONG]');
         $reply = trim(str_replace('[LINK_DAT_PHONG]', '', $reply));
 
+        // ── Override AI reply if it said "will check" despite results existing ──
+        // GPT-4o-mini sometimes ignores the instruction; server-side replacement is reliable.
+        if (!empty($availableRooms)) {
+            $willCheck = preg_match('/(?:sẽ|đang|ngay)\s*kiểm\s*tra|chờ\s*(em|xíu|một\s*chút)|một\s*chút\s*xíu|em\s*kiểm\s*tra/ui', $reply);
+            $hasResult = preg_match('/\d+\s*phòng|phòng\s*trống|còn\s*phòng/ui', $reply);
+            if ($willCheck || !$hasResult) {
+                $count = count($availableRooms);
+                $ci    = date('d/m', strtotime($dates['check_in']));
+                $co    = date('d/m', strtotime($dates['check_out']));
+                $reply = "Dạ em vừa kiểm tra xong ạ! Còn **{$count} phòng trống** cho ngày {$ci} đến {$co}. Anh/Chị xem các phòng bên dưới nhé!";
+            }
+        }
+
         // ── Append room list when GoHost returned results ────────
         if (!empty($availableRooms)) {
             $list = "\n\n**Danh sách phòng còn trống:**\n";
@@ -232,6 +245,41 @@ class ChatController extends Controller
             // check_out auto-filled — mark as incomplete so we ask customer
             return ['check_in' => $ci, 'check_out' => date('Y-m-d', strtotime("$ci +1 day")), 'explicit' => false];
         }
+
+        // No dd/mm patterns — try standalone day references, assume current month
+        $month = date('m');
+        $ciDay = null;
+        $coDay = null;
+
+        // "nhận/vào/từ [ngày] X" → check-in day
+        if (preg_match('/(?:nhận|check[\s\-]?in|vào|từ)\s*(?:ngày\s*)?(\d{1,2})(?!\s*[\/\-]\d)/ui', $text, $md)) {
+            $ciDay = (int) $md[1];
+        }
+        // "trả/checkout/ra [ngày] X" → check-out day
+        if (preg_match('/(?:trả|checkout|check[\s\-]?out|ra)\s*(?:ngày\s*)?(\d{1,2})(?!\s*[\/\-]\d)/ui', $text, $md)) {
+            $coDay = (int) $md[1];
+        }
+        // "[từ/ngày] X đến/tới Y" range — not followed by người/khách (avoids "2 đến 4 người")
+        if (!$ciDay || !$coDay) {
+            if (preg_match('/(?:(?:từ|ngày)\s*)?(\d{1,2})\s*(?:đến|tới)\s*(?:ngày\s*)?(\d{1,2})(?!\s*[\/\-\d])(?!\s*(?:người|khách|pax))/ui', $text, $md)) {
+                if (!$ciDay) $ciDay = (int) $md[1];
+                if (!$coDay) $coDay = (int) $md[2];
+            }
+        }
+
+        if ($ciDay && $ciDay >= 1 && $ciDay <= 31) {
+            $ci = "$year-$month-" . str_pad($ciDay, 2, '0', STR_PAD_LEFT);
+            if ($coDay && $coDay >= 1 && $coDay <= 31 && $coDay !== $ciDay) {
+                $co = "$year-$month-" . str_pad($coDay, 2, '0', STR_PAD_LEFT);
+                if (strtotime($co) <= strtotime($ci)) {
+                    // Checkout day earlier than check-in in same month → next month
+                    $co = date('Y-m-d', mktime(0, 0, 0, (int) $month + 1, $coDay, (int) $year));
+                }
+                return ['check_in' => $ci, 'check_out' => $co, 'explicit' => true];
+            }
+            return ['check_in' => $ci, 'check_out' => date('Y-m-d', strtotime("$ci +1 day")), 'explicit' => false];
+        }
+
         return [];
     }
 
