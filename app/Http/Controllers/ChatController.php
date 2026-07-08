@@ -88,12 +88,9 @@ class ChatController extends Controller
             }
 
             if (!empty($availableRooms)) {
-                $rag      = $this->ragFilter($message, $availableRooms);
-                $context  = "[KẾT QUẢ TỪ HỆ THỐNG]: Các phòng còn trống:\n";
-                foreach ($rag as $p) {
-                    $context .= "• {$p['name']} — {$p['price']} VNĐ/đêm\n";
-                }
-                $context .= "\n=> Liệt kê ngắn gọn tên + giá từng phòng cho khách. KHÔNG nói 'Để em kiểm tra' hay 'Đợi em'.";
+                $count   = count($availableRooms);
+                $context = "[KẾT QUẢ TỪ HỆ THỐNG]: Còn {$count} phòng trống.\n"
+                         . "=> Chỉ cần nói ngắn 1-2 câu thông báo có phòng, hỏi thêm nhu cầu nếu cần. KHÔNG liệt kê tên phòng (hệ thống sẽ tự hiển thị danh sách). KHÔNG nói 'Để em kiểm tra'.";
             } else {
                 $context = "TÌNH TRẠNG: HẾT PHÒNG cho ngày khách yêu cầu. Hãy xin lỗi khách lịch sự. KHÔNG gạ hỏi đổi ngày.";
             }
@@ -143,6 +140,15 @@ class ChatController extends Controller
         // ── Handle booking link tag ──────────────────────────────
         $showBookingLink = str_contains($reply, '[LINK_DAT_PHONG]');
         $reply = trim(str_replace('[LINK_DAT_PHONG]', '', $reply));
+
+        // ── Append room list when GoHost returned results ────────
+        if (!empty($availableRooms)) {
+            $list = "\n\n**Danh sách phòng còn trống:**\n";
+            foreach ($availableRooms as $r) {
+                $list .= "• {$r['name']} — {$r['price']} VNĐ/đêm\n";
+            }
+            $reply .= rtrim($list);
+        }
 
         $params = [];
         if (!empty($dates['check_in']))  $params['checkin']  = $dates['check_in'];
