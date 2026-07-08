@@ -82,9 +82,9 @@ class ChatController extends Controller
         }
 
         // If check-in known but checkout still missing, try standalone day keyword from current message
-        // e.g. "trả ngày 21", "đến 21"
+        // e.g. "trả ngày 21", "đến 21", "ngày 21 và 2 người"
         if (!empty($dates) && empty($dates['explicit'])) {
-            if (preg_match('/(?:đến|trả|checkout|out|ngày trả)[^\d]*(\d{1,2})(?!\s*[\/\-\d])/ui', $message, $dm)) {
+            if (preg_match('/(?:đến|trả|checkout|out|ngày\s*trả|ngày)[^\d]*(\d{1,2})(?!\s*[\/\-\d])(?!\s*(?:người|khách|pax))/ui', $message, $dm)) {
                 $day     = (int) $dm[1];
                 $ciMonth = date('m', strtotime($dates['check_in']));
                 $ciYear  = date('Y', strtotime($dates['check_in']));
@@ -279,6 +279,14 @@ class ChatController extends Controller
         // "[từ/ngày] X đến/tới Y" range — not followed by người/khách (avoids "2 đến 4 người")
         if (!$ciDay || !$coDay) {
             if (preg_match('/(?:(?:từ|ngày)\s*)?(\d{1,2})\s*(?:đến|tới)\s*(?:ngày\s*)?(\d{1,2})(?!\s*[\/\-\d])(?!\s*(?:người|khách|pax))/ui', $text, $md)) {
+                if (!$ciDay) $ciDay = (int) $md[1];
+                if (!$coDay) $coDay = (int) $md[2];
+            }
+        }
+        // "ngày X Y" or just "X Y" — two consecutive day numbers, assume check-in/out pair
+        // e.g. "ngày 20 21", "20 21 tháng 7"
+        if (!$ciDay || !$coDay) {
+            if (preg_match('/(?:ngày\s*)?(\d{1,2})\s+(\d{1,2})(?!\s*[\/\-\d])(?!\s*(?:người|khách|pax|phòng))/ui', $text, $md)) {
                 if (!$ciDay) $ciDay = (int) $md[1];
                 if (!$coDay) $coDay = (int) $md[2];
             }
