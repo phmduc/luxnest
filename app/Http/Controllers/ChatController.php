@@ -291,6 +291,13 @@ class ChatController extends Controller
                 if (!$coDay) $coDay = (int) $md[2];
             }
         }
+        // Bare "ngày X" as check-in fallback — only when no other keyword matched
+        // e.g. "ngày 20 còn phòng k", "ngày 20 tháng này"
+        if (!$ciDay && !$coDay) {
+            if (preg_match('/ngày\s*(\d{1,2})(?!\s*[\/\-]\d)(?!\s*(?:người|khách|pax))/ui', $text, $md)) {
+                $ciDay = (int) $md[1];
+            }
+        }
 
         if ($ciDay && $ciDay >= 1 && $ciDay <= 31) {
             $ci = "$year-$month-" . str_pad($ciDay, 2, '0', STR_PAD_LEFT);
