@@ -208,14 +208,11 @@
         first.forEach(r => wrap.insertAdjacentHTML('beforeend', buildRoomCardHtml(r, roomsUrl)));
 
         if (rest.length > 0) {
-            const btn = document.createElement('button');
+            const href = roomsUrl || '/rooms';
+            const btn  = document.createElement('a');
             btn.className = 'ai-see-more-btn';
-            btn.innerHTML = `<i class="ph ph-caret-down"></i> Xem thêm ${rest.length} phòng`;
-            btn.addEventListener('click', function () {
-                rest.forEach(r => wrap.insertAdjacentHTML('beforeend', buildRoomCardHtml(r, roomsUrl)));
-                btn.remove();
-                scrollBottom();
-            });
+            btn.href      = href;
+            btn.innerHTML = `<i class="ph ph-list"></i> Xem thêm ${rest.length} phòng`;
             wrap.appendChild(btn);
         }
 
