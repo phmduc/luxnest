@@ -47,13 +47,22 @@ class ChatController extends Controller
                 'branch'    => $r->branch,
             ]])->all();
 
-        // ── Extract dates & guests from message + recent history ─
-        $fullContext = $message;
-        foreach (array_slice($history, -2) as $msg) {
-            $fullContext .= ' ' . ($msg['content'] ?? '');
+        // ── Extract dates & guests from current message only ─────
+        // Only scan the current user message to avoid false positives
+        // from AI replies in history (e.g. AI mentioning "2 người" contaminates guests)
+        $dates  = $this->extractDates($message);
+        $guests = $this->extractGuests($message);
+
+        // Fall back to scanning recent user turns if current message has no info
+        if (empty($dates) || $guests === 0) {
+            foreach (array_reverse(array_slice($history, -4)) as $msg) {
+                if (($msg['role'] ?? '') !== 'user') continue;
+                $userText = $msg['content'] ?? '';
+                if (empty($dates))    $dates  = $this->extractDates($userText);
+                if ($guests === 0)    $guests = $this->extractGuests($userText);
+                if (!empty($dates) && $guests > 0) break;
+            }
         }
-        $dates  = $this->extractDates($fullContext);
-        $guests = $this->extractGuests($fullContext);
 
         // ── Build context ────────────────────────────────────────
         $context = '';
