@@ -67,7 +67,7 @@ class ChatController extends Controller
         // ── Build context ────────────────────────────────────────
         $context = '';
 
-        if (!empty($dates) && $guests > 0 && $this->gohost->isConfigured()) {
+        if (!empty($dates) && !empty($dates['explicit']) && $guests > 0 && $this->gohost->isConfigured()) {
             $result = $this->gohost->searchRoomTypes(
                 $dates['check_in'], $dates['check_out'], $guests
             );
@@ -96,8 +96,9 @@ class ChatController extends Controller
             }
         } else {
             $missing = [];
-            if (empty($dates))   $missing[] = 'ngày nhận phòng và ngày trả phòng';
-            if ($guests === 0)   $missing[] = 'số lượng khách';
+            if (empty($dates))                      $missing[] = 'ngày nhận phòng và ngày trả phòng';
+            elseif (empty($dates['explicit']))       $missing[] = 'ngày trả phòng';
+            if ($guests === 0)                       $missing[] = 'số lượng khách';
             $missingStr = implode(', ', $missing);
             $context = "[CHỈ THỊ]: Khách chưa cung cấp đủ thông tin để kiểm tra phòng trống. Còn thiếu: {$missingStr}. "
                      . "Hãy hỏi lại khách để lấy đủ thông tin. Hỏi tự nhiên, thân thiện. KHÔNG báo phòng hay giá lúc này.";
@@ -206,11 +207,12 @@ class ChatController extends Controller
             $ci = "$year-" . str_pad($m[2][0], 2, '0', STR_PAD_LEFT) . '-' . str_pad($m[1][0], 2, '0', STR_PAD_LEFT);
             $co = "$year-" . str_pad($m[2][1], 2, '0', STR_PAD_LEFT) . '-' . str_pad($m[1][1], 2, '0', STR_PAD_LEFT);
             if (strtotime($co) < strtotime($ci)) [$ci, $co] = [$co, $ci];
-            return ['check_in' => $ci, 'check_out' => $co];
+            return ['check_in' => $ci, 'check_out' => $co, 'explicit' => true];
         }
         if ($found === 1) {
             $ci = "$year-" . str_pad($m[2][0], 2, '0', STR_PAD_LEFT) . '-' . str_pad($m[1][0], 2, '0', STR_PAD_LEFT);
-            return ['check_in' => $ci, 'check_out' => date('Y-m-d', strtotime("$ci +1 day"))];
+            // check_out auto-filled — mark as incomplete so we ask customer
+            return ['check_in' => $ci, 'check_out' => date('Y-m-d', strtotime("$ci +1 day")), 'explicit' => false];
         }
         return [];
     }
