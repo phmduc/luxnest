@@ -104,8 +104,10 @@ class ChatController extends Controller
 
             if (!empty($availableRooms)) {
                 $count   = count($availableRooms);
-                $context = "[KẾT QUẢ TỪ HỆ THỐNG]: Còn {$count} phòng trống.\n"
-                         . "=> Chỉ cần nói ngắn 1-2 câu thông báo có phòng, hỏi thêm nhu cầu nếu cần. KHÔNG liệt kê tên phòng (hệ thống sẽ tự hiển thị danh sách). KHÔNG nói 'Để em kiểm tra'.";
+                $context = "[KẾT QUẢ ĐÃ CÓ - KHÔNG CẦN KIỂM TRA THÊM]: Hệ thống vừa kiểm tra xong, còn {$count} phòng trống. "
+                         . "Thông báo ngay kết quả cho khách (VD: 'Dạ còn {$count} phòng trống ạ!'). "
+                         . "TUYỆT ĐỐI KHÔNG nói 'sẽ kiểm tra', 'đợi em', 'một chút' — kết quả đã có rồi. "
+                         . "Danh sách phòng sẽ tự hiển thị, không cần liệt kê tên.";
             } else {
                 $context = "TÌNH TRẠNG: HẾT PHÒNG cho ngày khách yêu cầu. Hãy xin lỗi khách lịch sự. KHÔNG gạ hỏi đổi ngày.";
             }
@@ -124,6 +126,7 @@ class ChatController extends Controller
 - Xưng 'Em', gọi khách là 'Anh/Chị' theo cách khách xưng. KHÔNG gọi khách là 'Mình'.
 - Văn phong: ngắn gọn, thân thiện, giống người thật nhắn Zalo. Không văn mẫu dài dòng.
 - Khi khách hỏi giá/phòng mà thiếu ngày hoặc số người, hỏi lại vui vẻ.
+- Khi có kết quả phòng từ hệ thống: thông báo NGAY, KHÔNG nói 'sẽ kiểm tra' hay 'chờ em'.
 - Khi khách chốt đặt phòng, chèn [LINK_DAT_PHONG] ở cuối tin nhắn.
 - Dữ liệu hiện hành:\n{$context}";
 
