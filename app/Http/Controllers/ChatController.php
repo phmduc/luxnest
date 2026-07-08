@@ -88,9 +88,12 @@ class ChatController extends Controller
             }
 
             if (!empty($availableRooms)) {
-                $count    = count($availableRooms);
-                $context  = "[KẾT QUẢ TỪ HỆ THỐNG]: Còn {$count} phòng trống cho ngày khách yêu cầu. Danh sách thẻ phòng sẽ hiện tự động bên dưới tin nhắn của em.\n";
-                $context .= "=> Hãy thông báo ngắn gọn: 'Em tìm được {$count} phòng còn trống, Anh/Chị xem thẻ phòng bên dưới nhé!' rồi hỏi thêm nhu cầu nếu cần. KHÔNG liệt kê tên từng phòng.";
+                $rag      = $this->ragFilter($message, $availableRooms);
+                $context  = "[KẾT QUẢ TỪ HỆ THỐNG]: Các phòng còn trống:\n";
+                foreach ($rag as $p) {
+                    $context .= "• {$p['name']} — {$p['price']} VNĐ/đêm\n";
+                }
+                $context .= "\n=> Liệt kê ngắn gọn tên + giá từng phòng cho khách. KHÔNG nói 'Để em kiểm tra' hay 'Đợi em'.";
             } else {
                 $context = "TÌNH TRẠNG: HẾT PHÒNG cho ngày khách yêu cầu. Hãy xin lỗi khách lịch sự. KHÔNG gạ hỏi đổi ngày.";
             }
@@ -127,7 +130,7 @@ class ChatController extends Controller
             ->post('https://api.openai.com/v1/chat/completions', [
                 'model'      => 'gpt-4o-mini',
                 'messages'   => $messages,
-                'max_tokens' => 300,
+                'max_tokens' => 700,
                 'temperature'=> 0.7,
             ]);
 
