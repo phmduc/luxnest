@@ -121,9 +121,11 @@ class ChatController extends Controller
         }
 
         // ── Build context ────────────────────────────────────────
-        $context = '';
+        $context       = '';
+        $goHostCalled  = false;
 
         if (!empty($dates) && !empty($dates['explicit']) && $guests > 0 && $this->gohost->isConfigured()) {
+            $goHostCalled = true;
             $result = $this->gohost->searchRoomTypes(
                 $dates['check_in'], $dates['check_out'], $guests
             );
@@ -201,10 +203,11 @@ class ChatController extends Controller
         $showBookingLink = str_contains($reply, '[LINK_DAT_PHONG]');
         $reply = trim(str_replace('[LINK_DAT_PHONG]', '', $reply));
 
+        $willCheckPattern = '/(?:sẽ|đang|ngay)\s*kiểm\s*tra|chờ\s*(em|xíu|một\s*chút)|một\s*chút\s*xíu|em\s*kiểm\s*tra/ui';
+
         // ── Override AI reply if it said "will check" despite results existing ──
-        // GPT-4o-mini sometimes ignores the instruction; server-side replacement is reliable.
         if (!empty($availableRooms)) {
-            $willCheck = preg_match('/(?:sẽ|đang|ngay)\s*kiểm\s*tra|chờ\s*(em|xíu|một\s*chút)|một\s*chút\s*xíu|em\s*kiểm\s*tra/ui', $reply);
+            $willCheck = preg_match($willCheckPattern, $reply);
             $hasResult = preg_match('/\d+\s*phòng|phòng\s*trống|còn\s*phòng/ui', $reply);
             if ($willCheck || !$hasResult) {
                 $count = count($availableRooms);
@@ -212,6 +215,13 @@ class ChatController extends Controller
                 $co    = date('d/m', strtotime($dates['check_out']));
                 $reply = "Dạ em vừa kiểm tra xong ạ! Còn **{$count} phòng trống** cho ngày {$ci} đến {$co}. Anh/Chị xem các phòng bên dưới nhé!";
             }
+        }
+
+        // ── Override if GoHost searched but found no rooms and AI still says "will check" ──
+        if (empty($availableRooms) && $goHostCalled && preg_match($willCheckPattern, $reply)) {
+            $ci    = date('d/m', strtotime($dates['check_in']));
+            $co    = date('d/m', strtotime($dates['check_out']));
+            $reply = "Dạ em vừa kiểm tra rồi ạ, tiếc là hiện **không còn phòng trống** cho ngày {$ci} đến {$co} ạ. Anh/Chị thử chọn ngày khác xem ạ?";
         }
 
         // ── Append room list when GoHost returned results ────────
