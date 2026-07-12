@@ -14,12 +14,13 @@ class RemarketingVoucher extends Mailable
 
     public function __construct(
         public readonly object $order,
-        public readonly string $voucherCode,
+        public readonly string $voucherCode = '',
         public readonly int    $discountPercent = 10,
         public readonly string $greeting = '',
         public readonly string $body = '',
         public readonly string $hotline = '',
         public readonly string $customSubject = '',
+        public readonly string $voucherMode = 'auto', // none|fixed|auto
     ) {}
 
     public function envelope(): Envelope

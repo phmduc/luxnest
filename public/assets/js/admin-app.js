@@ -101,8 +101,10 @@
         if (tab === 'settings')    loadSettings();
         if (tab === 'news')        loadNews();
         if (tab === 'faqs')        loadFaqs();
-        if (tab === 'pagecontent') loadPageContent();
-        if (tab === 'remarketing') loadRemarketing();
+        if (tab === 'pagecontent')    loadPageContent();
+        if (tab === 'remarketing')    loadRemarketing();
+        if (tab === 'voucher')        loadVouchers();
+        if (tab === 'emailmarketing') { loadCampaigns(); loadVoucherOptions(); }
     }
 
     document.querySelectorAll('.nav-item[data-tab]').forEach(el => {
@@ -2212,10 +2214,24 @@
         // FAQs
         openFaqModal,
         deleteFaq,
-        // Remarketing
+        // Remarketing (legacy)
         sendRemarketingNow,
         saveRemarketingSchedule,
         clearRemarketingSchedule,
+        // Vouchers
+        loadVouchers,
+        openVoucherModal,
+        deleteVoucher,
+        toggleVoucherStatus,
+        onVoucherTypeChange,
+        // Email Campaigns
+        loadCampaigns,
+        openCampaignModal,
+        deleteCampaign,
+        sendCampaignNow,
+        previewEligible,
+        onCampaignVoucherModeChange,
+        onCampaignStatusChange,
     };
 
     // ---------------------------------------------------------------
@@ -2366,6 +2382,338 @@
             msgEl.style.color      = '#991B1B';
             msgEl.textContent      = res.message || 'Gửi thất bại.';
         }
+    }
+
+    // ---------------------------------------------------------------
+    // Vouchers
+    // ---------------------------------------------------------------
+
+    let voucherPage = 1;
+    let voucherSearchTimer = null;
+
+    async function loadVouchers(page = 1) {
+        voucherPage = page;
+        const search = (document.getElementById('voucher-search')?.value || '').trim();
+        const res    = await apiFetch(ADMIN_BASE + '/vouchers?page=' + page + '&search=' + encodeURIComponent(search));
+        if (!res.success) return;
+
+        const tbody = document.getElementById('voucher-list-body');
+        const items = res.data.data || [];
+
+        if (!items.length) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:32px;">Chưa có voucher nào.</td></tr>';
+            document.getElementById('voucher-pagination').innerHTML = '';
+            return;
+        }
+
+        tbody.innerHTML = items.map(v => {
+            const discount  = v.discount_type === 'percent' ? v.discount_value + '%' : Number(v.discount_value).toLocaleString('vi-VN') + ' VNĐ';
+            const maxUses   = v.max_uses ? v.max_uses : '∞';
+            const expires   = v.expires_at ? new Date(v.expires_at).toLocaleDateString('vi-VN') : '—';
+            const expired   = v.expires_at && new Date(v.expires_at) < new Date();
+            const statusBg  = v.is_active && !expired ? '#DCFCE7' : '#FEE2E2';
+            const statusCol = v.is_active && !expired ? '#166534' : '#991B1B';
+            const statusTxt = expired ? 'Hết hạn' : (v.is_active ? 'Hoạt động' : 'Tắt');
+            return `<tr>
+                <td><code style="background:var(--bg);padding:3px 8px;border-radius:6px;font-weight:700;">${v.code}</code></td>
+                <td>${v.name}</td>
+                <td style="font-weight:600;color:var(--orange);">${discount}</td>
+                <td>${v.used_count} / ${maxUses}</td>
+                <td>${expires}</td>
+                <td>
+                    <button class="status-toggle-btn" style="background:${statusBg};color:${statusCol};border:none;border-radius:20px;padding:3px 12px;font-size:0.78rem;font-weight:600;cursor:pointer;"
+                            onclick="AdminApp.toggleVoucherStatus(${v.id}, this)">${statusTxt}</button>
+                </td>
+                <td style="display:flex;gap:6px;justify-content:flex-end;">
+                    <button class="btn-view" onclick="AdminApp.openVoucherModal(${JSON.stringify(v).replace(/"/g,'&quot;')})">Sửa</button>
+                    <button class="btn-view" style="color:#dc2626;" onclick="AdminApp.deleteVoucher(${v.id},'${v.code}')">Xóa</button>
+                </td>
+            </tr>`;
+        }).join('');
+
+        renderPagination('voucher-pagination', res.data.current_page, res.data.last_page, loadVouchers);
+    }
+
+    document.getElementById('voucher-search')?.addEventListener('input', function () {
+        clearTimeout(voucherSearchTimer);
+        voucherSearchTimer = setTimeout(() => loadVouchers(1), 350);
+    });
+
+    function openVoucherModal(voucher = null) {
+        const isEdit = !!voucher;
+        document.getElementById('voucher-modal-title').textContent = isEdit ? 'Sửa voucher' : 'Tạo voucher';
+        document.getElementById('voucher-id').value       = voucher?.id || '';
+        document.getElementById('voucher-code').value     = voucher?.code || '';
+        document.getElementById('voucher-name').value     = voucher?.name || '';
+        document.getElementById('voucher-type').value     = voucher?.discount_type || 'percent';
+        document.getElementById('voucher-value').value    = voucher?.discount_value || 10;
+        document.getElementById('voucher-min-order').value = voucher?.min_order_amount || '';
+        document.getElementById('voucher-max-uses').value  = voucher?.max_uses || '';
+        document.getElementById('voucher-expires').value   = voucher?.expires_at ? voucher.expires_at.slice(0,10) : '';
+        document.getElementById('voucher-active').checked  = voucher ? !!voucher.is_active : true;
+        document.getElementById('voucher-notes').value     = voucher?.notes || '';
+        document.getElementById('voucher-form-error').style.display = 'none';
+        onVoucherTypeChange();
+        document.getElementById('voucher-modal').style.display = 'flex';
+    }
+
+    function onVoucherTypeChange() {
+        const type  = document.getElementById('voucher-type')?.value;
+        const label = document.getElementById('voucher-value-label');
+        if (label) label.textContent = type === 'percent' ? 'Giá trị giảm (%)' : 'Số tiền giảm (VNĐ)';
+    }
+
+    document.getElementById('voucher-modal-close')?.addEventListener('click',  () => { document.getElementById('voucher-modal').style.display = 'none'; });
+    document.getElementById('voucher-modal-cancel')?.addEventListener('click', () => { document.getElementById('voucher-modal').style.display = 'none'; });
+
+    document.getElementById('voucher-form')?.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const errEl = document.getElementById('voucher-form-error');
+        errEl.style.display = 'none';
+
+        const id   = document.getElementById('voucher-id').value;
+        const url  = id ? ADMIN_BASE + '/vouchers/' + id : ADMIN_BASE + '/vouchers';
+        const method = id ? 'PUT' : 'POST';
+
+        const payload = {
+            code:             document.getElementById('voucher-code').value.toUpperCase().trim(),
+            name:             document.getElementById('voucher-name').value.trim(),
+            discount_type:    document.getElementById('voucher-type').value,
+            discount_value:   parseInt(document.getElementById('voucher-value').value) || 0,
+            min_order_amount: parseInt(document.getElementById('voucher-min-order').value) || null,
+            max_uses:         parseInt(document.getElementById('voucher-max-uses').value) || null,
+            expires_at:       document.getElementById('voucher-expires').value || null,
+            is_active:        document.getElementById('voucher-active').checked,
+            notes:            document.getElementById('voucher-notes').value.trim() || null,
+        };
+
+        const res = await apiFetch(url, { method, body: JSON.stringify(payload) });
+
+        if (res.success) {
+            document.getElementById('voucher-modal').style.display = 'none';
+            loadVouchers(voucherPage);
+            loadVoucherOptions();
+        } else {
+            errEl.textContent    = res.message || Object.values(res.errors || {}).flat().join(' ');
+            errEl.style.display  = 'block';
+        }
+    });
+
+    async function deleteVoucher(id, code) {
+        if (!confirm(`Xóa voucher "${code}"? Hành động này không thể hoàn tác.`)) return;
+        const res = await apiFetch(ADMIN_BASE + '/vouchers/' + id, { method: 'DELETE' });
+        if (res.success) loadVouchers(voucherPage);
+        else alert(res.message || 'Lỗi khi xóa.');
+    }
+
+    async function toggleVoucherStatus(id, btn) {
+        const res = await apiFetch(ADMIN_BASE + '/vouchers/' + id + '/status', { method: 'PATCH', body: '{}' });
+        if (res.success) {
+            const active = res.is_active;
+            btn.textContent = active ? 'Hoạt động' : 'Tắt';
+            btn.style.background = active ? '#DCFCE7' : '#FEE2E2';
+            btn.style.color      = active ? '#166534' : '#991B1B';
+        }
+    }
+
+    // ---------------------------------------------------------------
+    // Email Campaigns
+    // ---------------------------------------------------------------
+
+    let voucherOptions = [];
+
+    async function loadVoucherOptions() {
+        const res = await apiFetch(ADMIN_BASE + '/vouchers?page=1&search=');
+        if (!res.success) return;
+        voucherOptions = (res.data.data || []).filter(v => v.is_active);
+        const sel = document.getElementById('campaign-voucher-id');
+        if (!sel) return;
+        const cur = sel.value;
+        sel.innerHTML = '<option value="">-- Chọn voucher --</option>' +
+            voucherOptions.map(v => {
+                const disc = v.discount_type === 'percent' ? v.discount_value + '%' : Number(v.discount_value).toLocaleString('vi-VN') + ' VNĐ';
+                return `<option value="${v.id}">${v.code} — ${v.name} (${disc})</option>`;
+            }).join('');
+        if (cur) sel.value = cur;
+    }
+
+    async function loadCampaigns() {
+        const res = await apiFetch(ADMIN_BASE + '/campaigns');
+        if (!res.success) return;
+
+        const tbody = document.getElementById('campaign-list-body');
+        const items = res.data || [];
+
+        if (!items.length) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:32px;">Chưa có chiến dịch nào. Tạo chiến dịch đầu tiên!</td></tr>';
+            return;
+        }
+
+        const statusMap = {
+            draft:     ['#F1F5F9', '#475569', 'Nháp'],
+            scheduled: ['#FEF3C7', '#92400E', 'Đã xếp lịch'],
+            sending:   ['#DBEAFE', '#1E40AF', 'Đang gửi'],
+            sent:      ['#DCFCE7', '#166534', 'Đã gửi'],
+        };
+
+        tbody.innerHTML = items.map(c => {
+            const cond     = c.conditions || {};
+            const condTxt  = `Checkout ${cond.checkout_max_days||60}–${cond.checkout_min_days||30} ngày trước` +
+                             (cond.min_bookings > 1 ? ` · ≥${cond.min_bookings} booking` : '') +
+                             (cond.min_spent    > 0 ? ` · ≥${Number(cond.min_spent).toLocaleString('vi-VN')}đ` : '');
+            const vMode    = c.voucher_mode === 'auto' ? `Tự tạo ${c.auto_discount_percent}%`
+                           : c.voucher_mode === 'fixed' ? (c.voucher ? c.voucher.code : 'Voucher')
+                           : 'Không';
+            const [sbg, scol, stxt] = statusMap[c.status] || statusMap.draft;
+            const sendDate = c.send_at ? new Date(c.send_at).toLocaleString('vi-VN') : (c.sent_at ? new Date(c.sent_at).toLocaleString('vi-VN') : '—');
+
+            return `<tr>
+                <td style="font-weight:600;">${c.name}</td>
+                <td style="font-size:0.78rem;color:var(--text-muted);">${condTxt}</td>
+                <td style="font-size:0.82rem;">${vMode}</td>
+                <td style="font-weight:600;color:var(--orange);">${c.eligible_count ?? '—'}</td>
+                <td><span style="background:${sbg};color:${scol};border-radius:20px;padding:3px 10px;font-size:0.78rem;font-weight:600;">${stxt}</span></td>
+                <td style="font-size:0.78rem;color:var(--text-muted);">${sendDate}</td>
+                <td style="display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap;">
+                    ${c.status !== 'sent' && c.status !== 'sending'
+                        ? `<button class="btn-view" style="background:#16a34a;color:#fff;border:none;" onclick="AdminApp.sendCampaignNow(${c.id},'${c.name.replace(/'/g,"\\'")}',this)">Gửi ngay</button>`
+                        : `<span style="font-size:0.75rem;color:var(--text-muted);">${c.sent_count} đã gửi</span>`}
+                    <button class="btn-view" onclick="AdminApp.openCampaignModal(${JSON.stringify(c).replace(/"/g,'&quot;')})">Sửa</button>
+                    <button class="btn-view" style="color:#dc2626;" onclick="AdminApp.deleteCampaign(${c.id},'${c.name.replace(/'/g,"\\'")}')">Xóa</button>
+                </td>
+            </tr>`;
+        }).join('');
+    }
+
+    function openCampaignModal(campaign = null) {
+        const isEdit = !!campaign;
+        document.getElementById('campaign-modal-title').textContent = isEdit ? 'Sửa chiến dịch' : 'Tạo chiến dịch email';
+        document.getElementById('campaign-id').value      = campaign?.id || '';
+        document.getElementById('campaign-name').value    = campaign?.name || '';
+        document.getElementById('campaign-subject').value = campaign?.subject || '';
+        document.getElementById('campaign-greeting').value = campaign?.greeting || '';
+        document.getElementById('campaign-body').value    = campaign?.body || '';
+        document.getElementById('campaign-voucher-mode').value = campaign?.voucher_mode || 'auto';
+        document.getElementById('campaign-discount').value = campaign?.auto_discount_percent ?? 10;
+        document.getElementById('campaign-status').value  = campaign?.status === 'scheduled' ? 'scheduled' : 'draft';
+
+        const cond = campaign?.conditions || {};
+        document.getElementById('cond-max-days').value      = cond.checkout_max_days ?? 60;
+        document.getElementById('cond-min-days').value      = cond.checkout_min_days ?? 30;
+        document.getElementById('cond-min-bookings').value  = cond.min_bookings ?? 1;
+        document.getElementById('cond-min-spent').value     = cond.min_spent || '';
+
+        if (campaign?.send_at) {
+            document.getElementById('campaign-send-at').value = campaign.send_at.replace(' ', 'T').slice(0, 16);
+        } else {
+            document.getElementById('campaign-send-at').value = '';
+        }
+
+        loadVoucherOptions().then(() => {
+            if (campaign?.voucher_id) {
+                document.getElementById('campaign-voucher-id').value = campaign.voucher_id;
+            }
+        });
+
+        document.getElementById('campaign-eligible-preview').style.display = 'none';
+        document.getElementById('campaign-form-error').style.display = 'none';
+        onCampaignVoucherModeChange();
+        onCampaignStatusChange();
+        document.getElementById('campaign-modal').style.display = 'flex';
+    }
+
+    function onCampaignVoucherModeChange() {
+        const mode = document.getElementById('campaign-voucher-mode')?.value;
+        document.getElementById('campaign-voucher-auto-opts').style.display  = mode === 'auto'  ? 'block' : 'none';
+        document.getElementById('campaign-voucher-fixed-opts').style.display = mode === 'fixed' ? 'block' : 'none';
+    }
+
+    function onCampaignStatusChange() {
+        const status = document.getElementById('campaign-status')?.value;
+        document.getElementById('campaign-send-at-wrap').style.display = status === 'scheduled' ? 'block' : 'none';
+    }
+
+    async function previewEligible() {
+        const id = document.getElementById('campaign-id').value;
+        if (!id) {
+            // No saved campaign yet — just show local count estimate
+            alert('Lưu chiến dịch trước để xem danh sách người nhận.');
+            return;
+        }
+        const res = await apiFetch(ADMIN_BASE + '/campaigns/' + id + '/eligible');
+        if (!res.success) return;
+
+        const el = document.getElementById('campaign-eligible-preview');
+        document.getElementById('campaign-eligible-count').textContent = res.count;
+        el.style.display = 'block';
+
+        if (res.count > 0 && res.preview?.length) {
+            const names = res.preview.map(p => `${p.name || p.email} (${p.checkout})`).join(', ');
+            el.title = names;
+        }
+    }
+
+    document.getElementById('campaign-modal-close')?.addEventListener('click',  () => { document.getElementById('campaign-modal').style.display = 'none'; });
+    document.getElementById('campaign-modal-cancel')?.addEventListener('click', () => { document.getElementById('campaign-modal').style.display = 'none'; });
+
+    document.getElementById('campaign-form')?.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const errEl = document.getElementById('campaign-form-error');
+        errEl.style.display = 'none';
+
+        const id     = document.getElementById('campaign-id').value;
+        const url    = id ? ADMIN_BASE + '/campaigns/' + id : ADMIN_BASE + '/campaigns';
+        const method = id ? 'PUT' : 'POST';
+
+        const payload = {
+            name:                  document.getElementById('campaign-name').value.trim(),
+            subject:               document.getElementById('campaign-subject').value.trim() || null,
+            greeting:              document.getElementById('campaign-greeting').value.trim() || null,
+            body:                  document.getElementById('campaign-body').value.trim() || null,
+            voucher_mode:          document.getElementById('campaign-voucher-mode').value,
+            voucher_id:            document.getElementById('campaign-voucher-id').value || null,
+            auto_discount_percent: parseInt(document.getElementById('campaign-discount').value) || 10,
+            conditions: {
+                checkout_max_days: parseInt(document.getElementById('cond-max-days').value) || 60,
+                checkout_min_days: parseInt(document.getElementById('cond-min-days').value) || 0,
+                min_bookings:      parseInt(document.getElementById('cond-min-bookings').value) || 1,
+                min_spent:         parseInt(document.getElementById('cond-min-spent').value) || 0,
+                order_statuses:    ['confirmed', 'completed', 'pending'],
+            },
+            status:  document.getElementById('campaign-status').value,
+            send_at: document.getElementById('campaign-send-at').value || null,
+        };
+
+        const res = await apiFetch(url, { method, body: JSON.stringify(payload) });
+
+        if (res.success) {
+            document.getElementById('campaign-id').value = res.data?.id || id || '';
+            document.getElementById('campaign-modal').style.display = 'none';
+            loadCampaigns();
+        } else {
+            errEl.textContent   = res.message || Object.values(res.errors || {}).flat().join(' ');
+            errEl.style.display = 'block';
+        }
+    });
+
+    async function deleteCampaign(id, name) {
+        if (!confirm(`Xóa chiến dịch "${name}"? Hành động này không thể hoàn tác.`)) return;
+        const res = await apiFetch(ADMIN_BASE + '/campaigns/' + id, { method: 'DELETE' });
+        if (res.success) loadCampaigns();
+        else alert(res.message || 'Lỗi khi xóa.');
+    }
+
+    async function sendCampaignNow(id, name, btn) {
+        if (!confirm(`Gửi ngay chiến dịch "${name}" đến tất cả khách đủ điều kiện?`)) return;
+        btn.disabled     = true;
+        btn.textContent  = 'Đang gửi...';
+
+        const res = await apiFetch(ADMIN_BASE + '/campaigns/' + id + '/send-now', { method: 'POST', body: '{}' });
+        btn.disabled    = false;
+        btn.textContent = 'Gửi ngay';
+
+        alert(res.message || (res.success ? 'Hoàn thành!' : 'Có lỗi xảy ra.'));
+        if (res.success) loadCampaigns();
     }
 
 })();

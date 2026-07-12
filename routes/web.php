@@ -156,10 +156,25 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,employee'])->group(funct
         Route::get('/page-contents/{slug}', [AdminDashboardController::class, 'getPageContent']);
         Route::post('/page-contents/{slug}', [AdminDashboardController::class, 'updatePageContent']);
 
-        // Remarketing email
+        // Remarketing email (legacy single-send)
         Route::get('/remarketing', [AdminDashboardController::class, 'getRemarketingSettings']);
         Route::post('/remarketing/settings', [AdminDashboardController::class, 'updateRemarketingSettings']);
         Route::post('/remarketing/send-now', [AdminDashboardController::class, 'sendRemarketingNow']);
+
+        // Vouchers
+        Route::get('/vouchers', [AdminDashboardController::class, 'getVouchers']);
+        Route::post('/vouchers', [AdminDashboardController::class, 'storeVoucher']);
+        Route::put('/vouchers/{id}', [AdminDashboardController::class, 'updateVoucher']);
+        Route::delete('/vouchers/{id}', [AdminDashboardController::class, 'destroyVoucher']);
+        Route::patch('/vouchers/{id}/status', [AdminDashboardController::class, 'toggleVoucherStatus']);
+
+        // Email campaigns
+        Route::get('/campaigns', [AdminDashboardController::class, 'getCampaigns']);
+        Route::post('/campaigns', [AdminDashboardController::class, 'storeCampaign']);
+        Route::put('/campaigns/{id}', [AdminDashboardController::class, 'updateCampaign']);
+        Route::delete('/campaigns/{id}', [AdminDashboardController::class, 'destroyCampaign']);
+        Route::get('/campaigns/{id}/eligible', [AdminDashboardController::class, 'getCampaignEligible']);
+        Route::post('/campaigns/{id}/send-now', [AdminDashboardController::class, 'sendCampaignNow']);
     });
 });
 

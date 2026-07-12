@@ -62,6 +62,7 @@
                                     </p>
                                 @endif
 
+                                @if($voucherMode !== 'none')
                                 <p style="line-height:1.8;margin:0 0 8px;">
                                     Để cảm ơn bạn đã tin tưởng lựa chọn LuxNest, chúng tôi gửi tặng bạn
                                     <strong style="color:#996d4e;">voucher giảm {{ $discountPercent }}%</strong>
@@ -74,6 +75,7 @@
                                     <p class="code">{{ $voucherCode }}</p>
                                     <p class="discount">Giảm {{ $discountPercent }}% tổng giá trị đặt phòng</p>
                                 </div>
+                                @endif
 
                                 @if($body)
                                     <p style="line-height:1.8;font-size:13px;color:#888;margin:0 0 20px;">{!! nl2br(e($body)) !!}</p>

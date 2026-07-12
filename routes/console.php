@@ -8,5 +8,18 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-// Remarketing: run hourly, command itself checks auto/schedule flags
+// Legacy single remarketing: run hourly, command checks auto/schedule flags
 Schedule::command('remarketing:send')->hourly();
+
+// Email campaigns: fire scheduled campaigns
+Schedule::call(function () {
+    $campaigns = \App\Models\EmailCampaign::with('voucher')
+        ->where('status', 'scheduled')
+        ->where('send_at', '<=', now())
+        ->get();
+
+    foreach ($campaigns as $campaign) {
+        $campaign->update(['status' => 'sending']);
+        (new \App\Services\CampaignMailerService())->send($campaign);
+    }
+})->hourly()->name('fire-scheduled-campaigns');

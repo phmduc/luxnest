@@ -42,7 +42,10 @@
             <a href="#" class="nav-item" data-tab="pagecontent">
                 <i class="ph ph-file-text"></i> Nội Dung Trang
             </a>
-            <a href="#" class="nav-item" data-tab="remarketing">
+            <a href="#" class="nav-item" data-tab="voucher">
+                <i class="ph ph-ticket"></i> Voucher
+            </a>
+            <a href="#" class="nav-item" data-tab="emailmarketing">
                 <i class="ph ph-envelope-simple-open"></i> Email Marketing
             </a>
             <a href="#" class="nav-item" data-tab="settings">
@@ -363,115 +366,71 @@
             </section>
             @endif
 
-            {{-- ═══ TAB: EMAIL MARKETING (admin only) ═══ --}}
+            {{-- ═══ TAB: VOUCHER (admin only) ═══ --}}
             @if(auth()->user()->isAdmin())
-            <section id="tab-remarketing" class="dashboard-tab">
-
+            <section id="tab-voucher" class="dashboard-tab">
                 <div class="section-toolbar">
-                    <h2>Email Marketing — Remarketing Voucher</h2>
+                    <h2>Quản Lý Voucher</h2>
+                    <button class="btn-primary" onclick="AdminApp.openVoucherModal()">
+                        <i class="ph ph-plus"></i> Tạo voucher
+                    </button>
                 </div>
 
-                {{-- Stats card --}}
-                <div id="remarketing-stats" style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:28px;">
-                    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:18px 28px;min-width:180px;">
-                        <div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;">Khách đủ điều kiện</div>
-                        <div id="remarketing-eligible" style="font-size:2rem;font-weight:700;color:var(--orange);">–</div>
-                        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px;">checkout 30–60 ngày trước, chưa gửi</div>
-                    </div>
+                <div style="display:flex;gap:10px;margin-bottom:16px;">
+                    <input type="text" id="voucher-search" class="mf-input" placeholder="Tìm theo mã hoặc tên..." style="max-width:320px;"
+                           oninput="AdminApp.loadVouchers(1)">
                 </div>
 
-                <div style="display:grid;grid-template-columns:1fr 340px;gap:24px;align-items:start;max-width:1020px;">
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Mã voucher</th>
+                                <th>Tên</th>
+                                <th>Giảm giá</th>
+                                <th>Đã dùng / Tối đa</th>
+                                <th>Hết hạn</th>
+                                <th>Trạng thái</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="voucher-list-body">
+                            <tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:32px;">Đang tải...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="voucher-pagination" class="pagination-container"></div>
+            </section>
+            @endif
 
-                    {{-- Content editor --}}
-                    <form id="remarketing-form">
-                        @csrf
-
-                        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px;">
-                            <h3 style="margin:0 0 18px;font-size:0.85rem;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);">Nội dung email</h3>
-
-                            <div class="mf-group">
-                                <label class="mf-label">Tiêu đề email (Subject)</label>
-                                <input type="text" id="rm-subject" class="mf-input"
-                                       placeholder="LuxNest nhớ bạn — Quà tặng đặc biệt dành cho lần quay lại 🎁">
-                                <p style="margin:5px 0 0;font-size:0.72rem;color:var(--text-muted);">Để trống sẽ dùng tiêu đề mặc định.</p>
-                            </div>
-
-                            <div class="mf-group" style="margin-top:14px;">
-                                <label class="mf-label">Nội dung mở đầu (Greeting)</label>
-                                <textarea id="rm-greeting" class="mf-input" rows="4"
-                                    placeholder="LuxNest rất vui được đón tiếp bạn vào kỳ nghỉ vừa rồi. Chúng tôi hy vọng bạn đã có những khoảnh khắc thật tuyệt vời tại Đà Lạt!"></textarea>
-                                <p style="margin:5px 0 0;font-size:0.72rem;color:var(--text-muted);">Đoạn văn hiển thị ngay sau tên khách. Để trống dùng nội dung mặc định.</p>
-                            </div>
-
-                            <div class="mf-group" style="margin-top:14px;">
-                                <label class="mf-label">Nội dung phụ (dưới voucher)</label>
-                                <textarea id="rm-body" class="mf-input" rows="4"
-                                    placeholder="⏰ Voucher có hiệu lực trong 30 ngày kể từ ngày nhận email này.&#10;📌 Nhập mã khi thanh toán trên website hoặc liên hệ trực tiếp với chúng tôi."></textarea>
-                                <p style="margin:5px 0 0;font-size:0.72rem;color:var(--text-muted);">Hiển thị bên dưới ô mã voucher. Để trống dùng nội dung mặc định.</p>
-                            </div>
-
-                            <div class="mf-group" style="margin-top:14px;max-width:200px;">
-                                <label class="mf-label">Giảm giá (%)</label>
-                                <input type="number" id="rm-discount" class="mf-input" min="1" max="100" value="10">
-                            </div>
-                        </div>
-
-                        <div id="remarketing-form-msg" style="display:none;margin-bottom:14px;padding:11px 14px;border-radius:9px;font-weight:600;font-size:0.85rem;"></div>
-
-                        <button type="submit" class="btn-primary" style="padding:10px 22px;">
-                            <i class="ph ph-floppy-disk"></i> Lưu nội dung
-                        </button>
-                    </form>
-
-                    {{-- Right panel: schedule + send --}}
-                    <div>
-                        {{-- Auto schedule --}}
-                        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;">
-                            <h3 style="margin:0 0 14px;font-size:0.85rem;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);">Tự động hàng ngày</h3>
-                            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
-                                <span style="font-size:0.88rem;">Bật gửi email tự động mỗi ngày</span>
-                                <label class="toggle-switch" style="flex-shrink:0;">
-                                    <input type="checkbox" id="rm-auto">
-                                    <span class="toggle-slider"></span>
-                                </label>
-                            </div>
-                            <p style="margin:10px 0 0;font-size:0.72rem;color:var(--text-muted);">Hệ thống kiểm tra và gửi mỗi giờ. Mỗi khách chỉ nhận 1 lần.</p>
-                        </div>
-
-                        {{-- One-shot schedule --}}
-                        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;">
-                            <h3 style="margin:0 0 14px;font-size:0.85rem;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);">Xếp lịch gửi 1 lần</h3>
-                            <div class="mf-group" style="margin:0;">
-                                <label class="mf-label">Ngày & giờ gửi</label>
-                                <input type="datetime-local" id="rm-send-at" class="mf-input">
-                            </div>
-                            <p style="margin:8px 0 14px;font-size:0.72rem;color:var(--text-muted);">
-                                Hệ thống sẽ tự động gửi vào thời điểm đã chọn, sau đó xóa lịch.
-                            </p>
-                            <div id="rm-scheduled-badge" style="display:none;margin-bottom:12px;padding:8px 12px;background:#FEF3C7;border-radius:8px;font-size:0.8rem;color:#92400E;">
-                                <i class="ph ph-clock"></i> <span id="rm-scheduled-text"></span>
-                                <button type="button" onclick="AdminApp.clearRemarketingSchedule()" style="margin-left:8px;background:none;border:none;color:#92400E;cursor:pointer;font-size:0.8rem;text-decoration:underline;">Xóa lịch</button>
-                            </div>
-                            <button type="button" class="btn-primary" style="width:100%;padding:10px;justify-content:center;" onclick="AdminApp.saveRemarketingSchedule()">
-                                <i class="ph ph-calendar-plus"></i> Xếp lịch
-                            </button>
-                        </div>
-
-                        {{-- Send now --}}
-                        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px;">
-                            <h3 style="margin:0 0 8px;font-size:0.85rem;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);">Gửi ngay</h3>
-                            <p style="margin:0 0 14px;font-size:0.83rem;color:var(--text-muted);">Gửi email đến tất cả khách đủ điều kiện ngay lập tức.</p>
-                            <div id="rm-send-msg" style="display:none;margin-bottom:12px;padding:10px 14px;border-radius:8px;font-size:0.83rem;font-weight:600;"></div>
-                            <button type="button" id="rm-send-btn" class="btn-primary"
-                                    style="width:100%;padding:10px;justify-content:center;background:#16a34a;"
-                                    onclick="AdminApp.sendRemarketingNow()">
-                                <i class="ph ph-paper-plane-tilt"></i> Gửi ngay
-                            </button>
-                        </div>
-                    </div>
-
+            {{-- ═══ TAB: EMAIL MARKETING / CAMPAIGNS (admin only) ═══ --}}
+            @if(auth()->user()->isAdmin())
+            <section id="tab-emailmarketing" class="dashboard-tab">
+                <div class="section-toolbar">
+                    <h2>Email Marketing</h2>
+                    <button class="btn-primary" onclick="AdminApp.openCampaignModal()">
+                        <i class="ph ph-plus"></i> Tạo chiến dịch
+                    </button>
                 </div>
 
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Tên chiến dịch</th>
+                                <th>Điều kiện</th>
+                                <th>Voucher</th>
+                                <th>Đủ điều kiện</th>
+                                <th>Trạng thái</th>
+                                <th>Ngày gửi</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="campaign-list-body">
+                            <tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:32px;">Đang tải...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </section>
             @endif
 
@@ -1540,6 +1499,197 @@
             <div style="margin-top:24px; display:flex; gap:10px; justify-content:flex-end;">
                 <button type="button" id="faq-modal-cancel" class="btn-view">Hủy</button>
                 <button type="submit" id="faq-submit-btn" class="btn-primary" style="padding:10px 22px;">Lưu câu hỏi</button>
+            </div>
+        </form>
+    </div>
+</div>
+@endif
+
+{{-- ═══════════════════ VOUCHER MODAL (admin only) ═══════════════════ --}}
+@if(auth()->user()->isAdmin())
+<div id="voucher-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-content" style="max-width:560px;">
+        <button class="modal-close" id="voucher-modal-close"><i class="ph ph-x"></i></button>
+        <h2 id="voucher-modal-title" style="font-size:1.4rem;font-weight:800;margin-bottom:24px;color:var(--text);">Tạo voucher</h2>
+
+        <form id="voucher-form">
+            @csrf
+            <input type="hidden" id="voucher-id">
+
+            <div class="mf-grid-2">
+                <div class="mf-group">
+                    <label class="mf-label">Mã voucher <span style="color:#dc2626;">*</span></label>
+                    <input type="text" id="voucher-code" class="mf-input" placeholder="LUXNEST20" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()">
+                </div>
+                <div class="mf-group">
+                    <label class="mf-label">Tên / Mô tả <span style="color:#dc2626;">*</span></label>
+                    <input type="text" id="voucher-name" class="mf-input" placeholder="Voucher hè 2026">
+                </div>
+
+                <div class="mf-group">
+                    <label class="mf-label">Loại giảm giá</label>
+                    <select id="voucher-type" class="mf-select" onchange="AdminApp.onVoucherTypeChange()">
+                        <option value="percent">Phần trăm (%)</option>
+                        <option value="fixed">Số tiền cố định (VNĐ)</option>
+                    </select>
+                </div>
+                <div class="mf-group">
+                    <label class="mf-label" id="voucher-value-label">Giá trị giảm (%)</label>
+                    <input type="number" id="voucher-value" class="mf-input" min="1" value="10" placeholder="10">
+                </div>
+
+                <div class="mf-group">
+                    <label class="mf-label">Đơn hàng tối thiểu (VNĐ)</label>
+                    <input type="number" id="voucher-min-order" class="mf-input" min="0" placeholder="Để trống = không giới hạn">
+                </div>
+                <div class="mf-group">
+                    <label class="mf-label">Số lần dùng tối đa</label>
+                    <input type="number" id="voucher-max-uses" class="mf-input" min="1" placeholder="Để trống = không giới hạn">
+                </div>
+
+                <div class="mf-group">
+                    <label class="mf-label">Ngày hết hạn</label>
+                    <input type="date" id="voucher-expires" class="mf-input">
+                </div>
+                <div class="mf-group" style="display:flex;align-items:center;gap:12px;padding-top:24px;">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="voucher-active" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span style="font-size:0.88rem;">Kích hoạt</span>
+                </div>
+
+                <div class="mf-group" style="grid-column:1/-1;">
+                    <label class="mf-label">Ghi chú</label>
+                    <textarea id="voucher-notes" class="mf-input" rows="2" placeholder="Nội dung nội bộ, khách không thấy"></textarea>
+                </div>
+            </div>
+
+            <div id="voucher-form-error" style="display:none;margin-top:14px;padding:11px 14px;background:#FEE2E2;border-radius:9px;color:#991B1B;font-weight:600;font-size:0.85rem;"></div>
+
+            <div style="margin-top:24px;display:flex;gap:10px;justify-content:flex-end;">
+                <button type="button" id="voucher-modal-cancel" class="btn-view">Hủy</button>
+                <button type="submit" class="btn-primary" style="padding:10px 22px;">Lưu voucher</button>
+            </div>
+        </form>
+    </div>
+</div>
+@endif
+
+{{-- ═══════════════════ CAMPAIGN MODAL (admin only) ═══════════════════ --}}
+@if(auth()->user()->isAdmin())
+<div id="campaign-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-content" style="max-width:680px;">
+        <button class="modal-close" id="campaign-modal-close"><i class="ph ph-x"></i></button>
+        <h2 id="campaign-modal-title" style="font-size:1.4rem;font-weight:800;margin-bottom:24px;color:var(--text);">Tạo chiến dịch email</h2>
+
+        <form id="campaign-form">
+            @csrf
+            <input type="hidden" id="campaign-id">
+
+            {{-- Section: Basic info --}}
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:16px;">
+                <h3 style="margin:0 0 14px;font-size:0.78rem;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);">Nội dung email</h3>
+                <div class="mf-group">
+                    <label class="mf-label">Tên chiến dịch <span style="color:#dc2626;">*</span></label>
+                    <input type="text" id="campaign-name" class="mf-input" placeholder="Remarketing hè 2026">
+                </div>
+                <div class="mf-group" style="margin-top:12px;">
+                    <label class="mf-label">Tiêu đề email (Subject)</label>
+                    <input type="text" id="campaign-subject" class="mf-input" placeholder="LuxNest nhớ bạn — Quà tặng đặc biệt 🎁">
+                    <p style="margin:4px 0 0;font-size:0.72rem;color:var(--text-muted);">Để trống dùng tiêu đề mặc định.</p>
+                </div>
+                <div class="mf-group" style="margin-top:12px;">
+                    <label class="mf-label">Lời mở đầu</label>
+                    <textarea id="campaign-greeting" class="mf-input" rows="3" placeholder="LuxNest rất vui được đón tiếp bạn..."></textarea>
+                </div>
+                <div class="mf-group" style="margin-top:12px;">
+                    <label class="mf-label">Nội dung phụ (dưới voucher)</label>
+                    <textarea id="campaign-body" class="mf-input" rows="3" placeholder="⏰ Voucher có hiệu lực trong 30 ngày..."></textarea>
+                </div>
+            </div>
+
+            {{-- Section: Voucher --}}
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:16px;">
+                <h3 style="margin:0 0 14px;font-size:0.78rem;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);">Voucher</h3>
+                <div class="mf-group">
+                    <label class="mf-label">Loại voucher</label>
+                    <select id="campaign-voucher-mode" class="mf-select" onchange="AdminApp.onCampaignVoucherModeChange()">
+                        <option value="auto">Tự tạo mã riêng cho mỗi người</option>
+                        <option value="fixed">Dùng voucher có sẵn (cùng 1 mã)</option>
+                        <option value="none">Không kèm voucher</option>
+                    </select>
+                </div>
+                <div id="campaign-voucher-auto-opts" style="margin-top:12px;">
+                    <div class="mf-group">
+                        <label class="mf-label">Giảm giá (%)</label>
+                        <input type="number" id="campaign-discount" class="mf-input" min="1" max="100" value="10" style="max-width:140px;">
+                    </div>
+                </div>
+                <div id="campaign-voucher-fixed-opts" style="display:none;margin-top:12px;">
+                    <div class="mf-group">
+                        <label class="mf-label">Chọn voucher</label>
+                        <select id="campaign-voucher-id" class="mf-select">
+                            <option value="">-- Chọn voucher --</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Section: Conditions --}}
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:16px;">
+                <h3 style="margin:0 0 4px;font-size:0.78rem;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);">Điều kiện nhận email</h3>
+                <p style="margin:0 0 14px;font-size:0.76rem;color:var(--text-muted);">Chỉ gửi đến khách thỏa tất cả điều kiện bên dưới. Mỗi email chỉ nhận 1 lần.</p>
+                <div class="mf-grid-2">
+                    <div class="mf-group">
+                        <label class="mf-label">Checkout từ <span style="font-weight:400;">(ngày trước)</span></label>
+                        <input type="number" id="cond-max-days" class="mf-input" min="1" value="60" placeholder="60">
+                    </div>
+                    <div class="mf-group">
+                        <label class="mf-label">Checkout đến <span style="font-weight:400;">(ngày trước)</span></label>
+                        <input type="number" id="cond-min-days" class="mf-input" min="0" value="30" placeholder="30">
+                    </div>
+                    <div class="mf-group">
+                        <label class="mf-label">Số booking tối thiểu</label>
+                        <input type="number" id="cond-min-bookings" class="mf-input" min="1" value="1" placeholder="1">
+                    </div>
+                    <div class="mf-group">
+                        <label class="mf-label">Chi tiêu tối thiểu (VNĐ)</label>
+                        <input type="number" id="cond-min-spent" class="mf-input" min="0" placeholder="Để trống = không giới hạn">
+                    </div>
+                </div>
+                <div id="campaign-eligible-preview" style="display:none;margin-top:12px;padding:10px 14px;background:var(--bg);border-radius:8px;font-size:0.82rem;color:var(--text-muted);">
+                    <i class="ph ph-users"></i> <span id="campaign-eligible-count">–</span> khách đủ điều kiện
+                    <button type="button" onclick="AdminApp.previewEligible()" style="margin-left:8px;font-size:0.78rem;color:var(--orange);background:none;border:none;cursor:pointer;text-decoration:underline;">Xem lại</button>
+                </div>
+                <button type="button" onclick="AdminApp.previewEligible()" style="margin-top:10px;font-size:0.8rem;color:var(--orange);background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:4px;">
+                    <i class="ph ph-magnifying-glass"></i> Xem ai sẽ nhận email này
+                </button>
+            </div>
+
+            {{-- Section: Schedule --}}
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:16px;">
+                <h3 style="margin:0 0 14px;font-size:0.78rem;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);">Thời gian gửi</h3>
+                <div class="mf-group">
+                    <label class="mf-label">Trạng thái</label>
+                    <select id="campaign-status" class="mf-select" onchange="AdminApp.onCampaignStatusChange()">
+                        <option value="draft">Lưu nháp</option>
+                        <option value="scheduled">Xếp lịch tự động</option>
+                    </select>
+                </div>
+                <div id="campaign-send-at-wrap" style="display:none;margin-top:12px;">
+                    <div class="mf-group">
+                        <label class="mf-label">Ngày & giờ gửi</label>
+                        <input type="datetime-local" id="campaign-send-at" class="mf-input">
+                    </div>
+                </div>
+            </div>
+
+            <div id="campaign-form-error" style="display:none;margin-top:4px;padding:11px 14px;background:#FEE2E2;border-radius:9px;color:#991B1B;font-weight:600;font-size:0.85rem;"></div>
+
+            <div style="margin-top:20px;display:flex;gap:10px;justify-content:flex-end;">
+                <button type="button" id="campaign-modal-cancel" class="btn-view">Hủy</button>
+                <button type="submit" class="btn-primary" style="padding:10px 22px;">Lưu chiến dịch</button>
             </div>
         </form>
     </div>

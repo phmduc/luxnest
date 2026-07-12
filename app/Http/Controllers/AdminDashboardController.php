@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Console\Commands\SendRemarketingEmails;
 use App\Mail\RemarketingVoucher;
+use App\Models\EmailCampaign;
 use App\Models\Faq;
 use App\Models\News;
 use App\Models\PageContent;
@@ -11,6 +12,8 @@ use App\Models\Room;
 use App\Models\Setting;
 use App\Models\User;
 use App\Models\VillaListing;
+use App\Models\Voucher;
+use App\Services\CampaignMailerService;
 use App\Services\GoHostService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -874,5 +877,181 @@ class AdminDashboardController extends Controller
                 : 'Không có khách nào đủ điều kiện nhận email lúc này.',
             'sent'    => $sent,
         ]);
+    }
+
+    // ---------------------------------------------------------------
+    // Vouchers (admin only)
+    // ---------------------------------------------------------------
+
+    public function getVouchers(Request $request): JsonResponse
+    {
+        $search = trim($request->input('search', ''));
+        $page   = max(1, (int) $request->input('page', 1));
+
+        $query = Voucher::query()->orderByDesc('created_at');
+        if ($search) {
+            $query->where(fn($q) => $q->where('code', 'like', "%{$search}%")
+                ->orWhere('name', 'like', "%{$search}%"));
+        }
+
+        return response()->json(['success' => true, 'data' => $query->paginate(15, ['*'], 'page', $page)]);
+    }
+
+    public function storeVoucher(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'code'              => 'required|string|max:50|unique:vouchers,code',
+            'name'              => 'required|string|max:255',
+            'discount_type'     => 'required|in:percent,fixed',
+            'discount_value'    => 'required|integer|min:1',
+            'min_order_amount'  => 'nullable|integer|min:0',
+            'max_uses'          => 'nullable|integer|min:1',
+            'expires_at'        => 'nullable|date',
+            'is_active'         => 'boolean',
+            'notes'             => 'nullable|string|max:1000',
+        ]);
+
+        $data['code'] = strtoupper(trim($data['code']));
+        $voucher = Voucher::create($data);
+
+        return response()->json(['success' => true, 'data' => $voucher], 201);
+    }
+
+    public function updateVoucher(Request $request, int $id): JsonResponse
+    {
+        $voucher = Voucher::findOrFail($id);
+
+        $data = $request->validate([
+            'code'              => "required|string|max:50|unique:vouchers,code,{$id}",
+            'name'              => 'required|string|max:255',
+            'discount_type'     => 'required|in:percent,fixed',
+            'discount_value'    => 'required|integer|min:1',
+            'min_order_amount'  => 'nullable|integer|min:0',
+            'max_uses'          => 'nullable|integer|min:1',
+            'expires_at'        => 'nullable|date',
+            'is_active'         => 'boolean',
+            'notes'             => 'nullable|string|max:1000',
+        ]);
+
+        $data['code'] = strtoupper(trim($data['code']));
+        $voucher->update($data);
+
+        return response()->json(['success' => true, 'data' => $voucher]);
+    }
+
+    public function destroyVoucher(int $id): JsonResponse
+    {
+        Voucher::findOrFail($id)->delete();
+        return response()->json(['success' => true]);
+    }
+
+    public function toggleVoucherStatus(int $id): JsonResponse
+    {
+        $v = Voucher::findOrFail($id);
+        $v->update(['is_active' => !$v->is_active]);
+        return response()->json(['success' => true, 'is_active' => $v->is_active]);
+    }
+
+    // ---------------------------------------------------------------
+    // Email Campaigns (admin only)
+    // ---------------------------------------------------------------
+
+    public function getCampaigns(Request $request): JsonResponse
+    {
+        $campaigns = EmailCampaign::with('voucher')
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(function ($c) {
+                $eligible = (new CampaignMailerService())->getEligible($c);
+                return array_merge($c->toArray(), ['eligible_count' => count($eligible)]);
+            });
+
+        return response()->json(['success' => true, 'data' => $campaigns]);
+    }
+
+    public function storeCampaign(Request $request): JsonResponse
+    {
+        $data = $this->validateCampaign($request);
+        $campaign = EmailCampaign::create($data);
+
+        return response()->json(['success' => true, 'data' => $campaign->load('voucher')], 201);
+    }
+
+    public function updateCampaign(Request $request, int $id): JsonResponse
+    {
+        $campaign = EmailCampaign::findOrFail($id);
+        $data     = $this->validateCampaign($request);
+        $campaign->update($data);
+
+        return response()->json(['success' => true, 'data' => $campaign->fresh('voucher')]);
+    }
+
+    public function destroyCampaign(int $id): JsonResponse
+    {
+        EmailCampaign::findOrFail($id)->delete();
+        return response()->json(['success' => true]);
+    }
+
+    public function getCampaignEligible(int $id): JsonResponse
+    {
+        $campaign = EmailCampaign::findOrFail($id);
+        $eligible = (new CampaignMailerService())->getEligible($campaign);
+
+        return response()->json([
+            'success' => true,
+            'count'   => count($eligible),
+            'preview' => array_slice(array_map(fn($o) => [
+                'email' => $o->customer_email,
+                'name'  => $o->customer_name,
+                'checkout' => $o->checkout_date,
+            ], $eligible), 0, 10),
+        ]);
+    }
+
+    public function sendCampaignNow(int $id): JsonResponse
+    {
+        $campaign = EmailCampaign::with('voucher')->findOrFail($id);
+
+        if ($campaign->status === 'sending') {
+            return response()->json(['success' => false, 'message' => 'Campaign đang được gửi.'], 409);
+        }
+
+        $campaign->update(['status' => 'sending']);
+        $sent = (new CampaignMailerService())->send($campaign);
+
+        return response()->json([
+            'success' => true,
+            'message' => $sent > 0
+                ? "Đã gửi thành công {$sent} email."
+                : 'Không có khách nào đủ điều kiện nhận email lúc này.',
+            'sent'    => $sent,
+        ]);
+    }
+
+    private function validateCampaign(Request $request): array
+    {
+        $data = $request->validate([
+            'name'                   => 'required|string|max:255',
+            'subject'                => 'nullable|string|max:255',
+            'greeting'               => 'nullable|string|max:3000',
+            'body'                   => 'nullable|string|max:3000',
+            'voucher_mode'           => 'required|in:none,fixed,auto',
+            'voucher_id'             => 'nullable|exists:vouchers,id',
+            'auto_discount_percent'  => 'nullable|integer|min:1|max:100',
+            'conditions'             => 'nullable|array',
+            'conditions.checkout_min_days' => 'nullable|integer|min:0',
+            'conditions.checkout_max_days' => 'nullable|integer|min:1',
+            'conditions.min_bookings'      => 'nullable|integer|min:1',
+            'conditions.min_spent'         => 'nullable|integer|min:0',
+            'conditions.order_statuses'    => 'nullable|array',
+            'status'                 => 'required|in:draft,scheduled',
+            'send_at'                => 'nullable|date',
+        ]);
+
+        if (($data['status'] ?? '') === 'scheduled' && empty($data['send_at'])) {
+            $data['status'] = 'draft';
+        }
+
+        return $data;
     }
 }
