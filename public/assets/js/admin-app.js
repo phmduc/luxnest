@@ -102,6 +102,7 @@
         if (tab === 'news')        loadNews();
         if (tab === 'faqs')        loadFaqs();
         if (tab === 'pagecontent') loadPageContent();
+        if (tab === 'remarketing') loadRemarketing();
     }
 
     document.querySelectorAll('.nav-item[data-tab]').forEach(el => {
@@ -2211,6 +2212,160 @@
         // FAQs
         openFaqModal,
         deleteFaq,
+        // Remarketing
+        sendRemarketingNow,
+        saveRemarketingSchedule,
+        clearRemarketingSchedule,
     };
+
+    // ---------------------------------------------------------------
+    // Remarketing
+    // ---------------------------------------------------------------
+
+    async function loadRemarketing() {
+        const res = await apiFetch(ADMIN_BASE + '/remarketing');
+        if (!res.success) return;
+        const d = res.data;
+
+        document.getElementById('rm-subject').value  = d.subject || '';
+        document.getElementById('rm-greeting').value = d.greeting || '';
+        document.getElementById('rm-body').value     = d.body || '';
+        document.getElementById('rm-discount').value = d.discount ?? 10;
+        document.getElementById('rm-auto').checked   = !!d.auto;
+        document.getElementById('rm-eligible').textContent = d.eligible ?? 0;
+
+        const badge = document.getElementById('rm-scheduled-badge');
+        const txt   = document.getElementById('rm-scheduled-text');
+        if (d.send_at) {
+            const dt = new Date(d.send_at);
+            txt.textContent = 'Đã xếp lịch: ' + dt.toLocaleString('vi-VN');
+            badge.style.display = 'block';
+            document.getElementById('rm-send-at').value = d.send_at.replace(' ', 'T').slice(0, 16);
+        } else {
+            badge.style.display = 'none';
+            document.getElementById('rm-send-at').value = '';
+        }
+    }
+
+    document.getElementById('rm-auto')?.addEventListener('change', async function () {
+        const checked = this.checked;
+        // Auto-save the toggle immediately
+        const res = await apiFetch(ADMIN_BASE + '/remarketing/settings', {
+            method: 'POST',
+            body: JSON.stringify({
+                subject:  document.getElementById('rm-subject').value,
+                greeting: document.getElementById('rm-greeting').value,
+                body:     document.getElementById('rm-body').value,
+                discount: parseInt(document.getElementById('rm-discount').value) || 10,
+                auto:     checked,
+                send_at:  document.getElementById('rm-send-at').value || null,
+            }),
+        });
+        if (!res.success) this.checked = !checked; // revert on error
+    });
+
+    document.getElementById('remarketing-form')?.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const msgEl = document.getElementById('remarketing-form-msg');
+        msgEl.style.display = 'none';
+
+        const res = await apiFetch(ADMIN_BASE + '/remarketing/settings', {
+            method: 'POST',
+            body: JSON.stringify({
+                subject:  document.getElementById('rm-subject').value,
+                greeting: document.getElementById('rm-greeting').value,
+                body:     document.getElementById('rm-body').value,
+                discount: parseInt(document.getElementById('rm-discount').value) || 10,
+                auto:     document.getElementById('rm-auto').checked,
+                send_at:  document.getElementById('rm-send-at').value || null,
+            }),
+        });
+
+        msgEl.style.display = 'block';
+        if (res.success) {
+            msgEl.style.background = '#DCFCE7';
+            msgEl.style.color      = '#166534';
+            msgEl.textContent      = res.message || 'Đã lưu.';
+        } else {
+            msgEl.style.background = '#FEE2E2';
+            msgEl.style.color      = '#991B1B';
+            msgEl.textContent      = res.message || 'Lỗi khi lưu.';
+        }
+        setTimeout(() => { msgEl.style.display = 'none'; }, 3000);
+    });
+
+    async function saveRemarketingSchedule() {
+        const sendAt = document.getElementById('rm-send-at').value;
+        if (!sendAt) { alert('Vui lòng chọn ngày & giờ gửi.'); return; }
+
+        const res = await apiFetch(ADMIN_BASE + '/remarketing/settings', {
+            method: 'POST',
+            body: JSON.stringify({
+                subject:  document.getElementById('rm-subject').value,
+                greeting: document.getElementById('rm-greeting').value,
+                body:     document.getElementById('rm-body').value,
+                discount: parseInt(document.getElementById('rm-discount').value) || 10,
+                auto:     document.getElementById('rm-auto').checked,
+                send_at:  sendAt,
+            }),
+        });
+
+        const badge = document.getElementById('rm-scheduled-badge');
+        const txt   = document.getElementById('rm-scheduled-text');
+        if (res.success) {
+            const dt = new Date(sendAt);
+            txt.textContent = 'Đã xếp lịch: ' + dt.toLocaleString('vi-VN');
+            badge.style.display = 'block';
+        } else {
+            alert(res.message || 'Lỗi khi xếp lịch.');
+        }
+    }
+
+    async function clearRemarketingSchedule() {
+        const res = await apiFetch(ADMIN_BASE + '/remarketing/settings', {
+            method: 'POST',
+            body: JSON.stringify({
+                subject:  document.getElementById('rm-subject').value,
+                greeting: document.getElementById('rm-greeting').value,
+                body:     document.getElementById('rm-body').value,
+                discount: parseInt(document.getElementById('rm-discount').value) || 10,
+                auto:     document.getElementById('rm-auto').checked,
+                send_at:  null,
+            }),
+        });
+        if (res.success) {
+            document.getElementById('rm-scheduled-badge').style.display = 'none';
+            document.getElementById('rm-send-at').value = '';
+        }
+    }
+
+    async function sendRemarketingNow() {
+        const btn   = document.getElementById('rm-send-btn');
+        const msgEl = document.getElementById('rm-send-msg');
+        if (!confirm('Gửi email remarketing đến tất cả khách đủ điều kiện ngay bây giờ?')) return;
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="ph ph-circle-notch"></i> Đang gửi...';
+        msgEl.style.display = 'none';
+
+        const res = await apiFetch(ADMIN_BASE + '/remarketing/send-now', { method: 'POST', body: '{}' });
+
+        btn.disabled = false;
+        btn.innerHTML = '<i class="ph ph-paper-plane-tilt"></i> Gửi ngay';
+        msgEl.style.display = 'block';
+
+        if (res.success) {
+            msgEl.style.background = '#DCFCE7';
+            msgEl.style.color      = '#166534';
+            msgEl.textContent      = res.message;
+            // Reload eligible count
+            const r2 = await apiFetch(ADMIN_BASE + '/remarketing');
+            if (r2.success) document.getElementById('rm-eligible').textContent = r2.data.eligible ?? 0;
+        } else {
+            msgEl.style.background = '#FEE2E2';
+            msgEl.style.color      = '#991B1B';
+            msgEl.textContent      = res.message || 'Gửi thất bại.';
+        }
+    }
 
 })();

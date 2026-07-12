@@ -53,10 +53,14 @@
                                     Xin chào {{ $order->customer_name }} 👋
                                 </p>
 
-                                <p style="line-height:1.8;margin:0 0 20px;">
-                                    LuxNest rất vui được đón tiếp bạn vào kỳ nghỉ vừa rồi.
-                                    Chúng tôi hy vọng bạn đã có những khoảnh khắc thật tuyệt vời tại Đà Lạt!
-                                </p>
+                                @if($greeting)
+                                    <p style="line-height:1.8;margin:0 0 20px;">{!! nl2br(e($greeting)) !!}</p>
+                                @else
+                                    <p style="line-height:1.8;margin:0 0 20px;">
+                                        LuxNest rất vui được đón tiếp bạn vào kỳ nghỉ vừa rồi.
+                                        Chúng tôi hy vọng bạn đã có những khoảnh khắc thật tuyệt vời tại Đà Lạt!
+                                    </p>
+                                @endif
 
                                 <p style="line-height:1.8;margin:0 0 8px;">
                                     Để cảm ơn bạn đã tin tưởng lựa chọn LuxNest, chúng tôi gửi tặng bạn
@@ -71,10 +75,14 @@
                                     <p class="discount">Giảm {{ $discountPercent }}% tổng giá trị đặt phòng</p>
                                 </div>
 
-                                <p style="line-height:1.8;font-size:13px;color:#888;margin:0 0 20px;">
-                                    ⏰ Voucher có hiệu lực trong <strong>30 ngày</strong> kể từ ngày nhận email này.<br>
-                                    📌 Nhập mã khi thanh toán trên website hoặc liên hệ trực tiếp với chúng tôi.
-                                </p>
+                                @if($body)
+                                    <p style="line-height:1.8;font-size:13px;color:#888;margin:0 0 20px;">{!! nl2br(e($body)) !!}</p>
+                                @else
+                                    <p style="line-height:1.8;font-size:13px;color:#888;margin:0 0 20px;">
+                                        ⏰ Voucher có hiệu lực trong <strong>30 ngày</strong> kể từ ngày nhận email này.<br>
+                                        📌 Nhập mã khi thanh toán trên website hoặc liên hệ trực tiếp với chúng tôi.
+                                    </p>
+                                @endif
 
                                 <hr class="divider">
 
@@ -86,7 +94,9 @@
 
                                 <p style="line-height:1.8;font-size:13px;color:#aaa;text-align:center;margin:0;">
                                     Nếu bạn không muốn nhận email từ chúng tôi, vui lòng bỏ qua email này.<br>
-                                    Hotline: <a href="tel:+84000000000" style="color:#996d4e;">0900 000 000</a>
+                                    @if($hotline)
+                                        Hotline: <a href="tel:{{ $hotline }}" style="color:#996d4e;">{{ $hotline }}</a>
+                                    @endif
                                 </p>
 
                             </div>

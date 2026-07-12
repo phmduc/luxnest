@@ -8,4 +8,5 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Schedule::command('remarketing:send')->dailyAt('09:00');
+// Remarketing: run hourly, command itself checks auto/schedule flags
+Schedule::command('remarketing:send')->hourly();

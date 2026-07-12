@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Console\Commands\SendRemarketingEmails;
+use App\Mail\RemarketingVoucher;
 use App\Models\Faq;
 use App\Models\News;
 use App\Models\PageContent;
@@ -13,8 +15,10 @@ use App\Services\GoHostService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 
 class AdminDashboardController extends Controller
 {
@@ -797,5 +801,78 @@ class AdminDashboardController extends Controller
         PageContent::updateOrCreate(['slug' => $slug], ['data' => $data]);
 
         return response()->json(['success' => true, 'data' => PageContent::dataFor($slug)]);
+    }
+
+    // ---------------------------------------------------------------
+    // Remarketing email management (admin only)
+    // ---------------------------------------------------------------
+
+    public function getRemarketingSettings(): JsonResponse
+    {
+        $s = DB::table('settings')->where('id', 1)->first();
+
+        $eligibleCount = DB::table('orders')
+            ->whereNull('remarketing_sent_at')
+            ->whereNotNull('customer_email')
+            ->where('customer_email', '!=', '')
+            ->whereNotNull('checkout_date')
+            ->whereDate('checkout_date', '>=', now()->subDays(60)->toDateString())
+            ->whereDate('checkout_date', '<=', now()->subDays(30)->toDateString())
+            ->whereIn('status', ['confirmed', 'completed', 'pending'])
+            ->count();
+
+        return response()->json([
+            'success' => true,
+            'data'    => [
+                'subject'     => $s->remarketing_subject ?? '',
+                'greeting'    => $s->remarketing_greeting ?? '',
+                'body'        => $s->remarketing_body ?? '',
+                'discount'    => (int) ($s->remarketing_discount ?? 10),
+                'auto'        => (bool) ($s->remarketing_auto ?? false),
+                'send_at'     => $s->remarketing_send_at ?? null,
+                'eligible'    => $eligibleCount,
+            ],
+        ]);
+    }
+
+    public function updateRemarketingSettings(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'subject'  => 'nullable|string|max:255',
+            'greeting' => 'nullable|string|max:2000',
+            'body'     => 'nullable|string|max:2000',
+            'discount' => 'required|integer|min:1|max:100',
+            'auto'     => 'required|boolean',
+            'send_at'  => 'nullable|date',
+        ]);
+
+        DB::table('settings')->where('id', 1)->update([
+            'remarketing_subject'  => $data['subject'] ?? null,
+            'remarketing_greeting' => $data['greeting'] ?? null,
+            'remarketing_body'     => $data['body'] ?? null,
+            'remarketing_discount' => $data['discount'],
+            'remarketing_auto'     => $data['auto'] ? 1 : 0,
+            'remarketing_send_at'  => !empty($data['send_at']) ? $data['send_at'] : null,
+            'updated_at'           => now(),
+        ]);
+
+        Cache::forget('site_settings');
+
+        return response()->json(['success' => true, 'message' => 'Đã lưu cài đặt remarketing.']);
+    }
+
+    public function sendRemarketingNow(Request $request): JsonResponse
+    {
+        $s    = DB::table('settings')->where('id', 1)->first();
+        $cmd  = new SendRemarketingEmails();
+        $sent = $cmd->sendToEligible($s);
+
+        return response()->json([
+            'success' => true,
+            'message' => $sent > 0
+                ? "Đã gửi thành công {$sent} email remarketing."
+                : 'Không có khách nào đủ điều kiện nhận email lúc này.',
+            'sent'    => $sent,
+        ]);
     }
 }

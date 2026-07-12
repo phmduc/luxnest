@@ -155,6 +155,11 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,employee'])->group(funct
         // Page content (Giới thiệu / Hợp tác)
         Route::get('/page-contents/{slug}', [AdminDashboardController::class, 'getPageContent']);
         Route::post('/page-contents/{slug}', [AdminDashboardController::class, 'updatePageContent']);
+
+        // Remarketing email
+        Route::get('/remarketing', [AdminDashboardController::class, 'getRemarketingSettings']);
+        Route::post('/remarketing/settings', [AdminDashboardController::class, 'updateRemarketingSettings']);
+        Route::post('/remarketing/send-now', [AdminDashboardController::class, 'sendRemarketingNow']);
     });
 });
 
