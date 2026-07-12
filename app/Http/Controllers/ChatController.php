@@ -217,8 +217,9 @@ class ChatController extends Controller
             }
         }
 
-        // ── Override if GoHost searched but found no rooms and AI still says "will check" ──
-        if (empty($availableRooms) && $goHostCalled && preg_match($willCheckPattern, $reply)) {
+        // ── Override when GoHost searched but found no rooms ──
+        // Always override regardless of what AI said — it cannot know the real result.
+        if (empty($availableRooms) && $goHostCalled) {
             $ci    = date('d/m', strtotime($dates['check_in']));
             $co    = date('d/m', strtotime($dates['check_out']));
             $reply = "Dạ em vừa kiểm tra rồi ạ, tiếc là hiện **không còn phòng trống** cho ngày {$ci} đến {$co} ạ. Anh/Chị thử chọn ngày khác xem ạ?";
