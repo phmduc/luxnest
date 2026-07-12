@@ -988,6 +988,7 @@ class AdminDashboardController extends Controller
 
     public function destroyCampaign(int $id): JsonResponse
     {
+        DB::table('campaign_sends')->where('campaign_id', $id)->delete();
         EmailCampaign::findOrFail($id)->delete();
         return response()->json(['success' => true]);
     }

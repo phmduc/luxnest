@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('campaign_sends', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('campaign_id')->constrained('email_campaigns')->cascadeOnDelete();
+            $table->unsignedBigInteger('campaign_id');
             $table->string('customer_email');
             $table->unsignedBigInteger('order_id')->nullable();
             $table->string('voucher_code', 50)->nullable();
