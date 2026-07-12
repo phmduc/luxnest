@@ -81,16 +81,40 @@ class ChatController extends Controller
             }
         }
 
-        // If check-in known but checkout still missing, try standalone day keyword from current message
-        // e.g. "trả ngày 21", "đến 21", "ngày 21 và 2 người"
+        // If check-in known but checkout still missing, try multiple patterns from current message
         if (!empty($dates) && empty($dates['explicit'])) {
+            $ciTS   = strtotime($dates['check_in']);
+            $ciMon  = date('m', $ciTS);
+            $ciYear = date('Y', $ciTS);
+            $coDay  = null;
+
+            // Pattern 1: keyword BEFORE number — "trả ngày 21", "đến 21", "ngày 21"
             if (preg_match('/(?:đến|trả|checkout|out|ngày\s*trả|ngày)[^\d]*(\d{1,2})(?!\s*[\/\-\d])(?!\s*(?:người|khách|pax))/ui', $message, $dm)) {
-                $day     = (int) $dm[1];
-                $ciMonth = date('m', strtotime($dates['check_in']));
-                $ciYear  = date('Y', strtotime($dates['check_in']));
-                $co      = sprintf('%s-%s-%02d', $ciYear, $ciMonth, $day);
-                if ($day >= 1 && $day <= 31 && strtotime($co) > strtotime($dates['check_in'])) {
+                $coDay = (int) $dm[1];
+            }
+            // Pattern 2: number BEFORE keyword — "21 trả", "21 anh trả"
+            // Use preg_match_all to skip false positives (small numbers like "2 người" before "trả")
+            if (!$coDay && preg_match_all('/(\d{1,2})[^\d\n]{0,20}(?:trả|checkout|check[\s\-]?out)/ui', $message, $dms)) {
+                foreach ($dms[1] as $d) {
+                    $d  = (int) $d;
+                    $co = sprintf('%s-%s-%02d', $ciYear, $ciMon, $d);
+                    if ($d >= 1 && $d <= 31 && strtotime($co) > $ciTS) { $coDay = $d; break; }
+                }
+            }
+
+            if ($coDay && $coDay >= 1 && $coDay <= 31) {
+                $co = sprintf('%s-%s-%02d', $ciYear, $ciMon, $coDay);
+                if (strtotime($co) > $ciTS) {
                     $dates['check_out'] = $co;
+                    $dates['explicit']  = true;
+                }
+            }
+
+            // Pattern 3: "X đêm/night" duration fallback — checkout = check_in + X nights
+            if (empty($dates['explicit']) && preg_match('/(\d{1,2})\s*(?:đêm|night)/ui', $message, $dm)) {
+                $nights = (int) $dm[1];
+                if ($nights >= 1 && $nights <= 30) {
+                    $dates['check_out'] = date('Y-m-d', strtotime($dates['check_in'] . " +{$nights} days"));
                     $dates['explicit']  = true;
                 }
             }
