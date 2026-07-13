@@ -351,6 +351,23 @@
                                 <textarea name="special_request" class="bk-textarea"
                                           placeholder="Phòng tầng cao, cần cũi trẻ em, đến muộn...">{{ old('special_request') }}</textarea>
                             </div>
+
+                            {{-- Voucher --}}
+                            <div class="bk-field full">
+                                <label class="bk-label">Mã voucher <span style="font-weight:400;text-transform:none;font-size:.78rem;color:#94a3b8">(tuỳ chọn)</span></label>
+                                <div style="display:flex;gap:8px;align-items:flex-start;">
+                                    <input type="text" id="bk-voucher-input" class="bk-input"
+                                           placeholder="Nhập mã voucher" style="text-transform:uppercase;flex:1;"
+                                           oninput="this.value=this.value.toUpperCase()">
+                                    <button type="button" id="bk-voucher-btn"
+                                            onclick="applyVoucher()"
+                                            style="flex-shrink:0;padding:12px 18px;background:#1a1a1a;color:#fff;border:none;border-radius:10px;font-size:.88rem;font-weight:600;cursor:pointer;white-space:nowrap;">
+                                        Áp dụng
+                                    </button>
+                                </div>
+                                <div id="bk-voucher-msg" style="margin-top:7px;font-size:.82rem;display:none;"></div>
+                                <input type="hidden" name="voucher_code" id="bk-voucher-code">
+                            </div>
                         </div>
                     </div>
 
@@ -376,9 +393,9 @@
                             Chúng tôi sẽ liên hệ xác nhận qua email/SĐT trong vòng 15 phút.
                         </p>
 
-                        <button type="submit" class="bk-submit">
+                        <button type="submit" class="bk-submit" id="bk-submit-btn">
                             <i class="fa-solid fa-lock"></i>
-                            Xác nhận đặt phòng — {{ number_format($totalPrice, 0, ',', '.') }}₫
+                            Xác nhận đặt phòng — <span id="bk-submit-price">{{ number_format($totalPrice, 0, ',', '.') }}₫</span>
                         </button>
                         <p class="bk-secure">
                             <i class="fa-solid fa-shield-halved"></i>
@@ -422,7 +439,11 @@
                         {{-- Price breakdown --}}
                         <div class="bk-price-row">
                             <span>{{ number_format($room->price, 0, ',', '.') }}₫ × {{ $nights }} đêm</span>
-                            <span>{{ number_format($totalPrice, 0, ',', '.') }}₫</span>
+                            <span id="bk-base-price-display">{{ number_format($totalPrice, 0, ',', '.') }}₫</span>
+                        </div>
+                        <div class="bk-price-row" id="bk-discount-row" style="display:none;">
+                            <span id="bk-discount-label" style="color:#16a34a;">Voucher giảm giá</span>
+                            <span id="bk-discount-display" style="color:#16a34a;font-weight:600;"></span>
                         </div>
                         <div class="bk-price-row">
                             <span>Phí dịch vụ</span>
@@ -430,13 +451,13 @@
                         </div>
                         <div class="bk-price-total">
                             <span>Tổng cộng</span>
-                            <span>{{ number_format($totalPrice, 0, ',', '.') }}₫</span>
+                            <span id="bk-total-display">{{ number_format($totalPrice, 0, ',', '.') }}₫</span>
                         </div>
 
                         {{-- Deposit --}}
                         <div class="bk-deposit-box">
                             <div class="bk-deposit-label">Tổng thanh toán</div>
-                            <div class="bk-deposit-amount">{{ number_format($totalPrice, 0, ',', '.') }}₫</div>
+                            <div class="bk-deposit-amount" id="bk-deposit-amount-display">{{ number_format($totalPrice, 0, ',', '.') }}₫</div>
                             <div class="bk-deposit-note">Bao gồm thuế và phí dịch vụ</div>
                         </div>
                     </div>
@@ -538,6 +559,88 @@ document.getElementById('bk-confirm-ok')?.addEventListener('click', function() {
 // Đóng confirm khi click ra ngoài
 bkConfirm?.addEventListener('click', function(e) {
     if (e.target === this) this.style.display = 'none';
+});
+
+// ── Voucher ──────────────────────────────────────────────
+const BASE_PRICE = {{ $totalPrice }};
+let appliedDiscount = 0;
+
+function formatVND(n) {
+    return new Intl.NumberFormat('vi-VN').format(n) + '₫';
+}
+
+function updatePriceDisplay(discount) {
+    const finalPrice = Math.max(0, BASE_PRICE - discount);
+    document.getElementById('bk-total-display').textContent       = formatVND(finalPrice);
+    document.getElementById('bk-deposit-amount-display').textContent = formatVND(finalPrice);
+    document.getElementById('bk-submit-price').textContent        = formatVND(finalPrice);
+}
+
+async function applyVoucher() {
+    const code  = document.getElementById('bk-voucher-input').value.trim().toUpperCase();
+    const msgEl = document.getElementById('bk-voucher-msg');
+    const btn   = document.getElementById('bk-voucher-btn');
+
+    if (!code) {
+        msgEl.style.display = 'block';
+        msgEl.style.color   = '#dc2626';
+        msgEl.textContent   = 'Vui lòng nhập mã voucher.';
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Đang kiểm tra...';
+
+    try {
+        const res = await fetch('{{ route("voucher.validate") }}?code=' + encodeURIComponent(code) + '&amount=' + BASE_PRICE);
+        const data = await res.json();
+
+        msgEl.style.display = 'block';
+
+        if (data.success) {
+            appliedDiscount = data.discount;
+
+            // Show discount row
+            document.getElementById('bk-discount-row').style.display = '';
+            document.getElementById('bk-discount-label').textContent = data.label;
+            document.getElementById('bk-discount-display').textContent = '−' + formatVND(data.discount);
+
+            // Update all price displays
+            updatePriceDisplay(appliedDiscount);
+
+            // Set hidden input
+            document.getElementById('bk-voucher-code').value = data.code;
+
+            msgEl.style.color = '#16a34a';
+            msgEl.textContent = '✓ ' + data.message;
+            btn.textContent   = 'Đã áp dụng';
+            btn.style.background = '#16a34a';
+        } else {
+            msgEl.style.color = '#dc2626';
+            msgEl.textContent = data.message;
+            btn.disabled = false;
+            btn.textContent = 'Áp dụng';
+
+            // Reset if was previously applied
+            if (appliedDiscount > 0) {
+                appliedDiscount = 0;
+                document.getElementById('bk-discount-row').style.display = 'none';
+                document.getElementById('bk-voucher-code').value = '';
+                updatePriceDisplay(0);
+            }
+        }
+    } catch(e) {
+        msgEl.style.display = 'block';
+        msgEl.style.color   = '#dc2626';
+        msgEl.textContent   = 'Có lỗi xảy ra, vui lòng thử lại.';
+        btn.disabled = false;
+        btn.textContent = 'Áp dụng';
+    }
+}
+
+// Allow Enter key in voucher input
+document.getElementById('bk-voucher-input')?.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); applyVoucher(); }
 });
 </script>
 @endpush

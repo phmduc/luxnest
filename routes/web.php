@@ -41,6 +41,7 @@ Route::post('/chat/send', [ChatController::class, 'send'])->name('chat.send');
 Route::get('/dat-phong', [BookingController::class, 'show'])->name('booking.show');
 Route::post('/dat-phong', [BookingController::class, 'store'])->name('booking.store');
 Route::get('/dat-phong/thanh-cong', [BookingController::class, 'success'])->name('booking.success');
+Route::get('/api/voucher/validate', [BookingController::class, 'validateVoucher'])->name('voucher.validate');
 
 Route::get('/api/availability', function (\Illuminate\Http\Request $req, GoHostService $gohost) {
     $slug    = $req->get('slug');
