@@ -2408,26 +2408,33 @@
         }
 
         tbody.innerHTML = items.map(v => {
-            const discount  = v.discount_type === 'percent' ? v.discount_value + '%' : Number(v.discount_value).toLocaleString('vi-VN') + ' VNĐ';
-            const maxUses   = v.max_uses ? v.max_uses : '∞';
-            const expires   = v.expires_at ? new Date(v.expires_at).toLocaleDateString('vi-VN') : '—';
-            const expired   = v.expires_at && new Date(v.expires_at) < new Date();
-            const statusBg  = v.is_active && !expired ? '#DCFCE7' : '#FEE2E2';
-            const statusCol = v.is_active && !expired ? '#166534' : '#991B1B';
-            const statusTxt = expired ? 'Hết hạn' : (v.is_active ? 'Hoạt động' : 'Tắt');
+            const discount    = v.discount_type === 'percent'
+                ? `<span class="discount-value">${v.discount_value}%</span>`
+                : `<span class="discount-value">${Number(v.discount_value).toLocaleString('vi-VN')}đ</span>`;
+            const maxUses     = v.max_uses ? v.max_uses : '∞';
+            const usedRatio   = v.max_uses ? `<span style="color:${v.used_count >= v.max_uses ? '#dc2626' : 'inherit'}">${v.used_count}</span> / ${maxUses}` : `${v.used_count} / ∞`;
+            const expires     = v.expires_at ? new Date(v.expires_at).toLocaleDateString('vi-VN') : '—';
+            const expired     = v.expires_at && new Date(v.expires_at) < new Date();
+            const statusClass = expired ? 'status-voucher-expired' : (v.is_active ? 'status-voucher-active' : 'status-voucher-inactive');
+            const statusTxt   = expired ? 'Hết hạn' : (v.is_active ? 'Hoạt động' : 'Tắt');
+            const statusIcon  = expired ? 'ph-clock' : (v.is_active ? 'ph-check-circle' : 'ph-x-circle');
             return `<tr>
-                <td><code style="background:var(--bg);padding:3px 8px;border-radius:6px;font-weight:700;">${v.code}</code></td>
-                <td>${v.name}</td>
-                <td style="font-weight:600;color:var(--orange);">${discount}</td>
-                <td>${v.used_count} / ${maxUses}</td>
-                <td>${expires}</td>
+                <td><span class="voucher-code-chip">${v.code}</span></td>
+                <td><span style="font-weight:500;">${v.name}</span>${v.notes ? `<span class="table-customer">${v.notes}</span>` : ''}</td>
+                <td>${discount}${v.min_order_amount ? `<span class="table-customer">tối thiểu ${Number(v.min_order_amount).toLocaleString('vi-VN')}đ</span>` : ''}</td>
+                <td>${usedRatio}</td>
+                <td style="white-space:nowrap;">${expires}${expired ? '<span class="table-customer" style="color:#dc2626;">Đã hết hạn</span>' : ''}</td>
                 <td>
-                    <button class="status-toggle-btn" style="background:${statusBg};color:${statusCol};border:none;border-radius:20px;padding:3px 12px;font-size:0.78rem;font-weight:600;cursor:pointer;"
-                            onclick="AdminApp.toggleVoucherStatus(${v.id}, this)">${statusTxt}</button>
+                    <button class="status-toggle-btn ${statusClass}"
+                            onclick="AdminApp.toggleVoucherStatus(${v.id}, this)">
+                        <i class="ph ${statusIcon}"></i>${statusTxt}
+                    </button>
                 </td>
-                <td style="display:flex;gap:6px;justify-content:flex-end;">
-                    <button class="btn-view" onclick="AdminApp.openVoucherModal(${JSON.stringify(v).replace(/"/g,'&quot;')})">Sửa</button>
-                    <button class="btn-view" style="color:#dc2626;" onclick="AdminApp.deleteVoucher(${v.id},'${v.code}')">Xóa</button>
+                <td>
+                    <div style="display:flex;gap:6px;justify-content:flex-end;">
+                        <button class="btn-view" onclick="AdminApp.openVoucherModal(${JSON.stringify(v).replace(/"/g,'&quot;')})"><i class="ph ph-pencil-simple"></i> Sửa</button>
+                        <button class="btn-view btn-danger" onclick="AdminApp.deleteVoucher(${v.id},'${v.code}')"><i class="ph ph-trash"></i></button>
+                    </div>
                 </td>
             </tr>`;
         }).join('');
@@ -2511,9 +2518,8 @@
         const res = await apiFetch(ADMIN_BASE + '/vouchers/' + id + '/status', { method: 'PATCH', body: '{}' });
         if (res.success) {
             const active = res.is_active;
-            btn.textContent = active ? 'Hoạt động' : 'Tắt';
-            btn.style.background = active ? '#DCFCE7' : '#FEE2E2';
-            btn.style.color      = active ? '#166534' : '#991B1B';
+            btn.className = 'status-toggle-btn ' + (active ? 'status-voucher-active' : 'status-voucher-inactive');
+            btn.innerHTML = `<i class="ph ${active ? 'ph-check-circle' : 'ph-x-circle'}"></i>${active ? 'Hoạt động' : 'Tắt'}`;
         }
     }
 
@@ -2551,36 +2557,55 @@
         }
 
         const statusMap = {
-            draft:     ['#F1F5F9', '#475569', 'Nháp'],
-            scheduled: ['#FEF3C7', '#92400E', 'Đã xếp lịch'],
-            sending:   ['#DBEAFE', '#1E40AF', 'Đang gửi'],
-            sent:      ['#DCFCE7', '#166534', 'Đã gửi'],
+            draft:     ['status-draft',     'Nháp',          'ph-pencil'],
+            scheduled: ['status-scheduled', 'Đã xếp lịch',   'ph-calendar-check'],
+            sending:   ['status-sending',   'Đang gửi',      'ph-paper-plane-tilt'],
+            sent:      ['status-sent',      'Đã gửi',        'ph-check-circle'],
         };
 
         tbody.innerHTML = items.map(c => {
-            const cond     = c.conditions || {};
-            const condTxt  = `Checkout ${cond.checkout_max_days||60}–${cond.checkout_min_days||30} ngày trước` +
-                             (cond.min_bookings > 1 ? ` · ≥${cond.min_bookings} booking` : '') +
-                             (cond.min_spent    > 0 ? ` · ≥${Number(cond.min_spent).toLocaleString('vi-VN')}đ` : '');
-            const vMode    = c.voucher_mode === 'auto' ? `Tự tạo ${c.auto_discount_percent}%`
-                           : c.voucher_mode === 'fixed' ? (c.voucher ? c.voucher.code : 'Voucher')
-                           : 'Không';
-            const [sbg, scol, stxt] = statusMap[c.status] || statusMap.draft;
-            const sendDate = c.send_at ? new Date(c.send_at).toLocaleString('vi-VN') : (c.sent_at ? new Date(c.sent_at).toLocaleString('vi-VN') : '—');
+            const cond    = c.conditions || {};
+            const minDays = cond.checkout_min_days ?? 30;
+            const maxDays = cond.checkout_max_days ?? 60;
+            const condParts = [`Trả phòng ${minDays}–${maxDays} ngày trước`];
+            if (cond.min_bookings > 1) condParts.push(`≥${cond.min_bookings} booking`);
+            if (cond.min_spent > 0)    condParts.push(`≥${Number(cond.min_spent).toLocaleString('vi-VN')}đ`);
+
+            const vMode = c.voucher_mode === 'auto'
+                ? `<span class="voucher-code-chip" style="background:#FFF3E8;color:var(--orange);border-color:#fed7aa;">Tự tạo ${c.auto_discount_percent}%</span>`
+                : c.voucher_mode === 'fixed'
+                    ? `<span class="voucher-code-chip">${c.voucher ? c.voucher.code : 'Voucher'}</span>`
+                    : `<span style="color:var(--text-muted);font-size:0.8rem;">—</span>`;
+
+            const [sClass, sTxt, sIcon] = statusMap[c.status] || statusMap.draft;
+            const sendDate = c.send_at
+                ? new Date(c.send_at).toLocaleString('vi-VN', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})
+                : (c.sent_at ? new Date(c.sent_at).toLocaleString('vi-VN', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—');
+
+            const eligibleBadge = c.eligible_count != null
+                ? `<span class="eligible-badge">${c.eligible_count}</span>`
+                : `<span style="color:var(--text-muted);">—</span>`;
+
+            const actionBtn = (c.status !== 'sent' && c.status !== 'sending')
+                ? `<button class="btn-send-now" onclick="AdminApp.sendCampaignNow(${c.id},'${c.name.replace(/'/g,"\\'")}',this)"><i class="ph ph-paper-plane-tilt"></i> Gửi ngay</button>`
+                : `<span class="table-customer"><i class="ph ph-check-circle" style="color:#16a34a;"></i> ${c.sent_count ?? 0} đã gửi</span>`;
 
             return `<tr>
-                <td style="font-weight:600;">${c.name}</td>
-                <td style="font-size:0.78rem;color:var(--text-muted);">${condTxt}</td>
-                <td style="font-size:0.82rem;">${vMode}</td>
-                <td style="font-weight:600;color:var(--orange);">${c.eligible_count ?? '—'}</td>
-                <td><span style="background:${sbg};color:${scol};border-radius:20px;padding:3px 10px;font-size:0.78rem;font-weight:600;">${stxt}</span></td>
-                <td style="font-size:0.78rem;color:var(--text-muted);">${sendDate}</td>
-                <td style="display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap;">
-                    ${c.status !== 'sent' && c.status !== 'sending'
-                        ? `<button class="btn-view" style="background:#16a34a;color:#fff;border:none;" onclick="AdminApp.sendCampaignNow(${c.id},'${c.name.replace(/'/g,"\\'")}',this)">Gửi ngay</button>`
-                        : `<span style="font-size:0.75rem;color:var(--text-muted);">${c.sent_count} đã gửi</span>`}
-                    <button class="btn-view" onclick="AdminApp.openCampaignModal(${JSON.stringify(c).replace(/"/g,'&quot;')})">Sửa</button>
-                    <button class="btn-view" style="color:#dc2626;" onclick="AdminApp.deleteCampaign(${c.id},'${c.name.replace(/'/g,"\\'")}')">Xóa</button>
+                <td>
+                    <span style="font-weight:600;">${c.name}</span>
+                    ${c.subject ? `<span class="table-customer">${c.subject}</span>` : ''}
+                </td>
+                <td style="font-size:0.78rem;color:var(--text-muted);">${condParts.join('<br>')}</td>
+                <td>${vMode}</td>
+                <td style="text-align:center;">${eligibleBadge}</td>
+                <td><span class="status-badge ${sClass}"><i class="ph ${sIcon}"></i>${sTxt}</span></td>
+                <td style="font-size:0.78rem;white-space:nowrap;">${sendDate}</td>
+                <td>
+                    <div style="display:flex;gap:6px;justify-content:flex-end;align-items:center;flex-wrap:wrap;">
+                        ${actionBtn}
+                        <button class="btn-view" onclick="AdminApp.openCampaignModal(${JSON.stringify(c).replace(/"/g,'&quot;')})"><i class="ph ph-pencil-simple"></i> Sửa</button>
+                        <button class="btn-view btn-danger" onclick="AdminApp.deleteCampaign(${c.id},'${c.name.replace(/'/g,"\\'")}')"><i class="ph ph-trash"></i></button>
+                    </div>
                 </td>
             </tr>`;
         }).join('');

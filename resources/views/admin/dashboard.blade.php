@@ -381,8 +381,8 @@
                            oninput="AdminApp.loadVouchers(1)">
                 </div>
 
-                <div class="table-wrap">
-                    <table class="data-table">
+                <div class="data-table-container">
+                    <table class="manager-table">
                         <thead>
                             <tr>
                                 <th>Mã voucher</th>
@@ -395,7 +395,7 @@
                             </tr>
                         </thead>
                         <tbody id="voucher-list-body">
-                            <tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:32px;">Đang tải...</td></tr>
+                            <tr><td colspan="7" class="table-empty-state">Đang tải...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -413,21 +413,21 @@
                     </button>
                 </div>
 
-                <div class="table-wrap">
-                    <table class="data-table">
+                <div class="data-table-container">
+                    <table class="manager-table">
                         <thead>
                             <tr>
                                 <th>Tên chiến dịch</th>
                                 <th>Điều kiện</th>
                                 <th>Voucher</th>
-                                <th>Đủ điều kiện</th>
+                                <th style="text-align:center;">Đủ điều kiện</th>
                                 <th>Trạng thái</th>
                                 <th>Ngày gửi</th>
                                 <th></th>
                             </tr>
                         </thead>
                         <tbody id="campaign-list-body">
-                            <tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:32px;">Đang tải...</td></tr>
+                            <tr><td colspan="7" class="table-empty-state">Đang tải...</td></tr>
                         </tbody>
                     </table>
                 </div>
