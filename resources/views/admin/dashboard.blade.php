@@ -1640,14 +1640,24 @@
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:16px;">
                 <h3 style="margin:0 0 4px;font-size:0.78rem;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);">Điều kiện nhận email</h3>
                 <p style="margin:0 0 14px;font-size:0.76rem;color:var(--text-muted);">Chỉ gửi đến khách thỏa tất cả điều kiện bên dưới. Mỗi email chỉ nhận 1 lần.</p>
+                {{-- Visual range indicator --}}
+                <div style="background:var(--bg);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:0.8rem;color:var(--text-muted);display:flex;align-items:center;gap:6px;">
+                    <i class="ph ph-calendar-blank" style="color:var(--orange);"></i>
+                    Gửi đến khách đã trả phòng trong khoảng
+                    <strong id="cond-range-preview" style="color:var(--text);">30 – 60 ngày trước</strong>
+                </div>
                 <div class="mf-grid-2">
                     <div class="mf-group">
-                        <label class="mf-label">Checkout từ <span style="font-weight:400;">(ngày trước)</span></label>
-                        <input type="number" id="cond-max-days" class="mf-input" min="1" value="60" placeholder="60">
+                        <label class="mf-label">Trả phòng ít nhất <span style="font-weight:400;">(ngày trước)</span></label>
+                        <input type="number" id="cond-min-days" class="mf-input" min="0" value="30" placeholder="30"
+                               oninput="AdminApp.updateCondRangePreview()">
+                        <p style="margin:4px 0 0;font-size:0.7rem;color:var(--text-muted);">VD: 30 → đã trả phòng ít nhất 30 ngày trước</p>
                     </div>
                     <div class="mf-group">
-                        <label class="mf-label">Checkout đến <span style="font-weight:400;">(ngày trước)</span></label>
-                        <input type="number" id="cond-min-days" class="mf-input" min="0" value="30" placeholder="30">
+                        <label class="mf-label">Trả phòng không quá <span style="font-weight:400;">(ngày trước)</span></label>
+                        <input type="number" id="cond-max-days" class="mf-input" min="1" value="60" placeholder="60"
+                               oninput="AdminApp.updateCondRangePreview()">
+                        <p style="margin:4px 0 0;font-size:0.7rem;color:var(--text-muted);">VD: 60 → không quá 60 ngày trước</p>
                     </div>
                     <div class="mf-group">
                         <label class="mf-label">Số booking tối thiểu</label>

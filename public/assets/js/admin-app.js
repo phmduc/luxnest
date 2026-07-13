@@ -2232,6 +2232,7 @@
         previewEligible,
         onCampaignVoucherModeChange,
         onCampaignStatusChange,
+        updateCondRangePreview,
     };
 
     // ---------------------------------------------------------------
@@ -2598,10 +2599,11 @@
         document.getElementById('campaign-status').value  = campaign?.status === 'scheduled' ? 'scheduled' : 'draft';
 
         const cond = campaign?.conditions || {};
-        document.getElementById('cond-max-days').value      = cond.checkout_max_days ?? 60;
         document.getElementById('cond-min-days').value      = cond.checkout_min_days ?? 30;
+        document.getElementById('cond-max-days').value      = cond.checkout_max_days ?? 60;
         document.getElementById('cond-min-bookings').value  = cond.min_bookings ?? 1;
         document.getElementById('cond-min-spent').value     = cond.min_spent || '';
+        updateCondRangePreview();
 
         if (campaign?.send_at) {
             document.getElementById('campaign-send-at').value = campaign.send_at.replace(' ', 'T').slice(0, 16);
@@ -2620,6 +2622,13 @@
         onCampaignVoucherModeChange();
         onCampaignStatusChange();
         document.getElementById('campaign-modal').style.display = 'flex';
+    }
+
+    function updateCondRangePreview() {
+        const minDays = parseInt(document.getElementById('cond-min-days')?.value) || 0;
+        const maxDays = parseInt(document.getElementById('cond-max-days')?.value) || 0;
+        const el = document.getElementById('cond-range-preview');
+        if (el) el.textContent = minDays + ' – ' + maxDays + ' ngày trước';
     }
 
     function onCampaignVoucherModeChange() {
