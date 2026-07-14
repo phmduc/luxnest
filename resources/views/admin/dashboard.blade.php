@@ -1874,15 +1874,7 @@
                     <i class="ph ph-arrow-down"></i> Xem thêm
                 </button>
             </div>
-
-        {{-- Multi-select footer --}}
-        <div id="media-lib-footer" style="display:none;flex-shrink:0;align-items:center;justify-content:space-between;padding:10px 0 0;border-top:1px solid var(--border);margin-top:6px;">
-            <span id="media-lib-select-count" style="font-size:.84rem;color:var(--text-muted);"></span>
-            <button id="media-lib-confirm-btn" type="button" class="btn-primary" disabled
-                    onclick="AdminApp.confirmMediaLibSelection()"
-                    style="padding:7px 20px;font-size:.875rem;">Thêm ảnh</button>
-        </div>
-        </div>
+        </div>{{-- end #media-lib-section-library --}}
 
         {{-- Upload section --}}
         <div id="media-lib-section-upload" style="display:none;flex:1;overflow-y:auto;padding-top:16px;">
@@ -1906,6 +1898,14 @@
                 </div>
                 <span style="font-size:.8rem;color:var(--text-muted);">Đang tải lên...</span>
             </div>
+        </div>{{-- end #media-lib-section-upload --}}
+
+        {{-- Multi-select confirm footer (direct child of modal-content) --}}
+        <div id="media-lib-footer" style="display:none;flex-shrink:0;align-items:center;justify-content:space-between;padding:12px 0 0;border-top:1px solid var(--border);margin-top:8px;">
+            <span id="media-lib-select-count" style="font-size:.84rem;color:var(--text-muted);"></span>
+            <button id="media-lib-confirm-btn" type="button" class="btn-primary" disabled
+                    onclick="AdminApp.confirmMediaLibSelection()"
+                    style="padding:7px 20px;font-size:.875rem;">Thêm ảnh</button>
         </div>
     </div>
 </div>

@@ -2264,16 +2264,17 @@
             const item = document.createElement('div');
             item.className = 'media-lib-item';
             item.innerHTML = `<img src="${img.url}" alt="" loading="lazy"><span class="media-lib-item__check"><i class="ph ph-check"></i></span>`;
-            if (mediaLib.multiSelect) {
-                item.onclick = () => {
+            item.onclick = () => {
+                if (mediaLib.multiSelect) {
                     const si = mediaLib.selected.findIndex(s => s.path === img.path);
                     if (si >= 0) { mediaLib.selected.splice(si, 1); item.classList.remove('selected'); }
                     else         { mediaLib.selected.push({ url: img.url, path: img.path }); item.classList.add('selected'); }
                     updateMediaLibSelectBtn();
-                };
-            } else {
-                item.onclick = () => { mediaLibraryOnPick?.(img.url, img.path); closeMediaLibrary(); };
-            }
+                } else {
+                    mediaLibraryOnPick?.(img.url, img.path);
+                    closeMediaLibrary();
+                }
+            };
             grid.appendChild(item);
         });
         mediaLib.hasMore = !!res.has_more;
