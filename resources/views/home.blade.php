@@ -330,6 +330,32 @@
 @endif
 
 {{-- ============================================================
+     MASONRY GALLERY
+     ============================================================ --}}
+@if($galleryPhotos->isNotEmpty())
+<section class="lx-section lx-section--gallery">
+    <div class="lx-container">
+        <div class="lx-masonry" id="lx-gallery">
+            @foreach($galleryPhotos as $photo)
+            <a class="lx-masonry__item"
+               href="{{ asset('storage/'.$photo->image) }}"
+               data-fancybox="lx-gallery"
+               data-caption="{{ e($photo->caption ?? '') }}">
+                <img src="{{ asset('storage/'.$photo->image) }}"
+                     alt="{{ e($photo->caption ?? 'LuxNest gallery') }}"
+                     loading="lazy">
+                @if($photo->caption)
+                <span class="lx-masonry__caption">{{ $photo->caption }}</span>
+                @endif
+                <span class="lx-masonry__zoom"><i class="ph ph-magnifying-glass-plus"></i></span>
+            </a>
+            @endforeach
+        </div>
+    </div>
+</section>
+@endif
+
+{{-- ============================================================
      WHY LUXNEST
      ============================================================ --}}
 <section class="lx-section">
@@ -357,36 +383,6 @@
         </div>
     </div>
 </section>
-
-{{-- ============================================================
-     MASONRY GALLERY
-     ============================================================ --}}
-@if($galleryPhotos->isNotEmpty())
-<section class="lx-section lx-section--gallery">
-    <div class="lx-container">
-        <div class="gallery-eyebrow">
-            <span>Khoảnh khắc tại LuxNest</span>
-        </div>
-        <h2 class="lx-section__title lx-section__title--center">Không gian sống <em class="gallery-title-em">đáng nhớ</em></h2>
-        <div class="lx-masonry" id="lx-gallery">
-            @foreach($galleryPhotos as $photo)
-            <a class="lx-masonry__item"
-               href="{{ asset('storage/'.$photo->image) }}"
-               data-fancybox="lx-gallery"
-               data-caption="{{ e($photo->caption ?? '') }}">
-                <img src="{{ asset('storage/'.$photo->image) }}"
-                     alt="{{ e($photo->caption ?? 'LuxNest gallery') }}"
-                     loading="lazy">
-                @if($photo->caption)
-                <span class="lx-masonry__caption">{{ $photo->caption }}</span>
-                @endif
-                <span class="lx-masonry__zoom"><i class="ph ph-magnifying-glass-plus"></i></span>
-            </a>
-            @endforeach
-        </div>
-    </div>
-</section>
-@endif
 
 @endsection
 
