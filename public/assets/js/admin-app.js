@@ -709,8 +709,7 @@
 
     function openSlotPicker(idx) {
         activeSlot = idx;
-        const fi = document.getElementById('room-file-input');
-        if (fi) { fi.value = ''; fi.click(); }
+        openMediaLibrary((url) => { gallerySlots[idx] = url; renderSlot(idx); }, ADMIN_BASE + '/rooms/upload-image');
     }
 
     document.getElementById('room-file-input')?.addEventListener('change', function () {
@@ -1199,8 +1198,7 @@
 
     function openVillaSlotPicker(idx) {
         activeVillaSlot = idx;
-        const fi = document.getElementById('villa-file-input');
-        if (fi) { fi.value = ''; fi.click(); }
+        openMediaLibrary((url) => { villaGallerySlots[idx] = url; renderVillaSlot(idx); }, ADMIN_BASE + '/villas/upload-image');
     }
 
     document.getElementById('villa-file-input')?.addEventListener('change', function () {
@@ -1788,8 +1786,7 @@
     }
 
     function openNewsImagePicker() {
-        const fi = document.getElementById('news-file-input');
-        if (fi) { fi.value = ''; fi.click(); }
+        openMediaLibrary((url) => { document.getElementById('news-image').value = url; renderNewsImage(url); }, ADMIN_BASE + '/news/upload-image');
     }
 
     function clearNewsImage() {
@@ -2169,70 +2166,168 @@
     // Media Library (admin only)
     // ---------------------------------------------------------------
 
+    const mediaLib = { folder: 'all', page: 1, loading: false, hasMore: false, search: '', searchTimer: null, uploadUrl: '' };
     let mediaLibraryOnPick = null;
+    let mediaLibSentinelObserver = null;
 
-    function openMediaLibrary(onPick) {
+    function openMediaLibrary(onPick, uploadUrl) {
         if (typeof USER_ROLE !== 'undefined' && USER_ROLE !== 'admin') return;
         mediaLibraryOnPick = onPick;
-        document.getElementById('media-library-modal').style.display = 'flex';
-        // reset to "all" tab
+        mediaLib.uploadUrl = uploadUrl || '';
+        const modal = document.getElementById('media-library-modal');
+        if (!modal) return;
+        modal.style.display = 'flex';
+        switchMediaLibTab('library');
         document.querySelectorAll('.media-lib-tab').forEach(t => t.classList.toggle('active', t.dataset.folder === 'all'));
-        loadMediaLibraryImages('all');
+        const searchEl = document.getElementById('media-lib-search');
+        if (searchEl) searchEl.value = '';
+        mediaLib.search = '';
+        loadMediaLibraryImages('all', null, true);
     }
 
     function closeMediaLibrary() {
-        document.getElementById('media-library-modal').style.display = 'none';
+        const modal = document.getElementById('media-library-modal');
+        if (modal) modal.style.display = 'none';
         mediaLibraryOnPick = null;
+        if (mediaLibSentinelObserver) { mediaLibSentinelObserver.disconnect(); mediaLibSentinelObserver = null; }
     }
 
-    async function loadMediaLibraryImages(folder = 'all', tabEl = null) {
+    function switchMediaLibTab(tab) {
+        const libSection    = document.getElementById('media-lib-section-library');
+        const uploadSection = document.getElementById('media-lib-section-upload');
+        const libBtn        = document.getElementById('media-lib-tab-library');
+        const uploadBtn     = document.getElementById('media-lib-tab-upload');
+        if (!libSection || !uploadSection) return;
+        if (tab === 'library') {
+            libSection.style.display = 'flex';
+            libSection.style.flexDirection = 'column';
+            uploadSection.style.display = 'none';
+            libBtn?.classList.add('active'); uploadBtn?.classList.remove('active');
+        } else {
+            libSection.style.display = 'none';
+            uploadSection.style.display = 'block';
+            uploadBtn?.classList.add('active'); libBtn?.classList.remove('active');
+            const progress = document.getElementById('media-lib-upload-progress');
+            const bar = document.getElementById('media-lib-upload-bar');
+            if (progress) progress.style.display = 'none';
+            if (bar) bar.style.width = '0%';
+        }
+    }
+
+    async function loadMediaLibraryImages(folder, tabEl, reset) {
+        if (reset === undefined) reset = true;
+        if (mediaLib.loading) return;
+        if (!reset && !mediaLib.hasMore) return;
         if (tabEl) {
             document.querySelectorAll('.media-lib-tab').forEach(t => t.classList.remove('active'));
             tabEl.classList.add('active');
         }
+        if (reset) {
+            mediaLib.folder = folder || 'all';
+            mediaLib.page   = 1;
+            mediaLib.hasMore = false;
+            if (mediaLibSentinelObserver) { mediaLibSentinelObserver.disconnect(); mediaLibSentinelObserver = null; }
+        }
         const grid = document.getElementById('media-lib-grid');
         if (!grid) return;
-        grid.innerHTML = '<div class="table-empty-state"><i class="ph ph-spinner"></i><span>Đang tải...</span></div>';
-
-        const res = await apiFetch(ADMIN_BASE + '/media-library?folder=' + folder);
-        if (!res?.success || !res.data.length) {
-            grid.innerHTML = '<div class="table-empty-state"><i class="ph ph-image"></i><span>Chưa có ảnh nào trong thư mục này.</span></div>';
+        if (reset) {
+            grid.innerHTML = '<div class="table-empty-state" style="grid-column:1/-1;"><i class="ph ph-spinner"></i><span>Đang tải...</span></div>';
+        }
+        mediaLib.loading = true;
+        const url = ADMIN_BASE + '/media-library?folder=' + encodeURIComponent(mediaLib.folder)
+                  + '&page=' + mediaLib.page
+                  + '&search=' + encodeURIComponent(mediaLib.search);
+        const res = await apiFetch(url);
+        mediaLib.loading = false;
+        if (!res?.success) return;
+        if (reset) grid.innerHTML = '';
+        if (!res.data.length && mediaLib.page === 1) {
+            grid.innerHTML = '<div class="table-empty-state" style="grid-column:1/-1;"><i class="ph ph-image"></i><span>Chưa có ảnh nào.</span></div>';
             return;
         }
-
-        grid.innerHTML = '';
         res.data.forEach(img => {
             const item = document.createElement('div');
             item.className = 'media-lib-item';
             item.innerHTML = `<img src="${img.url}" alt="" loading="lazy"><span class="media-lib-item__check"><i class="ph ph-check"></i></span>`;
-            item.onclick = () => {
-                mediaLibraryOnPick?.(img.url, img.path);
-                closeMediaLibrary();
-            };
+            item.onclick = () => { mediaLibraryOnPick?.(img.url, img.path); closeMediaLibrary(); };
             grid.appendChild(item);
         });
+        mediaLib.hasMore = !!res.has_more;
+        if (mediaLib.hasMore) {
+            mediaLib.page++;
+            observeMediaLibSentinel();
+        }
+    }
+
+    function handleMediaLibSearch() {
+        clearTimeout(mediaLib.searchTimer);
+        mediaLib.searchTimer = setTimeout(() => {
+            mediaLib.search = (document.getElementById('media-lib-search')?.value || '').trim();
+            loadMediaLibraryImages(mediaLib.folder, null, true);
+        }, 400);
+    }
+
+    function observeMediaLibSentinel() {
+        const sentinel = document.getElementById('media-lib-sentinel');
+        if (!sentinel) return;
+        if (mediaLibSentinelObserver) mediaLibSentinelObserver.disconnect();
+        mediaLibSentinelObserver = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting && mediaLib.hasMore && !mediaLib.loading) {
+                loadMediaLibraryImages(mediaLib.folder, null, false);
+            }
+        }, { threshold: 0.1 });
+        mediaLibSentinelObserver.observe(sentinel);
+    }
+
+    async function handleMediaLibUpload(file) {
+        if (!file || !mediaLib.uploadUrl) return;
+        const progress = document.getElementById('media-lib-upload-progress');
+        const bar      = document.getElementById('media-lib-upload-bar');
+        if (progress) progress.style.display = 'block';
+        if (bar)      bar.style.width = '30%';
+        const fd = new FormData();
+        fd.append('image', file);
+        try {
+            const res = await apiFetch(mediaLib.uploadUrl, { method: 'POST', body: fd });
+            if (bar) bar.style.width = '100%';
+            if (res?.success && res.url) {
+                mediaLibraryOnPick?.(res.url, res.path);
+                closeMediaLibrary();
+            } else {
+                alert(res?.message || 'Upload thất bại');
+            }
+        } catch (e) {
+            alert('Upload thất bại');
+        } finally {
+            setTimeout(() => {
+                if (progress) progress.style.display = 'none';
+                if (bar) bar.style.width = '0%';
+            }, 600);
+        }
+    }
+
+    function handleMediaLibDrop(e) {
+        e.preventDefault();
+        document.getElementById('media-lib-upload-zone')?.classList.remove('dragging');
+        const file = e.dataTransfer?.files[0];
+        if (file && file.type.startsWith('image/')) handleMediaLibUpload(file);
+    }
+
+    function handleMediaLibFileSelect(file) {
+        if (file && file.type.startsWith('image/')) handleMediaLibUpload(file);
     }
 
     // Context-specific openers
     function openMediaLibraryForRoomSlot(idx) {
-        openMediaLibrary((url) => {
-            gallerySlots[idx] = url;
-            renderSlot(idx);
-        });
+        openMediaLibrary((url) => { gallerySlots[idx] = url; renderSlot(idx); }, ADMIN_BASE + '/rooms/upload-image');
     }
 
     function openMediaLibraryForVillaSlot(idx) {
-        openMediaLibrary((url) => {
-            villaGallerySlots[idx] = url;
-            renderVillaSlot(idx);
-        });
+        openMediaLibrary((url) => { villaGallerySlots[idx] = url; renderVillaSlot(idx); }, ADMIN_BASE + '/villas/upload-image');
     }
 
     function openMediaLibraryForNews() {
-        openMediaLibrary((url) => {
-            document.getElementById('news-image').value = url;
-            renderNewsImage(url);
-        });
+        openMediaLibrary((url) => { document.getElementById('news-image').value = url; renderNewsImage(url); }, ADMIN_BASE + '/news/upload-image');
     }
 
     function openMediaLibraryForGalleryPhoto() {
@@ -2244,7 +2339,7 @@
             if (preview)     { preview.src = url; preview.style.display = 'block'; }
             if (placeholder) placeholder.style.display = 'none';
             if (clearBtn)    clearBtn.style.display = 'block';
-        });
+        }, ADMIN_BASE + '/gallery-photos/upload-image');
     }
 
     document.getElementById('media-lib-close')?.addEventListener('click', closeMediaLibrary);
@@ -2338,7 +2433,7 @@
     }
 
     function triggerGalleryPhotoUpload() {
-        document.getElementById('gallery-photo-file-input').click();
+        openMediaLibraryForGalleryPhoto();
     }
 
     async function handleGalleryPhotoFile(file) {
@@ -2529,7 +2624,12 @@
         onManualEmailsChange,
         // Media Library
         openMediaLibrary,
+        closeMediaLibrary,
+        switchMediaLibTab,
         loadMediaLibraryImages,
+        handleMediaLibSearch,
+        handleMediaLibDrop,
+        handleMediaLibFileSelect,
         openMediaLibraryForRoomSlot,
         openMediaLibraryForVillaSlot,
         openMediaLibraryForNews,

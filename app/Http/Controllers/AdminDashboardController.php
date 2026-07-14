@@ -1128,22 +1128,36 @@ class AdminDashboardController extends Controller
     public function getMediaLibrary(Request $request): JsonResponse
     {
         $folder  = $request->get('folder', 'all');
+        $page    = max(1, (int) $request->get('page', 1));
+        $perPage = 16;
+        $search  = strtolower(trim($request->get('search', '')));
         $allowed = ['rooms', 'villas', 'gallery', 'news', 'settings'];
         $exts    = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
 
         $folders = ($folder !== 'all' && in_array($folder, $allowed)) ? [$folder] : $allowed;
 
-        $files = collect($folders)
+        $all = collect($folders)
             ->flatMap(fn($f) => Storage::disk('public')->allFiles($f))
             ->filter(fn($p) => in_array(strtolower(pathinfo($p, PATHINFO_EXTENSION)), $exts))
+            ->filter(fn($p) => !$search || str_contains(strtolower(basename($p)), $search))
+            ->reverse()
+            ->values()
             ->map(fn($path) => [
                 'path'   => $path,
                 'url'    => asset('storage/' . $path),
                 'folder' => explode('/', $path)[0],
-            ])
-            ->values();
+            ]);
 
-        return response()->json(['success' => true, 'data' => $files]);
+        $total   = $all->count();
+        $items   = $all->slice(($page - 1) * $perPage, $perPage)->values();
+
+        return response()->json([
+            'success'  => true,
+            'data'     => $items,
+            'page'     => $page,
+            'has_more' => ($page * $perPage) < $total,
+            'total'    => $total,
+        ]);
     }
 
     public function uploadGalleryImage(Request $request): JsonResponse

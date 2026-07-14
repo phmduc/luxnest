@@ -1059,10 +1059,6 @@
                                         style="background:#fff; border:none; border-radius:7px; padding:5px 9px; cursor:pointer; font-size:0.78rem; font-weight:600;">
                                     <i class="ph ph-pencil"></i>
                                 </button>
-                                <button type="button" onclick="event.stopPropagation(); AdminApp.openMediaLibraryForRoomSlot(0)"
-                                        style="background:#6366f1; color:#fff; border:none; border-radius:7px; padding:5px 9px; cursor:pointer; font-size:0.78rem;" title="Chọn từ thư viện">
-                                    <i class="ph ph-images"></i>
-                                </button>
                                 <button type="button" onclick="event.stopPropagation(); AdminApp.clearSlot(0)"
                                         style="background:#EF4444; color:#fff; border:none; border-radius:7px; padding:5px 9px; cursor:pointer; font-size:0.78rem;">
                                     <i class="ph ph-trash"></i>
@@ -1092,10 +1088,6 @@
                                 <button type="button" onclick="event.stopPropagation(); AdminApp.openSlotPicker({{ $s }})"
                                         style="background:#fff; border:none; border-radius:6px; padding:4px 7px; cursor:pointer; font-size:0.72rem; font-weight:600;">
                                     <i class="ph ph-pencil"></i>
-                                </button>
-                                <button type="button" onclick="event.stopPropagation(); AdminApp.openMediaLibraryForRoomSlot({{ $s }})"
-                                        style="background:#6366f1; color:#fff; border:none; border-radius:6px; padding:4px 7px; cursor:pointer; font-size:0.72rem;" title="Thư viện">
-                                    <i class="ph ph-images"></i>
                                 </button>
                                 <button type="button" onclick="event.stopPropagation(); AdminApp.clearSlot({{ $s }})"
                                         style="background:#EF4444; color:#fff; border:none; border-radius:6px; padding:4px 7px; cursor:pointer; font-size:0.72rem;">
@@ -1269,10 +1261,6 @@
                                         style="background:#fff; border:none; border-radius:7px; padding:5px 9px; cursor:pointer; font-size:0.78rem; font-weight:600;">
                                     <i class="ph ph-pencil"></i>
                                 </button>
-                                <button type="button" onclick="event.stopPropagation(); AdminApp.openMediaLibraryForVillaSlot(0)"
-                                        style="background:#6366f1; color:#fff; border:none; border-radius:7px; padding:5px 9px; cursor:pointer; font-size:0.78rem;" title="Chọn từ thư viện">
-                                    <i class="ph ph-images"></i>
-                                </button>
                                 <button type="button" onclick="event.stopPropagation(); AdminApp.clearVillaSlot(0)"
                                         style="background:#EF4444; color:#fff; border:none; border-radius:7px; padding:5px 9px; cursor:pointer; font-size:0.78rem;">
                                     <i class="ph ph-trash"></i>
@@ -1302,10 +1290,6 @@
                                 <button type="button" onclick="event.stopPropagation(); AdminApp.openVillaSlotPicker({{ $s }})"
                                         style="background:#fff; border:none; border-radius:6px; padding:4px 7px; cursor:pointer; font-size:0.72rem; font-weight:600;">
                                     <i class="ph ph-pencil"></i>
-                                </button>
-                                <button type="button" onclick="event.stopPropagation(); AdminApp.openMediaLibraryForVillaSlot({{ $s }})"
-                                        style="background:#6366f1; color:#fff; border:none; border-radius:6px; padding:4px 7px; cursor:pointer; font-size:0.72rem;" title="Thư viện">
-                                    <i class="ph ph-images"></i>
                                 </button>
                                 <button type="button" onclick="event.stopPropagation(); AdminApp.clearVillaSlot({{ $s }})"
                                         style="background:#EF4444; color:#fff; border:none; border-radius:6px; padding:4px 7px; cursor:pointer; font-size:0.72rem;">
@@ -1449,10 +1433,6 @@
                             <button type="button" onclick="event.stopPropagation(); AdminApp.openNewsImagePicker()"
                                     style="background:#fff; border:none; border-radius:7px; padding:5px 9px; cursor:pointer; font-size:0.78rem; font-weight:600;">
                                 <i class="ph ph-pencil"></i>
-                            </button>
-                            <button type="button" onclick="event.stopPropagation(); AdminApp.openMediaLibraryForNews()"
-                                    style="background:#6366f1; color:#fff; border:none; border-radius:7px; padding:5px 9px; cursor:pointer; font-size:0.78rem;" title="Chọn từ thư viện">
-                                <i class="ph ph-images"></i>
                             </button>
                             <button type="button" onclick="event.stopPropagation(); AdminApp.clearNewsImage()"
                                     style="background:#EF4444; color:#fff; border:none; border-radius:7px; padding:5px 9px; cursor:pointer; font-size:0.78rem;">
@@ -1823,17 +1803,7 @@
                 <div id="gallery-photo-slot" class="gallery-photo-upload-slot" onclick="AdminApp.triggerGalleryPhotoUpload()" ondragover="event.preventDefault()" ondrop="AdminApp.handleGalleryPhotoDrop(event)">
                     <div class="gallery-photo-upload-placeholder" id="gallery-photo-placeholder">
                         <i class="ph ph-image" style="font-size:2rem;color:var(--text-muted);"></i>
-                        <span style="font-size:.82rem;color:var(--text-muted);">Kéo ảnh vào đây hoặc</span>
-                        <div style="display:flex;gap:8px;margin-top:6px;">
-                            <button type="button" onclick="event.stopPropagation(); AdminApp.triggerGalleryPhotoUpload()"
-                                    style="padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:.75rem;cursor:pointer;font-family:inherit;">
-                                <i class="ph ph-upload-simple"></i> Upload mới
-                            </button>
-                            <button type="button" onclick="event.stopPropagation(); AdminApp.openMediaLibraryForGalleryPhoto()"
-                                    style="padding:5px 12px;border-radius:6px;border:none;background:#6366f1;color:#fff;font-size:.75rem;cursor:pointer;font-family:inherit;">
-                                <i class="ph ph-images"></i> Thư viện
-                            </button>
-                        </div>
+                        <span style="font-size:.82rem;color:var(--text-muted);">Kéo ảnh vào đây hoặc click để chọn</span>
                         <span style="font-size:.72rem;color:var(--text-muted);opacity:.6;margin-top:4px;">JPG / PNG / WebP · tối đa 4 MB</span>
                     </div>
                     <img id="gallery-photo-preview" src="" alt="" style="display:none;width:100%;border-radius:8px;object-fit:cover;max-height:220px;">
@@ -1874,29 +1844,64 @@
 {{-- ═══════════════════ MEDIA LIBRARY MODAL (admin only) ═══════════════════ --}}
 @if(auth()->user()->isAdmin())
 <div id="media-library-modal" class="modal-overlay" style="display:none;">
-    <div class="modal-content" style="max-width:860px; max-height:88vh; display:flex; flex-direction:column;">
+    <div class="modal-content" style="max-width:880px; max-height:92vh; display:flex; flex-direction:column;">
         <button class="modal-close" id="media-lib-close"><i class="ph ph-x"></i></button>
-        <h2 style="font-size:1.2rem;font-weight:800;color:var(--text);margin-bottom:16px;flex-shrink:0;">
-            <i class="ph ph-images" style="color:var(--orange);"></i> Thư Viện Ảnh
+        <h2 style="font-size:1.2rem;font-weight:800;color:var(--text);margin-bottom:14px;flex-shrink:0;">
+            <i class="ph ph-images" style="color:var(--orange);"></i> Chọn Ảnh
         </h2>
 
-        {{-- Folder tabs --}}
-        <div class="media-lib-tabs" style="flex-shrink:0;">
-            <button class="media-lib-tab active" data-folder="all"   onclick="AdminApp.loadMediaLibraryImages('all',   this)">Tất cả</button>
-            <button class="media-lib-tab"         data-folder="rooms"  onclick="AdminApp.loadMediaLibraryImages('rooms',  this)">Phòng</button>
-            <button class="media-lib-tab"         data-folder="villas" onclick="AdminApp.loadMediaLibraryImages('villas', this)">Villa</button>
-            <button class="media-lib-tab"         data-folder="gallery" onclick="AdminApp.loadMediaLibraryImages('gallery',this)">Gallery</button>
-            <button class="media-lib-tab"         data-folder="news"   onclick="AdminApp.loadMediaLibraryImages('news',   this)">Tin tức</button>
+        {{-- Main tabs: Thư viện / Upload mới --}}
+        <div class="media-lib-main-tabs">
+            <button class="media-lib-main-tab active" id="media-lib-tab-library" onclick="AdminApp.switchMediaLibTab('library')">
+                <i class="ph ph-images"></i> Thư viện
+            </button>
+            <button class="media-lib-main-tab" id="media-lib-tab-upload" onclick="AdminApp.switchMediaLibTab('upload')">
+                <i class="ph ph-upload-simple"></i> Upload mới
+            </button>
         </div>
 
-        {{-- Image grid --}}
-        <div id="media-lib-grid" class="media-lib-grid" style="flex:1;overflow-y:auto;margin-top:14px;">
-            <div class="table-empty-state"><i class="ph ph-images"></i><span>Đang tải...</span></div>
+        {{-- Library section --}}
+        <div id="media-lib-section-library" style="display:flex;flex-direction:column;flex:1;min-height:0;">
+            <div style="flex-shrink:0;padding-top:12px;">
+                <input type="text" id="media-lib-search" class="media-lib-search-input"
+                       placeholder="Tìm kiếm tên file..." oninput="AdminApp.handleMediaLibSearch()">
+            </div>
+            <div class="media-lib-tabs" style="flex-shrink:0;margin-top:10px;">
+                <button class="media-lib-tab active" data-folder="all"     onclick="AdminApp.loadMediaLibraryImages('all',     this, true)">Tất cả</button>
+                <button class="media-lib-tab"         data-folder="rooms"   onclick="AdminApp.loadMediaLibraryImages('rooms',   this, true)">Phòng</button>
+                <button class="media-lib-tab"         data-folder="villas"  onclick="AdminApp.loadMediaLibraryImages('villas',  this, true)">Villa</button>
+                <button class="media-lib-tab"         data-folder="gallery" onclick="AdminApp.loadMediaLibraryImages('gallery', this, true)">Gallery</button>
+                <button class="media-lib-tab"         data-folder="news"    onclick="AdminApp.loadMediaLibraryImages('news',    this, true)">Tin tức</button>
+            </div>
+            <div id="media-lib-grid" class="media-lib-grid" style="flex:1;overflow-y:auto;margin-top:12px;align-content:start;">
+                <div class="table-empty-state"><i class="ph ph-images"></i><span>Đang tải...</span></div>
+            </div>
+            <div id="media-lib-sentinel" style="height:1px;flex-shrink:0;"></div>
         </div>
 
-        <p style="flex-shrink:0;font-size:.74rem;color:var(--text-muted);margin-top:12px;">
-            Click vào ảnh để chọn · Ảnh chưa có hãy upload trực tiếp vào ô tương ứng.
-        </p>
+        {{-- Upload section --}}
+        <div id="media-lib-section-upload" style="display:none;flex:1;overflow-y:auto;padding-top:16px;">
+            <div class="media-lib-upload-zone" id="media-lib-upload-zone"
+                 ondragover="event.preventDefault(); this.classList.add('dragging')"
+                 ondragleave="this.classList.remove('dragging')"
+                 ondrop="AdminApp.handleMediaLibDrop(event)">
+                <i class="ph ph-upload-simple" style="font-size:2.5rem;color:var(--text-muted);"></i>
+                <p style="margin:10px 0 4px;font-weight:700;font-size:1rem;color:var(--text);">Kéo ảnh vào đây</p>
+                <p style="font-size:.82rem;color:var(--text-muted);margin:0 0 16px;">hoặc</p>
+                <label class="btn-primary" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px;padding:8px 20px;">
+                    <i class="ph ph-folder-open"></i> Chọn file
+                    <input type="file" id="media-lib-file-input" accept="image/*" style="display:none;"
+                           onchange="AdminApp.handleMediaLibFileSelect(this.files[0]); this.value=''">
+                </label>
+                <p style="font-size:.72rem;color:var(--text-muted);margin-top:14px;opacity:.7;">JPG · PNG · WebP · GIF · tối đa 8 MB</p>
+            </div>
+            <div id="media-lib-upload-progress" style="display:none;margin-top:20px;text-align:center;">
+                <div style="height:4px;background:var(--border);border-radius:3px;overflow:hidden;max-width:320px;margin:0 auto 10px;">
+                    <div id="media-lib-upload-bar" style="height:100%;background:var(--orange);width:0%;transition:width .3s;"></div>
+                </div>
+                <span style="font-size:.8rem;color:var(--text-muted);">Đang tải lên...</span>
+            </div>
+        </div>
     </div>
 </div>
 @endif
