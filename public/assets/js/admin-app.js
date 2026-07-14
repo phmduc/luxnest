@@ -2166,6 +2166,93 @@
     });
 
     // ---------------------------------------------------------------
+    // Media Library (admin only)
+    // ---------------------------------------------------------------
+
+    let mediaLibraryOnPick = null;
+
+    function openMediaLibrary(onPick) {
+        if (typeof USER_ROLE !== 'undefined' && USER_ROLE !== 'admin') return;
+        mediaLibraryOnPick = onPick;
+        document.getElementById('media-library-modal').style.display = 'flex';
+        // reset to "all" tab
+        document.querySelectorAll('.media-lib-tab').forEach(t => t.classList.toggle('active', t.dataset.folder === 'all'));
+        loadMediaLibraryImages('all');
+    }
+
+    function closeMediaLibrary() {
+        document.getElementById('media-library-modal').style.display = 'none';
+        mediaLibraryOnPick = null;
+    }
+
+    async function loadMediaLibraryImages(folder = 'all', tabEl = null) {
+        if (tabEl) {
+            document.querySelectorAll('.media-lib-tab').forEach(t => t.classList.remove('active'));
+            tabEl.classList.add('active');
+        }
+        const grid = document.getElementById('media-lib-grid');
+        if (!grid) return;
+        grid.innerHTML = '<div class="table-empty-state"><i class="ph ph-spinner"></i><span>Đang tải...</span></div>';
+
+        const res = await apiFetch(ADMIN_BASE + '/media-library?folder=' + folder);
+        if (!res?.success || !res.data.length) {
+            grid.innerHTML = '<div class="table-empty-state"><i class="ph ph-image"></i><span>Chưa có ảnh nào trong thư mục này.</span></div>';
+            return;
+        }
+
+        grid.innerHTML = '';
+        res.data.forEach(img => {
+            const item = document.createElement('div');
+            item.className = 'media-lib-item';
+            item.innerHTML = `<img src="${img.url}" alt="" loading="lazy"><span class="media-lib-item__check"><i class="ph ph-check"></i></span>`;
+            item.onclick = () => {
+                mediaLibraryOnPick?.(img.url, img.path);
+                closeMediaLibrary();
+            };
+            grid.appendChild(item);
+        });
+    }
+
+    // Context-specific openers
+    function openMediaLibraryForRoomSlot(idx) {
+        openMediaLibrary((url) => {
+            gallerySlots[idx] = url;
+            renderSlot(idx);
+        });
+    }
+
+    function openMediaLibraryForVillaSlot(idx) {
+        openMediaLibrary((url) => {
+            villaGallerySlots[idx] = url;
+            renderVillaSlot(idx);
+        });
+    }
+
+    function openMediaLibraryForNews() {
+        openMediaLibrary((url) => {
+            document.getElementById('news-image').value = url;
+            renderNewsImage(url);
+        });
+    }
+
+    function openMediaLibraryForGalleryPhoto() {
+        openMediaLibrary((url, path) => {
+            galleryPhotoImagePath = path;
+            const preview     = document.getElementById('gallery-photo-preview');
+            const placeholder = document.getElementById('gallery-photo-placeholder');
+            const clearBtn    = document.getElementById('gallery-photo-clear');
+            if (preview)     { preview.src = url; preview.style.display = 'block'; }
+            if (placeholder) placeholder.style.display = 'none';
+            if (clearBtn)    clearBtn.style.display = 'block';
+        });
+    }
+
+    document.getElementById('media-lib-close')?.addEventListener('click', closeMediaLibrary);
+    document.getElementById('media-library-modal')?.addEventListener('click', function (e) {
+        if (e.target === this) closeMediaLibrary();
+    });
+
+    // ---------------------------------------------------------------
     // Gallery Photos (admin only)
     // ---------------------------------------------------------------
 
@@ -2440,6 +2527,13 @@
         filterCampaignMembers,
         updateMemberSelectedCount,
         onManualEmailsChange,
+        // Media Library
+        openMediaLibrary,
+        loadMediaLibraryImages,
+        openMediaLibraryForRoomSlot,
+        openMediaLibraryForVillaSlot,
+        openMediaLibraryForNews,
+        openMediaLibraryForGalleryPhoto,
         // Gallery Photos
         loadGalleryPhotos,
         openGalleryPhotoModal,

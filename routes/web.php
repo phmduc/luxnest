@@ -177,6 +177,9 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,employee'])->group(funct
         Route::get('/campaigns/{id}/eligible', [AdminDashboardController::class, 'getCampaignEligible']);
         Route::post('/campaigns/{id}/send-now', [AdminDashboardController::class, 'sendCampaignNow']);
 
+        // Media library
+        Route::get('/media-library', [AdminDashboardController::class, 'getMediaLibrary']);
+
         // Gallery photos
         Route::get('/gallery-photos', [AdminDashboardController::class, 'getGalleryPhotos']);
         Route::post('/gallery-photos', [AdminDashboardController::class, 'storeGalleryPhoto']);

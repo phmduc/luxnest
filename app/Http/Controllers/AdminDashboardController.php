@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 
 class AdminDashboardController extends Controller
 {
@@ -1122,6 +1123,27 @@ class AdminDashboardController extends Controller
         $photo = GalleryPhoto::findOrFail($id);
         $photo->update(['is_active' => !$photo->is_active]);
         return response()->json(['success' => true, 'is_active' => $photo->is_active]);
+    }
+
+    public function getMediaLibrary(Request $request): JsonResponse
+    {
+        $folder  = $request->get('folder', 'all');
+        $allowed = ['rooms', 'villas', 'gallery', 'news', 'settings'];
+        $exts    = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+
+        $folders = ($folder !== 'all' && in_array($folder, $allowed)) ? [$folder] : $allowed;
+
+        $files = collect($folders)
+            ->flatMap(fn($f) => Storage::disk('public')->allFiles($f))
+            ->filter(fn($p) => in_array(strtolower(pathinfo($p, PATHINFO_EXTENSION)), $exts))
+            ->map(fn($path) => [
+                'path'   => $path,
+                'url'    => asset('storage/' . $path),
+                'folder' => explode('/', $path)[0],
+            ])
+            ->values();
+
+        return response()->json(['success' => true, 'data' => $files]);
     }
 
     public function uploadGalleryImage(Request $request): JsonResponse

@@ -1524,3 +1524,63 @@ textarea.mf-input { resize: vertical; }
     padding: 24px;
     pointer-events: none;
 }
+
+/* ══════════════════════════════════════════════════════════════
+   MEDIA LIBRARY
+   ══════════════════════════════════════════════════════════════ */
+
+.media-lib-tabs {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.media-lib-tab {
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    font-size: .78rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background .12s, color .12s, border-color .12s;
+}
+.media-lib-tab:hover { background: var(--bg); color: var(--text); }
+.media-lib-tab.active { background: var(--orange); color: #fff; border-color: var(--orange); }
+
+.media-lib-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 8px;
+}
+
+.media-lib-item {
+    aspect-ratio: 1;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    border: 2px solid transparent;
+    transition: border-color .15s, transform .15s;
+    background: var(--bg2);
+}
+.media-lib-item:hover { border-color: var(--orange); transform: scale(1.03); }
+.media-lib-item img {
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
+}
+.media-lib-item__check {
+    display: none;
+    position: absolute;
+    top: 5px; right: 5px;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--orange);
+    color: #fff;
+    align-items: center;
+    justify-content: center;
+    font-size: .75rem;
+}
+.media-lib-item:hover .media-lib-item__check { display: flex; }
