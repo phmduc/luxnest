@@ -6,6 +6,7 @@ use App\Console\Commands\SendRemarketingEmails;
 use App\Mail\RemarketingVoucher;
 use App\Models\EmailCampaign;
 use App\Models\Faq;
+use App\Models\GalleryPhoto;
 use App\Models\News;
 use App\Models\PageContent;
 use App\Models\Room;
@@ -1070,5 +1071,68 @@ class AdminDashboardController extends Controller
         }
 
         return $data;
+    }
+
+    // ---------------------------------------------------------------
+    // Gallery Photos CRUD (admin only)
+    // ---------------------------------------------------------------
+
+    public function getGalleryPhotos(): JsonResponse
+    {
+        $photos = GalleryPhoto::orderBy('sort_order')->orderBy('id')->get();
+        return response()->json(['success' => true, 'data' => $photos]);
+    }
+
+    public function storeGalleryPhoto(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'image'      => 'required|string|max:1000',
+            'caption'    => 'nullable|string|max:255',
+            'sort_order' => 'nullable|integer|min:0',
+            'is_active'  => 'boolean',
+        ]);
+        $data['sort_order'] = $data['sort_order'] ?? 0;
+        $data['is_active']  = $data['is_active']  ?? true;
+
+        $photo = GalleryPhoto::create($data);
+        return response()->json(['success' => true, 'photo' => $photo]);
+    }
+
+    public function updateGalleryPhoto(Request $request, int $id): JsonResponse
+    {
+        $photo = GalleryPhoto::findOrFail($id);
+        $data  = $request->validate([
+            'image'      => 'nullable|string|max:1000',
+            'caption'    => 'nullable|string|max:255',
+            'sort_order' => 'nullable|integer|min:0',
+            'is_active'  => 'boolean',
+        ]);
+        $photo->update($data);
+        return response()->json(['success' => true, 'photo' => $photo]);
+    }
+
+    public function destroyGalleryPhoto(int $id): JsonResponse
+    {
+        GalleryPhoto::findOrFail($id)->delete();
+        return response()->json(['success' => true]);
+    }
+
+    public function toggleGalleryPhotoStatus(int $id): JsonResponse
+    {
+        $photo = GalleryPhoto::findOrFail($id);
+        $photo->update(['is_active' => !$photo->is_active]);
+        return response()->json(['success' => true, 'is_active' => $photo->is_active]);
+    }
+
+    public function uploadGalleryImage(Request $request): JsonResponse
+    {
+        $request->validate([
+            'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:4096',
+        ]);
+
+        $path = $request->file('image')->store('gallery', 'public');
+        $url  = asset('storage/' . $path);
+
+        return response()->json(['success' => true, 'url' => $url, 'path' => $path]);
     }
 }

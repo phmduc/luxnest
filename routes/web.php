@@ -176,6 +176,14 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,employee'])->group(funct
         Route::delete('/campaigns/{id}', [AdminDashboardController::class, 'destroyCampaign']);
         Route::get('/campaigns/{id}/eligible', [AdminDashboardController::class, 'getCampaignEligible']);
         Route::post('/campaigns/{id}/send-now', [AdminDashboardController::class, 'sendCampaignNow']);
+
+        // Gallery photos
+        Route::get('/gallery-photos', [AdminDashboardController::class, 'getGalleryPhotos']);
+        Route::post('/gallery-photos', [AdminDashboardController::class, 'storeGalleryPhoto']);
+        Route::put('/gallery-photos/{id}', [AdminDashboardController::class, 'updateGalleryPhoto']);
+        Route::delete('/gallery-photos/{id}', [AdminDashboardController::class, 'destroyGalleryPhoto']);
+        Route::patch('/gallery-photos/{id}/status', [AdminDashboardController::class, 'toggleGalleryPhotoStatus']);
+        Route::post('/gallery-photos/upload-image', [AdminDashboardController::class, 'uploadGalleryImage']);
     });
 });
 

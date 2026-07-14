@@ -105,6 +105,7 @@
         if (tab === 'remarketing')    loadRemarketing();
         if (tab === 'voucher')        loadVouchers();
         if (tab === 'emailmarketing') { loadCampaigns(); loadVoucherOptions(); }
+        if (tab === 'gallery')        loadGalleryPhotos();
     }
 
     document.querySelectorAll('.nav-item[data-tab]').forEach(el => {
@@ -2165,6 +2166,207 @@
     });
 
     // ---------------------------------------------------------------
+    // Gallery Photos (admin only)
+    // ---------------------------------------------------------------
+
+    let galleryPhotoUploading = false;
+    let galleryPhotoImagePath = '';
+
+    async function loadGalleryPhotos() {
+        if (typeof USER_ROLE !== 'undefined' && USER_ROLE !== 'admin') return;
+        const grid = document.getElementById('gallery-admin-grid');
+        if (!grid) return;
+        grid.innerHTML = '<div class="table-empty-state"><i class="ph ph-spinner"></i><span>Đang tải...</span></div>';
+
+        const res = await apiFetch(ADMIN_BASE + '/gallery-photos');
+        if (!res?.success) {
+            grid.innerHTML = '<div class="table-empty-state"><i class="ph ph-warning"></i><span>Không tải được ảnh.</span></div>';
+            return;
+        }
+        const photos = res.data;
+        if (!photos.length) {
+            grid.innerHTML = '<div class="table-empty-state"><i class="ph ph-images"></i><span>Chưa có ảnh nào. Nhấn "Thêm ảnh" để bắt đầu.</span></div>';
+            return;
+        }
+
+        grid.innerHTML = '';
+        photos.forEach(photo => {
+            const imgUrl  = photo.image.startsWith('http') ? photo.image : `/storage/${photo.image}`;
+            const inactive = !photo.is_active ? 'gallery-admin-card--inactive' : '';
+            const card = document.createElement('div');
+            card.className = `gallery-admin-card ${inactive}`;
+            card.innerHTML = `
+                <img class="gallery-admin-card__thumb" src="${imgUrl}" alt="${photo.caption || ''}">
+                <div class="gallery-admin-card__body">
+                    <div class="gallery-admin-card__caption">${photo.caption || '<em style="opacity:.5">Không có chú thích</em>'}</div>
+                    <div class="gallery-admin-card__meta">Thứ tự: ${photo.sort_order} · ${photo.is_active ? '<span style="color:#16a34a">Hiện</span>' : '<span style="color:#dc2626">Ẩn</span>'}</div>
+                    <div class="gallery-admin-card__actions">
+                        <button onclick="AdminApp.openGalleryPhotoModal(${JSON.stringify(photo).replace(/"/g, '&quot;')})">✏ Sửa</button>
+                        <button onclick="AdminApp.toggleGalleryPhotoStatus(${photo.id}, this)">${photo.is_active ? '👁 Ẩn' : '👁 Hiện'}</button>
+                        <button class="del" onclick="AdminApp.deleteGalleryPhoto(${photo.id})">🗑</button>
+                    </div>
+                </div>`;
+            grid.appendChild(card);
+        });
+
+        const addCard = document.createElement('div');
+        addCard.className = 'gallery-admin-card--add';
+        addCard.innerHTML = '<i class="ph ph-plus" style="font-size:1.6rem;"></i><span>Thêm ảnh</span>';
+        addCard.onclick = () => openGalleryPhotoModal();
+        grid.appendChild(addCard);
+    }
+
+    function openGalleryPhotoModal(photo = null) {
+        if (typeof USER_ROLE !== 'undefined' && USER_ROLE !== 'admin') return;
+        document.getElementById('gallery-photo-modal-title').textContent = photo ? 'Chỉnh sửa ảnh' : 'Thêm ảnh gallery';
+        document.getElementById('gallery-photo-id').value = photo?.id ?? '';
+        document.getElementById('gallery-photo-caption').value = photo?.caption ?? '';
+        document.getElementById('gallery-photo-sort').value = photo?.sort_order ?? 0;
+        document.getElementById('gallery-photo-active').checked = photo ? !!photo.is_active : true;
+        document.getElementById('gallery-photo-form-error').style.display = 'none';
+        document.getElementById('gallery-photo-file-input').value = '';
+        galleryPhotoImagePath = photo?.image ?? '';
+
+        const preview     = document.getElementById('gallery-photo-preview');
+        const placeholder = document.getElementById('gallery-photo-placeholder');
+        const clearBtn    = document.getElementById('gallery-photo-clear');
+        if (photo?.image) {
+            const url = photo.image.startsWith('http') ? photo.image : `/storage/${photo.image}`;
+            preview.src = url;
+            preview.style.display = 'block';
+            placeholder.style.display = 'none';
+            clearBtn.style.display = 'block';
+        } else {
+            preview.src = '';
+            preview.style.display = 'none';
+            placeholder.style.display = 'flex';
+            clearBtn.style.display = 'none';
+        }
+
+        document.getElementById('gallery-photo-modal').style.display = 'flex';
+    }
+
+    function closeGalleryPhotoModal() {
+        document.getElementById('gallery-photo-modal').style.display = 'none';
+    }
+
+    function triggerGalleryPhotoUpload() {
+        document.getElementById('gallery-photo-file-input').click();
+    }
+
+    async function handleGalleryPhotoFile(file) {
+        if (!file || galleryPhotoUploading) return;
+        galleryPhotoUploading = true;
+
+        const placeholder = document.getElementById('gallery-photo-placeholder');
+        const preview     = document.getElementById('gallery-photo-preview');
+        const clearBtn    = document.getElementById('gallery-photo-clear');
+        placeholder.innerHTML = '<i class="ph ph-spinner" style="font-size:1.5rem;color:var(--orange);"></i><span style="font-size:.8rem;color:var(--text-muted);">Đang tải lên...</span>';
+
+        const fd = new FormData();
+        fd.append('image', file);
+        fd.append('_token', csrf());
+
+        try {
+            const res = await fetch(ADMIN_BASE + '/gallery-photos/upload-image', {
+                method: 'POST',
+                headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf() },
+                body: fd,
+            }).then(r => r.json());
+
+            if (res.success) {
+                galleryPhotoImagePath = res.path;
+                preview.src = res.url;
+                preview.style.display = 'block';
+                placeholder.style.display = 'none';
+                clearBtn.style.display = 'block';
+            } else {
+                placeholder.innerHTML = '<i class="ph ph-warning" style="color:#dc2626;"></i><span style="font-size:.78rem;color:#dc2626;">Tải lên thất bại</span>';
+            }
+        } catch {
+            placeholder.innerHTML = '<i class="ph ph-warning" style="color:#dc2626;"></i><span style="font-size:.78rem;color:#dc2626;">Lỗi kết nối</span>';
+        } finally {
+            galleryPhotoUploading = false;
+        }
+    }
+
+    function handleGalleryPhotoDrop(e) {
+        e.preventDefault();
+        const file = e.dataTransfer?.files?.[0];
+        if (file && file.type.startsWith('image/')) handleGalleryPhotoFile(file);
+    }
+
+    function clearGalleryPhoto() {
+        galleryPhotoImagePath = '';
+        const preview     = document.getElementById('gallery-photo-preview');
+        const placeholder = document.getElementById('gallery-photo-placeholder');
+        const clearBtn    = document.getElementById('gallery-photo-clear');
+        if (preview)  { preview.style.display = 'none'; preview.src = ''; }
+        if (clearBtn) clearBtn.style.display = 'none';
+        if (placeholder) {
+            placeholder.style.display = 'flex';
+            placeholder.innerHTML = `
+                <i class="ph ph-image" style="font-size:2rem;color:var(--text-muted);"></i>
+                <span style="font-size:.82rem;color:var(--text-muted);">Click hoặc kéo ảnh vào đây</span>
+                <span style="font-size:.75rem;color:var(--text-muted);opacity:.7;">JPG / PNG / WebP · tối đa 4 MB</span>`;
+        }
+        const fi = document.getElementById('gallery-photo-file-input');
+        if (fi) fi.value = '';
+    }
+
+    async function deleteGalleryPhoto(id) {
+        if (!confirm('Xóa ảnh này?')) return;
+        const res = await apiFetch(`${ADMIN_BASE}/gallery-photos/${id}`, 'DELETE');
+        if (res?.success) loadGalleryPhotos();
+    }
+
+    async function toggleGalleryPhotoStatus(id, btn) {
+        const res = await apiFetch(`${ADMIN_BASE}/gallery-photos/${id}/status`, 'PATCH');
+        if (res?.success) {
+            btn.textContent = res.is_active ? '👁 Ẩn' : '👁 Hiện';
+            loadGalleryPhotos();
+        }
+    }
+
+    document.getElementById('gallery-photo-form')?.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const errEl = document.getElementById('gallery-photo-form-error');
+        errEl.style.display = 'none';
+
+        if (!galleryPhotoImagePath) {
+            errEl.textContent = 'Vui lòng chọn ảnh.';
+            errEl.style.display = 'block';
+            return;
+        }
+
+        const id = document.getElementById('gallery-photo-id').value;
+        const payload = {
+            image:      galleryPhotoImagePath,
+            caption:    document.getElementById('gallery-photo-caption').value.trim() || null,
+            sort_order: parseInt(document.getElementById('gallery-photo-sort').value) || 0,
+            is_active:  document.getElementById('gallery-photo-active').checked,
+        };
+
+        const url    = id ? `${ADMIN_BASE}/gallery-photos/${id}` : `${ADMIN_BASE}/gallery-photos`;
+        const method = id ? 'PUT' : 'POST';
+        const res    = await apiFetch(url, method, payload);
+
+        if (res?.success) {
+            closeGalleryPhotoModal();
+            loadGalleryPhotos();
+        } else {
+            errEl.textContent = res?.message || 'Có lỗi xảy ra.';
+            errEl.style.display = 'block';
+        }
+    });
+
+    document.getElementById('gallery-photo-modal-close')?.addEventListener('click', closeGalleryPhotoModal);
+    document.getElementById('gallery-photo-modal-cancel')?.addEventListener('click', closeGalleryPhotoModal);
+    document.getElementById('gallery-photo-modal')?.addEventListener('click', function (e) {
+        if (e.target === this) closeGalleryPhotoModal();
+    });
+
+    // ---------------------------------------------------------------
     // Public API
     // ---------------------------------------------------------------
 
@@ -2238,6 +2440,15 @@
         filterCampaignMembers,
         updateMemberSelectedCount,
         onManualEmailsChange,
+        // Gallery Photos
+        loadGalleryPhotos,
+        openGalleryPhotoModal,
+        deleteGalleryPhoto,
+        toggleGalleryPhotoStatus,
+        triggerGalleryPhotoUpload,
+        handleGalleryPhotoDrop,
+        handleGalleryPhotoFile,
+        clearGalleryPhoto,
     };
 
     // ---------------------------------------------------------------

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\GalleryPhoto;
 use App\Models\Room;
 use Illuminate\Http\Request;
 
@@ -29,6 +30,11 @@ class HomeController extends Controller
             ->groupBy('branch')
             ->map(fn($rooms) => $rooms->first());
 
-        return view('home', compact('featuredRooms', 'trendingRooms', 'branchRooms'));
+        $galleryPhotos = GalleryPhoto::where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
+
+        return view('home', compact('featuredRooms', 'trendingRooms', 'branchRooms', 'galleryPhotos'));
     }
 }

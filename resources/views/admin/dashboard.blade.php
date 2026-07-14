@@ -48,6 +48,9 @@
             <a href="#" class="nav-item" data-tab="emailmarketing">
                 <i class="ph ph-envelope-simple-open"></i> Email Marketing
             </a>
+            <a href="#" class="nav-item" data-tab="gallery">
+                <i class="ph ph-images"></i> Gallery
+            </a>
             <a href="#" class="nav-item" data-tab="settings">
                 <i class="ph ph-storefront"></i> Thông Tin Doanh Nghiệp
             </a>
@@ -811,6 +814,28 @@
                             </button>
                         </div>
                     </form>
+                </div>
+
+            </section>
+
+            {{-- ═══════════════════ GALLERY TAB ═══════════════════ --}}
+            <section id="tab-gallery" class="dashboard-tab">
+
+                <div class="section-toolbar">
+                    <h2>Gallery Ảnh</h2>
+                    <div class="toolbar-actions">
+                        <button class="btn-primary" onclick="AdminApp.openGalleryPhotoModal()">
+                            <i class="ph ph-plus"></i> Thêm ảnh
+                        </button>
+                    </div>
+                </div>
+
+                <p style="font-size:.83rem;color:var(--text-muted);margin-bottom:18px;">
+                    Ảnh sẽ hiển thị theo thứ tự <strong>Thứ tự sắp xếp</strong> (số nhỏ lên trước). Drag-and-drop thứ tự chưa hỗ trợ — chỉnh số thứ tự khi sửa ảnh.
+                </p>
+
+                <div id="gallery-admin-grid" class="gallery-admin-grid">
+                    <div class="table-empty-state"><i class="ph ph-images"></i><span>Đang tải...</span></div>
                 </div>
 
             </section>
@@ -1754,6 +1779,62 @@
             <div style="margin-top:20px;display:flex;gap:10px;justify-content:flex-end;">
                 <button type="button" id="campaign-modal-cancel" class="btn-view">Hủy</button>
                 <button type="submit" class="btn-primary" style="padding:10px 22px;">Lưu chiến dịch</button>
+            </div>
+        </form>
+    </div>
+</div>
+@endif
+
+{{-- ═══════════════════ GALLERY PHOTO MODAL (admin only) ═══════════════════ --}}
+@if(auth()->user()->isAdmin())
+<div id="gallery-photo-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-content" style="max-width:520px;">
+        <button class="modal-close" id="gallery-photo-modal-close"><i class="ph ph-x"></i></button>
+        <h2 id="gallery-photo-modal-title" style="font-size:1.4rem;font-weight:800;margin-bottom:24px;color:var(--text);">Thêm ảnh gallery</h2>
+
+        <form id="gallery-photo-form">
+            @csrf
+            <input type="hidden" id="gallery-photo-id">
+            <input type="hidden" id="gallery-photo-image-path">
+
+            {{-- Image upload --}}
+            <div class="mf-group" style="margin-bottom:18px;">
+                <label class="mf-label">Ảnh <span style="color:#dc2626;">*</span></label>
+                <div id="gallery-photo-slot" class="gallery-photo-upload-slot" onclick="AdminApp.triggerGalleryPhotoUpload()" ondragover="event.preventDefault()" ondrop="AdminApp.handleGalleryPhotoDrop(event)">
+                    <div class="gallery-photo-upload-placeholder" id="gallery-photo-placeholder">
+                        <i class="ph ph-image" style="font-size:2rem;color:var(--text-muted);"></i>
+                        <span style="font-size:.82rem;color:var(--text-muted);">Click hoặc kéo ảnh vào đây</span>
+                        <span style="font-size:.75rem;color:var(--text-muted);opacity:.7;">JPG / PNG / WebP · tối đa 4 MB</span>
+                    </div>
+                    <img id="gallery-photo-preview" src="" alt="" style="display:none;width:100%;border-radius:8px;object-fit:cover;max-height:220px;">
+                    <button type="button" id="gallery-photo-clear" style="display:none;position:absolute;top:8px;right:8px;background:rgba(0,0,0,.55);border:none;border-radius:6px;color:#fff;padding:4px 8px;cursor:pointer;font-size:.75rem;" onclick="event.stopPropagation();AdminApp.clearGalleryPhoto()">✕ Xóa</button>
+                </div>
+                <input type="file" id="gallery-photo-file-input" accept="image/*" style="display:none;" onchange="AdminApp.handleGalleryPhotoFile(this.files[0])">
+            </div>
+
+            <div class="mf-grid-2">
+                <div class="mf-group" style="grid-column:1/-1;">
+                    <label class="mf-label">Chú thích</label>
+                    <input type="text" id="gallery-photo-caption" class="mf-input" placeholder="Mô tả ngắn hiển thị khi hover (không bắt buộc)">
+                </div>
+                <div class="mf-group">
+                    <label class="mf-label">Thứ tự sắp xếp</label>
+                    <input type="number" id="gallery-photo-sort" class="mf-input" value="0" min="0">
+                </div>
+                <div class="mf-group" style="display:flex;align-items:center;gap:12px;padding-top:24px;">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="gallery-photo-active" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span style="font-size:.88rem;">Hiển thị</span>
+                </div>
+            </div>
+
+            <div id="gallery-photo-form-error" style="display:none;margin-top:14px;padding:11px 14px;background:#FEE2E2;border-radius:9px;color:#991B1B;font-weight:600;font-size:.85rem;"></div>
+
+            <div style="margin-top:24px;display:flex;gap:10px;justify-content:flex-end;">
+                <button type="button" id="gallery-photo-modal-cancel" class="btn-view">Hủy</button>
+                <button type="submit" class="btn-primary" style="padding:10px 22px;">Lưu ảnh</button>
             </div>
         </form>
     </div>
