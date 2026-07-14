@@ -85,12 +85,12 @@ class CampaignMailerService
      * For manual/members mode: build fake order stubs from email list
      * (or fetch most recent order if exists) for personalization.
      */
-    private function buildOrdersFromEmails(array $emails, int $campaignId): array
+    private function buildOrdersFromEmails(array $emails, ?int $campaignId): array
     {
-        $sentEmails = DB::table('campaign_sends')
+        $sentEmails = $campaignId ? DB::table('campaign_sends')
             ->where('campaign_id', $campaignId)
             ->pluck('customer_email')
-            ->toArray();
+            ->toArray() : [];
 
         $eligible = [];
         foreach ($emails as $email) {
