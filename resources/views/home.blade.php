@@ -335,6 +335,7 @@
 @if($galleryPhotos->isNotEmpty())
 <section class="lx-section lx-section--gallery">
     <div class="lx-container">
+        <h2 class="lx-section__title lx-section__title--center">Không gian sống <em class="gallery-title-em">đáng nhớ</em></h2>
         <div class="lx-masonry" id="lx-gallery">
             @foreach($galleryPhotos as $photo)
             <a class="lx-masonry__item"
