@@ -1843,7 +1843,7 @@
 
 {{-- ═══════════════════ MEDIA LIBRARY MODAL (admin only) ═══════════════════ --}}
 @if(auth()->user()->isAdmin())
-<div id="media-library-modal" class="modal-overlay" style="display:none;">
+<div id="media-library-modal" class="modal-overlay" style="display:none;z-index:1001;">
     <div class="modal-content" style="max-width:880px; max-height:92vh; display:flex; flex-direction:column; overflow:hidden;">
         <button class="modal-close" id="media-lib-close"><i class="ph ph-x"></i></button>
         <h2 style="font-size:1.2rem;font-weight:800;color:var(--text);margin-bottom:14px;flex-shrink:0;">
@@ -1874,6 +1874,14 @@
                     <i class="ph ph-arrow-down"></i> Xem thêm
                 </button>
             </div>
+
+        {{-- Multi-select footer --}}
+        <div id="media-lib-footer" style="display:none;flex-shrink:0;align-items:center;justify-content:space-between;padding:10px 0 0;border-top:1px solid var(--border);margin-top:6px;">
+            <span id="media-lib-select-count" style="font-size:.84rem;color:var(--text-muted);"></span>
+            <button id="media-lib-confirm-btn" type="button" class="btn-primary" disabled
+                    onclick="AdminApp.confirmMediaLibSelection()"
+                    style="padding:7px 20px;font-size:.875rem;">Thêm ảnh</button>
+        </div>
         </div>
 
         {{-- Upload section --}}

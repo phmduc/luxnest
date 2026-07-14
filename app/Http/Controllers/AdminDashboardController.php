@@ -1084,6 +1084,20 @@ class AdminDashboardController extends Controller
         return response()->json(['success' => true, 'data' => $photos]);
     }
 
+    public function batchStoreGalleryPhotos(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'images'   => 'required|array|max:100',
+            'images.*' => 'required|string|max:1000',
+        ]);
+        $count = 0;
+        foreach ($data['images'] as $i => $path) {
+            GalleryPhoto::create(['image' => $path, 'sort_order' => $i, 'is_active' => true]);
+            $count++;
+        }
+        return response()->json(['success' => true, 'count' => $count]);
+    }
+
     public function storeGalleryPhoto(Request $request): JsonResponse
     {
         $data = $request->validate([

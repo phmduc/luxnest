@@ -183,6 +183,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,employee'])->group(funct
         // Gallery photos
         Route::get('/gallery-photos', [AdminDashboardController::class, 'getGalleryPhotos']);
         Route::post('/gallery-photos', [AdminDashboardController::class, 'storeGalleryPhoto']);
+        Route::post('/gallery-photos/batch', [AdminDashboardController::class, 'batchStoreGalleryPhotos']);
         Route::put('/gallery-photos/{id}', [AdminDashboardController::class, 'updateGalleryPhoto']);
         Route::delete('/gallery-photos/{id}', [AdminDashboardController::class, 'destroyGalleryPhoto']);
         Route::patch('/gallery-photos/{id}/status', [AdminDashboardController::class, 'toggleGalleryPhotoStatus']);

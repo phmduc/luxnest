@@ -2166,13 +2166,15 @@
     // Media Library (admin only)
     // ---------------------------------------------------------------
 
-    const mediaLib = { page: 1, loading: false, hasMore: false, search: '', searchTimer: null, uploadUrl: '' };
+    const mediaLib = { page: 1, loading: false, hasMore: false, search: '', searchTimer: null, uploadUrl: '', multiSelect: false, selected: [] };
     let mediaLibraryOnPick = null;
 
-    function openMediaLibrary(onPick, uploadUrl) {
+    function openMediaLibrary(onPick, uploadUrl, multiSelect) {
         if (typeof USER_ROLE !== 'undefined' && USER_ROLE !== 'admin') return;
         mediaLibraryOnPick = onPick;
-        mediaLib.uploadUrl = uploadUrl || '';
+        mediaLib.uploadUrl  = uploadUrl || '';
+        mediaLib.multiSelect = !!multiSelect;
+        mediaLib.selected   = [];
         const modal = document.getElementById('media-library-modal');
         if (!modal) return;
         modal.style.display = 'flex';
@@ -2180,13 +2182,34 @@
         const searchEl = document.getElementById('media-lib-search');
         if (searchEl) searchEl.value = '';
         mediaLib.search = '';
+        const footer = document.getElementById('media-lib-footer');
+        if (footer) footer.style.display = mediaLib.multiSelect ? 'flex' : 'none';
+        updateMediaLibSelectBtn();
         loadMediaLibraryImages(true);
     }
 
     function closeMediaLibrary() {
         const modal = document.getElementById('media-library-modal');
         if (modal) modal.style.display = 'none';
-        mediaLibraryOnPick = null;
+        mediaLibraryOnPick  = null;
+        mediaLib.multiSelect = false;
+        mediaLib.selected    = [];
+        const footer = document.getElementById('media-lib-footer');
+        if (footer) footer.style.display = 'none';
+    }
+
+    function updateMediaLibSelectBtn() {
+        const btn = document.getElementById('media-lib-confirm-btn');
+        const cnt = document.getElementById('media-lib-select-count');
+        const n   = mediaLib.selected.length;
+        if (btn) { btn.disabled = n === 0; btn.textContent = n > 0 ? `Thêm ${n} ảnh` : 'Thêm ảnh'; }
+        if (cnt) cnt.textContent = n > 0 ? `Đã chọn: ${n}` : '';
+    }
+
+    function confirmMediaLibSelection() {
+        if (!mediaLib.selected.length) return;
+        mediaLibraryOnPick?.(mediaLib.selected);
+        closeMediaLibrary();
     }
 
     function switchMediaLibTab(tab) {
@@ -2241,7 +2264,16 @@
             const item = document.createElement('div');
             item.className = 'media-lib-item';
             item.innerHTML = `<img src="${img.url}" alt="" loading="lazy"><span class="media-lib-item__check"><i class="ph ph-check"></i></span>`;
-            item.onclick = () => { mediaLibraryOnPick?.(img.url, img.path); closeMediaLibrary(); };
+            if (mediaLib.multiSelect) {
+                item.onclick = () => {
+                    const si = mediaLib.selected.findIndex(s => s.path === img.path);
+                    if (si >= 0) { mediaLib.selected.splice(si, 1); item.classList.remove('selected'); }
+                    else         { mediaLib.selected.push({ url: img.url, path: img.path }); item.classList.add('selected'); }
+                    updateMediaLibSelectBtn();
+                };
+            } else {
+                item.onclick = () => { mediaLibraryOnPick?.(img.url, img.path); closeMediaLibrary(); };
+            }
             grid.appendChild(item);
         });
         mediaLib.hasMore = !!res.has_more;
@@ -2273,8 +2305,15 @@
             const res = await apiFetch(mediaLib.uploadUrl, { method: 'POST', body: fd });
             if (bar) bar.style.width = '100%';
             if (res?.success && res.url) {
-                mediaLibraryOnPick?.(res.url, res.path);
-                closeMediaLibrary();
+                if (mediaLib.multiSelect) {
+                    mediaLib.selected.push({ url: res.url, path: res.path });
+                    updateMediaLibSelectBtn();
+                    switchMediaLibTab('library');
+                    loadMediaLibraryImages(true);
+                } else {
+                    mediaLibraryOnPick?.(res.url, res.path);
+                    closeMediaLibrary();
+                }
             } else {
                 alert(res?.message || 'Upload thất bại');
             }
@@ -2375,8 +2414,8 @@
 
         const addCard = document.createElement('div');
         addCard.className = 'gallery-admin-card--add';
-        addCard.innerHTML = '<i class="ph ph-plus" style="font-size:1.6rem;"></i><span>Thêm ảnh</span>';
-        addCard.onclick = () => openGalleryPhotoModal();
+        addCard.innerHTML = '<i class="ph ph-images" style="font-size:1.6rem;"></i><span>Thêm ảnh</span>';
+        addCard.onclick = () => openGalleryBatchAdd();
         grid.appendChild(addCard);
     }
 
@@ -2412,6 +2451,19 @@
 
     function closeGalleryPhotoModal() {
         document.getElementById('gallery-photo-modal').style.display = 'none';
+    }
+
+    function openGalleryBatchAdd() {
+        if (typeof USER_ROLE !== 'undefined' && USER_ROLE !== 'admin') return;
+        openMediaLibrary(
+            async (selectedItems) => {
+                const paths = selectedItems.map(s => s.path);
+                const res   = await apiFetch(ADMIN_BASE + '/gallery-photos/batch', 'POST', { images: paths });
+                if (res?.success) loadGalleryPhotos();
+            },
+            ADMIN_BASE + '/gallery-photos/upload-image',
+            true
+        );
     }
 
     function triggerGalleryPhotoUpload() {
@@ -2613,6 +2665,7 @@
         handleMediaLibSearch,
         handleMediaLibDrop,
         handleMediaLibFileSelect,
+        confirmMediaLibSelection,
         openMediaLibraryForRoomSlot,
         openMediaLibraryForVillaSlot,
         openMediaLibraryForNews,
@@ -2620,6 +2673,7 @@
         // Gallery Photos
         loadGalleryPhotos,
         openGalleryPhotoModal,
+        openGalleryBatchAdd,
         deleteGalleryPhoto,
         toggleGalleryPhotoStatus,
         triggerGalleryPhotoUpload,

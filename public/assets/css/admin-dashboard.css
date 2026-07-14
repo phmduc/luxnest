@@ -1586,6 +1586,8 @@ textarea.mf-input { resize: vertical; }
     font-size: .75rem;
 }
 .media-lib-item:hover .media-lib-item__check { display: flex; }
+.media-lib-item.selected { border-color: var(--orange); }
+.media-lib-item.selected .media-lib-item__check { display: flex; }
 
 /* Media library: main (Thư viện / Upload mới) tabs */
 .media-lib-main-tabs {
