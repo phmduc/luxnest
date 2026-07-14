@@ -22,4 +22,4 @@ Schedule::call(function () {
         $campaign->update(['status' => 'sending']);
         (new \App\Services\CampaignMailerService())->send($campaign);
     }
-})->hourly()->name('fire-scheduled-campaigns');
+})->everyMinute()->name('fire-scheduled-campaigns');
