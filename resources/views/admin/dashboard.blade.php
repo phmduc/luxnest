@@ -1636,45 +1636,83 @@
                 </div>
             </div>
 
-            {{-- Section: Conditions --}}
+            {{-- Section: Recipients --}}
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:16px;">
-                <h3 style="margin:0 0 4px;font-size:0.78rem;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);">Điều kiện nhận email</h3>
-                <p style="margin:0 0 14px;font-size:0.76rem;color:var(--text-muted);">Chỉ gửi đến khách thỏa tất cả điều kiện bên dưới. Mỗi email chỉ nhận 1 lần.</p>
-                {{-- Visual range indicator --}}
-                <div style="background:var(--bg);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:0.8rem;color:var(--text-muted);display:flex;align-items:center;gap:6px;">
-                    <i class="ph ph-calendar-blank" style="color:var(--orange);"></i>
-                    Gửi đến khách đã trả phòng trong khoảng
-                    <strong id="cond-range-preview" style="color:var(--text);">30 – 60 ngày trước</strong>
+                <h3 style="margin:0 0 14px;font-size:0.78rem;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);">Người nhận</h3>
+
+                {{-- Mode toggle --}}
+                <div class="rcpt-mode-tabs" style="display:flex;gap:6px;margin-bottom:16px;">
+                    <button type="button" class="rcpt-mode-btn active" data-mode="eligible" onclick="AdminApp.setCampaignRecipientMode('eligible')">
+                        <i class="ph ph-funnel"></i> Đủ điều kiện
+                    </button>
+                    <button type="button" class="rcpt-mode-btn" data-mode="manual" onclick="AdminApp.setCampaignRecipientMode('manual')">
+                        <i class="ph ph-pencil-line"></i> Nhập email
+                    </button>
+                    <button type="button" class="rcpt-mode-btn" data-mode="members" onclick="AdminApp.setCampaignRecipientMode('members')">
+                        <i class="ph ph-users-three"></i> Chọn member
+                    </button>
                 </div>
-                <div class="mf-grid-2">
-                    <div class="mf-group">
-                        <label class="mf-label">Trả phòng ít nhất <span style="font-weight:400;">(ngày trước)</span></label>
-                        <input type="number" id="cond-min-days" class="mf-input" min="0" value="30" placeholder="30"
-                               oninput="AdminApp.updateCondRangePreview()">
-                        <p style="margin:4px 0 0;font-size:0.7rem;color:var(--text-muted);">VD: 30 → đã trả phòng ít nhất 30 ngày trước</p>
+                <input type="hidden" id="campaign-recipient-mode" value="eligible">
+
+                {{-- Eligible sub-section --}}
+                <div id="rcpt-eligible-section">
+                    <p style="margin:0 0 12px;font-size:0.76rem;color:var(--text-muted);">Chỉ gửi đến khách thỏa tất cả điều kiện bên dưới. Mỗi email chỉ nhận 1 lần.</p>
+                    <div style="background:var(--bg);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:0.8rem;color:var(--text-muted);display:flex;align-items:center;gap:6px;">
+                        <i class="ph ph-calendar-blank" style="color:var(--orange);"></i>
+                        Gửi đến khách đã trả phòng trong khoảng
+                        <strong id="cond-range-preview" style="color:var(--text);">30 – 60 ngày trước</strong>
                     </div>
-                    <div class="mf-group">
-                        <label class="mf-label">Trả phòng không quá <span style="font-weight:400;">(ngày trước)</span></label>
-                        <input type="number" id="cond-max-days" class="mf-input" min="1" value="60" placeholder="60"
-                               oninput="AdminApp.updateCondRangePreview()">
-                        <p style="margin:4px 0 0;font-size:0.7rem;color:var(--text-muted);">VD: 60 → không quá 60 ngày trước</p>
+                    <div class="mf-grid-2">
+                        <div class="mf-group">
+                            <label class="mf-label">Trả phòng ít nhất <span style="font-weight:400;">(ngày trước)</span></label>
+                            <input type="number" id="cond-min-days" class="mf-input" min="0" value="30" placeholder="30"
+                                   oninput="AdminApp.updateCondRangePreview()">
+                        </div>
+                        <div class="mf-group">
+                            <label class="mf-label">Trả phòng không quá <span style="font-weight:400;">(ngày trước)</span></label>
+                            <input type="number" id="cond-max-days" class="mf-input" min="1" value="60" placeholder="60"
+                                   oninput="AdminApp.updateCondRangePreview()">
+                        </div>
+                        <div class="mf-group">
+                            <label class="mf-label">Số booking tối thiểu</label>
+                            <input type="number" id="cond-min-bookings" class="mf-input" min="1" value="1" placeholder="1">
+                        </div>
+                        <div class="mf-group">
+                            <label class="mf-label">Chi tiêu tối thiểu (VNĐ)</label>
+                            <input type="number" id="cond-min-spent" class="mf-input" min="0" placeholder="Để trống = không giới hạn">
+                        </div>
                     </div>
-                    <div class="mf-group">
-                        <label class="mf-label">Số booking tối thiểu</label>
-                        <input type="number" id="cond-min-bookings" class="mf-input" min="1" value="1" placeholder="1">
+                    <div id="campaign-eligible-preview" style="display:none;margin-top:12px;padding:10px 14px;background:var(--bg);border-radius:8px;font-size:0.82rem;color:var(--text-muted);">
+                        <i class="ph ph-users"></i> <span id="campaign-eligible-count">–</span> khách đủ điều kiện
+                        <button type="button" onclick="AdminApp.previewEligible()" style="margin-left:8px;font-size:0.78rem;color:var(--orange);background:none;border:none;cursor:pointer;text-decoration:underline;">Xem lại</button>
                     </div>
+                    <button type="button" onclick="AdminApp.previewEligible()" style="margin-top:10px;font-size:0.8rem;color:var(--orange);background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:4px;">
+                        <i class="ph ph-magnifying-glass"></i> Xem ai sẽ nhận email này
+                    </button>
+                </div>
+
+                {{-- Manual email sub-section --}}
+                <div id="rcpt-manual-section" style="display:none;">
                     <div class="mf-group">
-                        <label class="mf-label">Chi tiêu tối thiểu (VNĐ)</label>
-                        <input type="number" id="cond-min-spent" class="mf-input" min="0" placeholder="Để trống = không giới hạn">
+                        <label class="mf-label">Danh sách email <span style="font-weight:400;color:var(--text-muted);">(mỗi dòng 1 email hoặc ngăn bằng dấu phẩy)</span></label>
+                        <textarea id="campaign-manual-emails" class="mf-input" rows="6"
+                            style="font-family:monospace;font-size:0.82rem;resize:vertical;"
+                            placeholder="customer1@gmail.com&#10;customer2@yahoo.com&#10;customer3@gmail.com"
+                            oninput="AdminApp.onManualEmailsChange()"></textarea>
+                        <div id="manual-email-count" style="margin-top:6px;font-size:0.78rem;color:var(--text-muted);">0 email hợp lệ</div>
                     </div>
                 </div>
-                <div id="campaign-eligible-preview" style="display:none;margin-top:12px;padding:10px 14px;background:var(--bg);border-radius:8px;font-size:0.82rem;color:var(--text-muted);">
-                    <i class="ph ph-users"></i> <span id="campaign-eligible-count">–</span> khách đủ điều kiện
-                    <button type="button" onclick="AdminApp.previewEligible()" style="margin-left:8px;font-size:0.78rem;color:var(--orange);background:none;border:none;cursor:pointer;text-decoration:underline;">Xem lại</button>
+
+                {{-- Members sub-section --}}
+                <div id="rcpt-members-section" style="display:none;">
+                    <input type="text" id="campaign-member-filter" class="mf-input" placeholder="Tìm theo tên hoặc email..."
+                           style="margin-bottom:10px;" oninput="AdminApp.filterCampaignMembers()">
+                    <div id="campaign-member-list"
+                         style="max-height:240px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;background:var(--bg);">
+                        <div style="padding:24px;text-align:center;color:var(--text-muted);font-size:0.82rem;">Đang tải...</div>
+                    </div>
+                    <div id="member-selected-count" style="margin-top:8px;font-size:0.78rem;color:var(--text-muted);">0 member được chọn</div>
                 </div>
-                <button type="button" onclick="AdminApp.previewEligible()" style="margin-top:10px;font-size:0.8rem;color:var(--orange);background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:4px;">
-                    <i class="ph ph-magnifying-glass"></i> Xem ai sẽ nhận email này
-                </button>
             </div>
 
             {{-- Section: Schedule --}}

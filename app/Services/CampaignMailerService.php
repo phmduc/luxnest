@@ -12,6 +12,27 @@ class CampaignMailerService
 {
     public function getEligible(EmailCampaign $campaign): array
     {
+        $mode = $campaign->recipient_mode ?? 'eligible';
+
+        if ($mode === 'manual') {
+            return $this->buildOrdersFromEmails(
+                $campaign->recipient_data ?? [],
+                $campaign->id
+            );
+        }
+
+        if ($mode === 'members') {
+            $ids = $campaign->recipient_data ?? [];
+            if (empty($ids)) return [];
+            $emails = DB::table('users')
+                ->whereIn('id', $ids)
+                ->whereNotNull('email')
+                ->pluck('email')
+                ->toArray();
+            return $this->buildOrdersFromEmails($emails, $campaign->id);
+        }
+
+        // --- eligible mode (conditions-based) ---
         $cond     = $campaign->conditions ?? [];
         $minDays  = (int) ($cond['checkout_min_days'] ?? 0);
         $maxDays  = (int) ($cond['checkout_max_days'] ?? 3650);
@@ -19,13 +40,11 @@ class CampaignMailerService
         $minSpent = (int) ($cond['min_spent'] ?? 0);
         $statuses = $cond['order_statuses'] ?? ['confirmed', 'completed', 'pending'];
 
-        // Emails already sent for this campaign
         $sentEmails = DB::table('campaign_sends')
             ->where('campaign_id', $campaign->id)
             ->pluck('customer_email')
             ->toArray();
 
-        // Distinct emails with at least one qualifying order in the date window
         $emails = DB::table('orders')
             ->whereNotNull('customer_email')
             ->where('customer_email', '!=', '')
@@ -39,7 +58,6 @@ class CampaignMailerService
 
         $eligible = [];
         foreach ($emails as $email) {
-            // Total bookings & spent across ALL orders (not just the window)
             $stats = DB::table('orders')
                 ->where('customer_email', $email)
                 ->whereIn('status', $statuses)
@@ -49,7 +67,6 @@ class CampaignMailerService
             if ($stats->cnt < $minBooks) continue;
             if ($minSpent > 0 && $stats->total < $minSpent) continue;
 
-            // Pick most recent order in the window for personalization
             $order = DB::table('orders')
                 ->where('customer_email', $email)
                 ->whereIn('status', $statuses)
@@ -59,6 +76,44 @@ class CampaignMailerService
                 ->first();
 
             if ($order) $eligible[] = $order;
+        }
+
+        return $eligible;
+    }
+
+    /**
+     * For manual/members mode: build fake order stubs from email list
+     * (or fetch most recent order if exists) for personalization.
+     */
+    private function buildOrdersFromEmails(array $emails, int $campaignId): array
+    {
+        $sentEmails = DB::table('campaign_sends')
+            ->where('campaign_id', $campaignId)
+            ->pluck('customer_email')
+            ->toArray();
+
+        $eligible = [];
+        foreach ($emails as $email) {
+            $email = trim(strtolower($email));
+            if (!$email || !filter_var($email, FILTER_VALIDATE_EMAIL)) continue;
+            if (in_array($email, $sentEmails)) continue;
+
+            // Try to fetch most recent order for personalization
+            $order = DB::table('orders')
+                ->where('customer_email', $email)
+                ->orderByDesc('created_at')
+                ->first();
+
+            // Stub if no order history
+            if (!$order) {
+                $order = (object)[
+                    'id'             => 0,
+                    'customer_email' => $email,
+                    'customer_name'  => '',
+                ];
+            }
+
+            $eligible[] = $order;
         }
 
         return $eligible;
@@ -82,19 +137,17 @@ class CampaignMailerService
 
         foreach ($eligible as $order) {
             try {
-                $voucherCode    = '';
+                $voucherCode     = '';
                 $discountPercent = $campaign->auto_discount_percent ?? 10;
 
                 if ($campaign->voucher_mode === 'fixed') {
                     $voucherCode = $fixedCode ?? '';
-                } elseif ($campaign->voucher_mode === 'auto') {
+                    if ($campaign->voucher) {
+                        $vr = $campaign->voucher;
+                        $discountPercent = $vr->discount_type === 'percent' ? $vr->discount_value : 0;
+                    }
+                } elseif ($campaign->voucher_mode === 'auto' && $order->id > 0) {
                     $voucherCode = $this->generateCode($order->id, $campaign->id);
-                }
-
-                // Determine discount for display
-                if ($campaign->voucher_mode === 'fixed' && $campaign->voucher) {
-                    $vr = $campaign->voucher;
-                    $discountPercent = $vr->discount_type === 'percent' ? $vr->discount_value : 0;
                 }
 
                 Mail::to($order->customer_email)->send(
@@ -108,7 +161,7 @@ class CampaignMailerService
                 DB::table('campaign_sends')->insertOrIgnore([
                     'campaign_id'    => $campaign->id,
                     'customer_email' => $order->customer_email,
-                    'order_id'       => $order->id,
+                    'order_id'       => $order->id ?: null,
                     'voucher_code'   => $voucherCode ?: null,
                     'sent_at'        => now(),
                 ]);

@@ -1002,9 +1002,9 @@ class AdminDashboardController extends Controller
             'success' => true,
             'count'   => count($eligible),
             'preview' => array_slice(array_map(fn($o) => [
-                'email' => $o->customer_email,
-                'name'  => $o->customer_name,
-                'checkout' => $o->checkout_date,
+                'email'    => $o->customer_email,
+                'name'     => $o->customer_name ?? '',
+                'checkout' => $o->checkout_date ?? null,
             ], $eligible), 0, 10),
         ]);
     }
@@ -1045,9 +1045,17 @@ class AdminDashboardController extends Controller
             'conditions.min_bookings'      => 'nullable|integer|min:1',
             'conditions.min_spent'         => 'nullable|integer|min:0',
             'conditions.order_statuses'    => 'nullable|array',
+            'recipient_mode'         => 'nullable|in:eligible,manual,members',
+            'recipient_data'         => 'nullable|array',
+            'recipient_data.*'       => 'nullable',
             'status'                 => 'required|in:draft,scheduled',
             'send_at'                => 'nullable|date',
         ]);
+
+        // Default recipient_mode
+        if (empty($data['recipient_mode'])) {
+            $data['recipient_mode'] = 'eligible';
+        }
 
         if (($data['status'] ?? '') === 'scheduled' && empty($data['send_at'])) {
             $data['status'] = 'draft';

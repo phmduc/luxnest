@@ -2233,6 +2233,11 @@
         onCampaignVoucherModeChange,
         onCampaignStatusChange,
         updateCondRangePreview,
+        // Recipient mode
+        setCampaignRecipientMode,
+        filterCampaignMembers,
+        updateMemberSelectedCount,
+        onManualEmailsChange,
     };
 
     // ---------------------------------------------------------------
@@ -2595,7 +2600,11 @@
                     <span style="font-weight:600;">${c.name}</span>
                     ${c.subject ? `<span class="table-customer">${c.subject}</span>` : ''}
                 </td>
-                <td style="font-size:0.78rem;color:var(--text-muted);">${condParts.join('<br>')}</td>
+                <td style="font-size:0.78rem;color:var(--text-muted);">${
+                    c.recipient_mode === 'manual'  ? `<span style="color:#1d4ed8;"><i class="ph ph-pencil-line"></i> Nhập email</span><br>${(c.recipient_data||[]).length} địa chỉ` :
+                    c.recipient_mode === 'members' ? `<span style="color:#7c3aed;"><i class="ph ph-users-three"></i> Chọn member</span><br>${(c.recipient_data||[]).length} member` :
+                    condParts.join('<br>')
+                }</td>
                 <td>${vMode}</td>
                 <td style="text-align:center;">${eligibleBadge}</td>
                 <td><span class="status-badge ${sClass}"><i class="ph ${sIcon}"></i>${sTxt}</span></td>
@@ -2611,8 +2620,106 @@
         }).join('');
     }
 
+    // ---- Recipient mode ----
+    let campaignMembersCache = null;
+
+    function setCampaignRecipientMode(mode) {
+        document.getElementById('campaign-recipient-mode').value = mode;
+        // Update tab buttons
+        document.querySelectorAll('.rcpt-mode-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.mode === mode);
+        });
+        // Show/hide sub-sections
+        document.getElementById('rcpt-eligible-section').style.display = mode === 'eligible' ? 'block' : 'none';
+        document.getElementById('rcpt-manual-section').style.display   = mode === 'manual'   ? 'block' : 'none';
+        document.getElementById('rcpt-members-section').style.display  = mode === 'members'  ? 'block' : 'none';
+
+        if (mode === 'members' && !campaignMembersCache) {
+            loadMembersForCampaign();
+        }
+    }
+
+    async function loadMembersForCampaign(selectedIds = []) {
+        const listEl = document.getElementById('campaign-member-list');
+        if (!listEl) return;
+
+        if (!campaignMembersCache) {
+            listEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:0.82rem;">Đang tải...</div>';
+            const res = await apiFetch(ADMIN_BASE + '/members?per_page=200');
+            if (!res.success) { listEl.innerHTML = '<div style="padding:20px;text-align:center;color:#dc2626;">Lỗi tải danh sách.</div>'; return; }
+            campaignMembersCache = res.data.data || [];
+        }
+
+        renderMemberList(campaignMembersCache, selectedIds);
+    }
+
+    function renderMemberList(members, selectedIds = [], filter = '') {
+        const listEl = document.getElementById('campaign-member-list');
+        if (!listEl) return;
+
+        const filt = filter.toLowerCase();
+        const filtered = filt
+            ? members.filter(m => (m.name||'').toLowerCase().includes(filt) || (m.email||'').toLowerCase().includes(filt))
+            : members;
+
+        if (!filtered.length) {
+            listEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:0.82rem;">Không tìm thấy member.</div>';
+            updateMemberSelectedCount();
+            return;
+        }
+
+        listEl.innerHTML = filtered.map(m => {
+            const checked = selectedIds.includes(m.id) ? 'checked' : '';
+            return `<label class="member-check-row">
+                <input type="checkbox" name="campaign_member_ids[]" value="${m.id}" ${checked} onchange="AdminApp.updateMemberSelectedCount()">
+                <div>
+                    <div class="member-check-name">${m.name || '—'}</div>
+                    <div class="member-check-email">${m.email}</div>
+                </div>
+            </label>`;
+        }).join('');
+
+        updateMemberSelectedCount();
+    }
+
+    function filterCampaignMembers() {
+        const filter = document.getElementById('campaign-member-filter')?.value || '';
+        const selected = getSelectedMemberIds();
+        renderMemberList(campaignMembersCache || [], selected, filter);
+    }
+
+    function getSelectedMemberIds() {
+        return [...document.querySelectorAll('#campaign-member-list input[type=checkbox]:checked')]
+            .map(cb => parseInt(cb.value));
+    }
+
+    function updateMemberSelectedCount() {
+        const count = getSelectedMemberIds().length;
+        const el = document.getElementById('member-selected-count');
+        if (el) el.textContent = count > 0
+            ? `${count} member được chọn`
+            : '0 member được chọn';
+    }
+
+    function onManualEmailsChange() {
+        const raw   = document.getElementById('campaign-manual-emails')?.value || '';
+        const emails = parseManualEmails(raw);
+        const el     = document.getElementById('manual-email-count');
+        if (el) el.textContent = emails.length > 0
+            ? `${emails.length} email hợp lệ`
+            : '0 email hợp lệ';
+    }
+
+    function parseManualEmails(raw) {
+        return raw.split(/[\n,;]+/)
+            .map(e => e.trim().toLowerCase())
+            .filter(e => e && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e));
+    }
+    // ---- End recipient mode ----
+
     function openCampaignModal(campaign = null) {
         const isEdit = !!campaign;
+        campaignMembersCache = null; // reset cache so members reload fresh
         document.getElementById('campaign-modal-title').textContent = isEdit ? 'Sửa chiến dịch' : 'Tạo chiến dịch email';
         document.getElementById('campaign-id').value      = campaign?.id || '';
         document.getElementById('campaign-name').value    = campaign?.name || '';
@@ -2641,6 +2748,21 @@
                 document.getElementById('campaign-voucher-id').value = campaign.voucher_id;
             }
         });
+
+        // Recipient mode
+        const rMode = campaign?.recipient_mode || 'eligible';
+        const rData = campaign?.recipient_data || [];
+        document.getElementById('campaign-manual-emails').value = '';
+        document.getElementById('campaign-member-filter').value = '';
+
+        if (rMode === 'manual') {
+            document.getElementById('campaign-manual-emails').value = (rData || []).join('\n');
+            onManualEmailsChange();
+        } else if (rMode === 'members') {
+            loadMembersForCampaign(rData || []);
+        }
+
+        setCampaignRecipientMode(rMode);
 
         document.getElementById('campaign-eligible-preview').style.display = 'none';
         document.getElementById('campaign-form-error').style.display = 'none';
@@ -2699,6 +2821,14 @@
         const url    = id ? ADMIN_BASE + '/campaigns/' + id : ADMIN_BASE + '/campaigns';
         const method = id ? 'PUT' : 'POST';
 
+        const rMode = document.getElementById('campaign-recipient-mode').value || 'eligible';
+        let rData = null;
+        if (rMode === 'manual') {
+            rData = parseManualEmails(document.getElementById('campaign-manual-emails').value || '');
+        } else if (rMode === 'members') {
+            rData = getSelectedMemberIds();
+        }
+
         const payload = {
             name:                  document.getElementById('campaign-name').value.trim(),
             subject:               document.getElementById('campaign-subject').value.trim() || null,
@@ -2714,6 +2844,8 @@
                 min_spent:         parseInt(document.getElementById('cond-min-spent').value) || 0,
                 order_statuses:    ['confirmed', 'completed', 'pending'],
             },
+            recipient_mode: rMode,
+            recipient_data: rData,
             status:  document.getElementById('campaign-status').value,
             send_at: document.getElementById('campaign-send-at').value || null,
         };
