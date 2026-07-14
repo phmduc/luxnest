@@ -10,7 +10,7 @@ class EmailCampaign extends Model
         'name', 'subject', 'greeting', 'body',
         'voucher_mode', 'voucher_id', 'auto_discount_percent',
         'conditions', 'recipient_mode', 'recipient_data',
-        'status', 'send_at', 'sent_at', 'sent_count',
+        'status', 'send_at', 'repeat_interval', 'sent_at', 'sent_count',
     ];
 
     protected $casts = [

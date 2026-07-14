@@ -1048,17 +1048,25 @@ class AdminDashboardController extends Controller
             'recipient_mode'         => 'nullable|in:eligible,manual,members',
             'recipient_data'         => 'nullable|array',
             'recipient_data.*'       => 'nullable',
-            'status'                 => 'required|in:draft,scheduled',
+            'status'                 => 'required|in:draft,scheduled,recurring',
             'send_at'                => 'nullable|date',
+            'repeat_interval'        => 'nullable|in:daily,weekly',
         ]);
 
-        // Default recipient_mode
         if (empty($data['recipient_mode'])) {
             $data['recipient_mode'] = 'eligible';
         }
 
         if (($data['status'] ?? '') === 'scheduled' && empty($data['send_at'])) {
             $data['status'] = 'draft';
+        }
+
+        // Recurring requires an interval
+        if (($data['status'] ?? '') === 'recurring' && empty($data['repeat_interval'])) {
+            $data['repeat_interval'] = 'daily';
+        }
+        if (($data['status'] ?? '') !== 'recurring') {
+            $data['repeat_interval'] = null;
         }
 
         return $data;

@@ -11,15 +11,32 @@ Artisan::command('inspire', function () {
 // Legacy single remarketing: run hourly, command checks auto/schedule flags
 Schedule::command('remarketing:send')->hourly();
 
-// Email campaigns: fire scheduled campaigns
+// Email campaigns: fire scheduled + recurring campaigns
 Schedule::call(function () {
-    $campaigns = \App\Models\EmailCampaign::with('voucher')
+    $mailer = new \App\Services\CampaignMailerService();
+
+    // One-shot: fire at the scheduled datetime
+    \App\Models\EmailCampaign::with('voucher')
         ->where('status', 'scheduled')
         ->where('send_at', '<=', now())
-        ->get();
+        ->get()
+        ->each(function ($c) use ($mailer) {
+            $c->update(['status' => 'sending']);
+            $mailer->send($c);
+        });
 
-    foreach ($campaigns as $campaign) {
-        $campaign->update(['status' => 'sending']);
-        (new \App\Services\CampaignMailerService())->send($campaign);
-    }
+    // Recurring: fire when interval has elapsed since last send
+    \App\Models\EmailCampaign::with('voucher')
+        ->where('status', 'recurring')
+        ->where(function ($q) {
+            $q->whereNull('sent_at')
+              ->orWhere(fn($q2) => $q2
+                  ->where('repeat_interval', 'daily')
+                  ->where('sent_at', '<=', now()->subDay()))
+              ->orWhere(fn($q2) => $q2
+                  ->where('repeat_interval', 'weekly')
+                  ->where('sent_at', '<=', now()->subWeek()));
+        })
+        ->get()
+        ->each(fn($c) => $mailer->send($c));
 })->everyMinute()->name('fire-scheduled-campaigns');

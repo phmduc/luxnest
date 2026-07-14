@@ -2562,11 +2562,13 @@
         }
 
         const statusMap = {
-            draft:     ['status-draft',     'Nháp',          'ph-pencil'],
-            scheduled: ['status-scheduled', 'Đã xếp lịch',   'ph-calendar-check'],
-            sending:   ['status-sending',   'Đang gửi',      'ph-paper-plane-tilt'],
-            sent:      ['status-sent',      'Đã gửi',        'ph-check-circle'],
+            draft:     ['status-draft',      'Nháp',            'ph-pencil'],
+            scheduled: ['status-scheduled',  'Đã xếp lịch',     'ph-calendar-check'],
+            sending:   ['status-sending',    'Đang gửi',        'ph-paper-plane-tilt'],
+            sent:      ['status-sent',       'Đã gửi',          'ph-check-circle'],
+            recurring: ['status-recurring',  'Lặp lại',         'ph-arrows-clockwise'],
         };
+        const intervalLabel = { daily: 'Mỗi ngày', weekly: 'Mỗi tuần' };
 
         tbody.innerHTML = items.map(c => {
             const cond    = c.conditions || {};
@@ -2583,17 +2585,21 @@
                     : `<span style="color:var(--text-muted);font-size:0.8rem;">—</span>`;
 
             const [sClass, sTxt, sIcon] = statusMap[c.status] || statusMap.draft;
-            const sendDate = c.send_at
-                ? new Date(c.send_at).toLocaleString('vi-VN', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})
-                : (c.sent_at ? new Date(c.sent_at).toLocaleString('vi-VN', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—');
+            const fmt = d => d ? new Date(d).toLocaleString('vi-VN', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : null;
+            const sendDate = c.status === 'recurring'
+                ? (intervalLabel[c.repeat_interval] || 'Định kỳ') + (c.sent_at ? `<br><span style="font-size:0.72rem;color:var(--text-muted);">Lần cuối: ${fmt(c.sent_at)}</span>` : '')
+                : (fmt(c.send_at) || fmt(c.sent_at) || '—');
 
             const eligibleBadge = c.eligible_count != null
                 ? `<span class="eligible-badge">${c.eligible_count}</span>`
                 : `<span style="color:var(--text-muted);">—</span>`;
 
-            const actionBtn = (c.status !== 'sent' && c.status !== 'sending')
-                ? `<button class="btn-send-now" onclick="AdminApp.sendCampaignNow(${c.id},'${c.name.replace(/'/g,"\\'")}',this)"><i class="ph ph-paper-plane-tilt"></i> Gửi ngay</button>`
-                : `<span class="table-customer"><i class="ph ph-check-circle" style="color:#16a34a;"></i> ${c.sent_count ?? 0} đã gửi</span>`;
+            const sentInfo = c.sent_count > 0
+                ? `<span class="table-customer"><i class="ph ph-check-circle" style="color:#16a34a;"></i> ${c.sent_count} đã gửi</span>`
+                : '';
+            const actionBtn = c.status === 'sending'
+                ? `<span style="font-size:0.78rem;color:var(--text-muted);">Đang gửi...</span>`
+                : `<button class="btn-send-now" onclick="AdminApp.sendCampaignNow(${c.id},'${c.name.replace(/'/g,"\\'")}',this)"><i class="ph ph-paper-plane-tilt"></i> Gửi ngay</button>${sentInfo}`;
 
             return `<tr>
                 <td>
@@ -2728,7 +2734,9 @@
         document.getElementById('campaign-body').value    = campaign?.body || '';
         document.getElementById('campaign-voucher-mode').value = campaign?.voucher_mode || 'auto';
         document.getElementById('campaign-discount').value = campaign?.auto_discount_percent ?? 10;
-        document.getElementById('campaign-status').value  = campaign?.status === 'scheduled' ? 'scheduled' : 'draft';
+        const st = campaign?.status;
+        document.getElementById('campaign-status').value = (st === 'scheduled' || st === 'recurring') ? st : 'draft';
+        document.getElementById('campaign-repeat-interval').value = campaign?.repeat_interval || 'daily';
 
         const cond = campaign?.conditions || {};
         document.getElementById('cond-min-days').value      = cond.checkout_min_days ?? 30;
@@ -2786,7 +2794,8 @@
 
     function onCampaignStatusChange() {
         const status = document.getElementById('campaign-status')?.value;
-        document.getElementById('campaign-send-at-wrap').style.display = status === 'scheduled' ? 'block' : 'none';
+        document.getElementById('campaign-send-at-wrap').style.display  = status === 'scheduled' ? 'block' : 'none';
+        document.getElementById('campaign-repeat-wrap').style.display   = status === 'recurring' ? 'block' : 'none';
     }
 
     async function previewEligible() {
@@ -2844,10 +2853,11 @@
                 min_spent:         parseInt(document.getElementById('cond-min-spent').value) || 0,
                 order_statuses:    ['confirmed', 'completed', 'pending'],
             },
-            recipient_mode: rMode,
-            recipient_data: rData,
-            status:  document.getElementById('campaign-status').value,
-            send_at: document.getElementById('campaign-send-at').value || null,
+            recipient_mode:    rMode,
+            recipient_data:    rData,
+            status:            document.getElementById('campaign-status').value,
+            send_at:           document.getElementById('campaign-send-at').value || null,
+            repeat_interval:   document.getElementById('campaign-repeat-interval').value || null,
         };
 
         const res = await apiFetch(url, { method, body: JSON.stringify(payload) });

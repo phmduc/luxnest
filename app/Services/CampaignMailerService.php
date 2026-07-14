@@ -179,7 +179,8 @@ class CampaignMailerService
         $campaign->update([
             'sent_count' => $campaign->sent_count + $sent,
             'sent_at'    => now(),
-            'status'     => 'sent',
+            // Recurring campaigns stay 'recurring'; one-shot becomes 'sent'
+            'status'     => $campaign->repeat_interval ? 'recurring' : 'sent',
         ]);
 
         return $sent;

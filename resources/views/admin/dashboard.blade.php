@@ -1719,16 +1719,32 @@
             <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:16px;">
                 <h3 style="margin:0 0 14px;font-size:0.78rem;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);">Thời gian gửi</h3>
                 <div class="mf-group">
-                    <label class="mf-label">Trạng thái</label>
+                    <label class="mf-label">Chế độ</label>
                     <select id="campaign-status" class="mf-select" onchange="AdminApp.onCampaignStatusChange()">
-                        <option value="draft">Lưu nháp</option>
-                        <option value="scheduled">Xếp lịch tự động</option>
+                        <option value="draft">Lưu nháp (chưa gửi)</option>
+                        <option value="scheduled">Gửi 1 lần — đúng giờ đặt</option>
+                        <option value="recurring">Lặp lại định kỳ — tự động gửi tiếp</option>
                     </select>
                 </div>
+                {{-- One-shot datetime --}}
                 <div id="campaign-send-at-wrap" style="display:none;margin-top:12px;">
                     <div class="mf-group">
                         <label class="mf-label">Ngày & giờ gửi</label>
                         <input type="datetime-local" id="campaign-send-at" class="mf-input">
+                    </div>
+                </div>
+                {{-- Recurring interval --}}
+                <div id="campaign-repeat-wrap" style="display:none;margin-top:12px;">
+                    <div class="mf-group">
+                        <label class="mf-label">Lặp lại mỗi</label>
+                        <select id="campaign-repeat-interval" class="mf-select">
+                            <option value="daily">Ngày — kiểm tra & gửi mỗi ngày 1 lần</option>
+                            <option value="weekly">Tuần — kiểm tra & gửi mỗi tuần 1 lần</option>
+                        </select>
+                        <p style="margin:6px 0 0;font-size:0.72rem;color:var(--text-muted);">
+                            <i class="ph ph-info"></i>
+                            Mỗi lần chạy chỉ gửi cho khách chưa nhận email này. Khách đã nhận sẽ không bị gửi lại.
+                        </p>
                     </div>
                 </div>
             </div>
