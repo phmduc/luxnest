@@ -2458,7 +2458,7 @@
         openMediaLibrary(
             async (selectedItems) => {
                 const paths = selectedItems.map(s => s.path);
-                const res   = await apiFetch(ADMIN_BASE + '/gallery-photos/batch', 'POST', { images: paths });
+                const res   = await apiFetch(ADMIN_BASE + '/gallery-photos/batch', { method: 'POST', body: { images: paths } });
                 if (res?.success) loadGalleryPhotos();
             },
             ADMIN_BASE + '/gallery-photos/upload-image',
