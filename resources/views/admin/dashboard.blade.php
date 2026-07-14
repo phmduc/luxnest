@@ -1844,7 +1844,7 @@
 {{-- ═══════════════════ MEDIA LIBRARY MODAL (admin only) ═══════════════════ --}}
 @if(auth()->user()->isAdmin())
 <div id="media-library-modal" class="modal-overlay" style="display:none;">
-    <div class="modal-content" style="max-width:880px; max-height:92vh; display:flex; flex-direction:column;">
+    <div class="modal-content" style="max-width:880px; max-height:92vh; display:flex; flex-direction:column; overflow:hidden;">
         <button class="modal-close" id="media-lib-close"><i class="ph ph-x"></i></button>
         <h2 style="font-size:1.2rem;font-weight:800;color:var(--text);margin-bottom:14px;flex-shrink:0;">
             <i class="ph ph-images" style="color:var(--orange);"></i> Chọn Ảnh
@@ -1861,7 +1861,7 @@
         </div>
 
         {{-- Library section --}}
-        <div id="media-lib-section-library" style="display:flex;flex-direction:column;flex:1;min-height:0;">
+        <div id="media-lib-section-library" style="display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;">
             <div style="flex-shrink:0;padding-top:12px;">
                 <input type="text" id="media-lib-search" class="media-lib-search-input"
                        placeholder="Tìm kiếm tên file..." oninput="AdminApp.handleMediaLibSearch()">
@@ -1873,7 +1873,7 @@
                 <button class="media-lib-tab"         data-folder="gallery" onclick="AdminApp.loadMediaLibraryImages('gallery', this, true)">Gallery</button>
                 <button class="media-lib-tab"         data-folder="news"    onclick="AdminApp.loadMediaLibraryImages('news',    this, true)">Tin tức</button>
             </div>
-            <div id="media-lib-grid" class="media-lib-grid" style="flex:1;overflow-y:auto;margin-top:12px;align-content:start;">
+            <div id="media-lib-grid" class="media-lib-grid" style="flex:1;overflow-y:auto;margin-top:12px;">
                 <div class="table-empty-state"><i class="ph ph-images"></i><span>Đang tải...</span></div>
             </div>
             <div id="media-lib-sentinel" style="height:1px;flex-shrink:0;"></div>

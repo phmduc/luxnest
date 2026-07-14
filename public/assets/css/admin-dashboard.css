@@ -1557,7 +1557,6 @@ textarea.mf-input { resize: vertical; }
 }
 
 .media-lib-item {
-    aspect-ratio: 1;
     border-radius: 8px;
     overflow: hidden;
     cursor: pointer;
@@ -1565,9 +1564,12 @@ textarea.mf-input { resize: vertical; }
     border: 2px solid transparent;
     transition: border-color .15s, transform .15s;
     background: var(--bg2);
+    padding-top: 100%; /* forces 1:1 square */
 }
 .media-lib-item:hover { border-color: var(--orange); transform: scale(1.03); }
 .media-lib-item img {
+    position: absolute;
+    inset: 0;
     width: 100%; height: 100%;
     object-fit: cover; display: block;
 }
