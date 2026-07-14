@@ -824,8 +824,8 @@
                 <div class="section-toolbar">
                     <h2>Gallery Ảnh</h2>
                     <div class="toolbar-actions">
-                        <button class="btn-primary" onclick="AdminApp.openGalleryPhotoModal()">
-                            <i class="ph ph-plus"></i> Thêm ảnh
+                        <button class="btn-primary" onclick="AdminApp.openGalleryBatchAdd()">
+                            <i class="ph ph-images"></i> Thêm ảnh
                         </button>
                     </div>
                 </div>

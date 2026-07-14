@@ -2389,8 +2389,7 @@
         }
         const photos = res.data;
         if (!photos.length) {
-            grid.innerHTML = '<div class="table-empty-state"><i class="ph ph-images"></i><span>Chưa có ảnh nào. Nhấn "Thêm ảnh" để bắt đầu.</span></div>';
-            return;
+            grid.innerHTML = '';
         }
 
         grid.innerHTML = '';
