@@ -1129,7 +1129,7 @@ class AdminDashboardController extends Controller
     {
         $folder  = $request->get('folder', 'all');
         $page    = max(1, (int) $request->get('page', 1));
-        $perPage = 16;
+        $perPage = 24;
         $search  = strtolower(trim($request->get('search', '')));
         $allowed = ['rooms', 'villas', 'gallery', 'news', 'settings'];
         $exts    = ['jpg', 'jpeg', 'png', 'webp', 'gif'];

@@ -2166,9 +2166,8 @@
     // Media Library (admin only)
     // ---------------------------------------------------------------
 
-    const mediaLib = { folder: 'all', page: 1, loading: false, hasMore: false, search: '', searchTimer: null, uploadUrl: '' };
+    const mediaLib = { page: 1, loading: false, hasMore: false, search: '', searchTimer: null, uploadUrl: '' };
     let mediaLibraryOnPick = null;
-    let mediaLibSentinelObserver = null;
 
     function openMediaLibrary(onPick, uploadUrl) {
         if (typeof USER_ROLE !== 'undefined' && USER_ROLE !== 'admin') return;
@@ -2178,18 +2177,16 @@
         if (!modal) return;
         modal.style.display = 'flex';
         switchMediaLibTab('library');
-        document.querySelectorAll('.media-lib-tab').forEach(t => t.classList.toggle('active', t.dataset.folder === 'all'));
         const searchEl = document.getElementById('media-lib-search');
         if (searchEl) searchEl.value = '';
         mediaLib.search = '';
-        loadMediaLibraryImages('all', null, true);
+        loadMediaLibraryImages(true);
     }
 
     function closeMediaLibrary() {
         const modal = document.getElementById('media-library-modal');
         if (modal) modal.style.display = 'none';
         mediaLibraryOnPick = null;
-        if (mediaLibSentinelObserver) { mediaLibSentinelObserver.disconnect(); mediaLibSentinelObserver = null; }
     }
 
     function switchMediaLibTab(tab) {
@@ -2214,28 +2211,23 @@
         }
     }
 
-    async function loadMediaLibraryImages(folder, tabEl, reset) {
+    async function loadMediaLibraryImages(reset) {
         if (reset === undefined) reset = true;
         if (mediaLib.loading) return;
         if (!reset && !mediaLib.hasMore) return;
-        if (tabEl) {
-            document.querySelectorAll('.media-lib-tab').forEach(t => t.classList.remove('active'));
-            tabEl.classList.add('active');
-        }
         if (reset) {
-            mediaLib.folder = folder || 'all';
             mediaLib.page   = 1;
             mediaLib.hasMore = false;
-            if (mediaLibSentinelObserver) { mediaLibSentinelObserver.disconnect(); mediaLibSentinelObserver = null; }
         }
-        const grid = document.getElementById('media-lib-grid');
+        const grid    = document.getElementById('media-lib-grid');
+        const moreBtn = document.getElementById('media-lib-more');
         if (!grid) return;
         if (reset) {
             grid.innerHTML = '<div class="table-empty-state" style="grid-column:1/-1;"><i class="ph ph-spinner"></i><span>Đang tải...</span></div>';
         }
+        if (moreBtn) moreBtn.style.display = 'none';
         mediaLib.loading = true;
-        const url = ADMIN_BASE + '/media-library?folder=' + encodeURIComponent(mediaLib.folder)
-                  + '&page=' + mediaLib.page
+        const url = ADMIN_BASE + '/media-library?folder=all&page=' + mediaLib.page
                   + '&search=' + encodeURIComponent(mediaLib.search);
         const res = await apiFetch(url);
         mediaLib.loading = false;
@@ -2253,30 +2245,20 @@
             grid.appendChild(item);
         });
         mediaLib.hasMore = !!res.has_more;
-        if (mediaLib.hasMore) {
-            mediaLib.page++;
-            observeMediaLibSentinel();
-        }
+        mediaLib.page++;
+        if (moreBtn) moreBtn.style.display = mediaLib.hasMore ? 'block' : 'none';
+    }
+
+    function loadMoreMediaLib() {
+        loadMediaLibraryImages(false);
     }
 
     function handleMediaLibSearch() {
         clearTimeout(mediaLib.searchTimer);
         mediaLib.searchTimer = setTimeout(() => {
             mediaLib.search = (document.getElementById('media-lib-search')?.value || '').trim();
-            loadMediaLibraryImages(mediaLib.folder, null, true);
+            loadMediaLibraryImages(true);
         }, 400);
-    }
-
-    function observeMediaLibSentinel() {
-        const sentinel = document.getElementById('media-lib-sentinel');
-        if (!sentinel) return;
-        if (mediaLibSentinelObserver) mediaLibSentinelObserver.disconnect();
-        mediaLibSentinelObserver = new IntersectionObserver(entries => {
-            if (entries[0].isIntersecting && mediaLib.hasMore && !mediaLib.loading) {
-                loadMediaLibraryImages(mediaLib.folder, null, false);
-            }
-        }, { threshold: 0.1 });
-        mediaLibSentinelObserver.observe(sentinel);
     }
 
     async function handleMediaLibUpload(file) {
@@ -2627,6 +2609,7 @@
         closeMediaLibrary,
         switchMediaLibTab,
         loadMediaLibraryImages,
+        loadMoreMediaLib,
         handleMediaLibSearch,
         handleMediaLibDrop,
         handleMediaLibFileSelect,

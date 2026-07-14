@@ -1866,17 +1866,14 @@
                 <input type="text" id="media-lib-search" class="media-lib-search-input"
                        placeholder="Tìm kiếm tên file..." oninput="AdminApp.handleMediaLibSearch()">
             </div>
-            <div class="media-lib-tabs" style="flex-shrink:0;margin-top:10px;">
-                <button class="media-lib-tab active" data-folder="all"     onclick="AdminApp.loadMediaLibraryImages('all',     this, true)">Tất cả</button>
-                <button class="media-lib-tab"         data-folder="rooms"   onclick="AdminApp.loadMediaLibraryImages('rooms',   this, true)">Phòng</button>
-                <button class="media-lib-tab"         data-folder="villas"  onclick="AdminApp.loadMediaLibraryImages('villas',  this, true)">Villa</button>
-                <button class="media-lib-tab"         data-folder="gallery" onclick="AdminApp.loadMediaLibraryImages('gallery', this, true)">Gallery</button>
-                <button class="media-lib-tab"         data-folder="news"    onclick="AdminApp.loadMediaLibraryImages('news',    this, true)">Tin tức</button>
-            </div>
             <div id="media-lib-grid" class="media-lib-grid" style="flex:1;overflow-y:auto;margin-top:12px;">
-                <div class="table-empty-state"><i class="ph ph-images"></i><span>Đang tải...</span></div>
+                <div class="table-empty-state" style="grid-column:1/-1;"><i class="ph ph-images"></i><span>Đang tải...</span></div>
             </div>
-            <div id="media-lib-sentinel" style="height:1px;flex-shrink:0;"></div>
+            <div id="media-lib-more" style="flex-shrink:0;text-align:center;padding:10px 0;display:none;">
+                <button type="button" onclick="AdminApp.loadMoreMediaLib()" class="btn-view" style="padding:7px 22px;font-size:.84rem;">
+                    <i class="ph ph-arrow-down"></i> Xem thêm
+                </button>
+            </div>
         </div>
 
         {{-- Upload section --}}
