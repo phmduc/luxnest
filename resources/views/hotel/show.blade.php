@@ -389,7 +389,7 @@
                         <strong style="font-size:.95rem;color:#fff;">Cần hỗ trợ?</strong>
                         <p style="margin:4px 0 0;font-size:.85rem;color:#cbd5e1;">Liên hệ LuxNest 24/7 qua hotline hoặc chat để được tư vấn đặt phòng và giải đáp mọi thắc mắc.</p>
                     </div>
-                    <a href="tel:+84123456789"
+                    <a href="tel:{{ preg_replace('/\s+/', '', $settings->hotline ?? '') }}"
                        style="flex-shrink:0;background:#996d4e;color:#fff;padding:10px 20px;border-radius:10px;font-weight:700;font-size:.85rem;text-decoration:none;white-space:nowrap;">
                         Gọi ngay
                     </a>

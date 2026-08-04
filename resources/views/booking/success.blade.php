@@ -59,7 +59,7 @@
         </div>
 
         <p style="margin-top:20px;font-size:.78rem;color:#94a3b8;">
-            <i class="fa-solid fa-headset"></i> Hotline hỗ trợ: <a href="tel:+84123456789" style="color:#1a1a1a;font-weight:600;">0123 456 789</a>
+            <i class="fa-solid fa-headset"></i> Hotline hỗ trợ: <a href="tel:{{ preg_replace('/\s+/', '', $settings->hotline ?? '') }}" style="color:#1a1a1a;font-weight:600;">{{ $settings->hotline ?? '' }}</a>
         </p>
     </div>
 </div>

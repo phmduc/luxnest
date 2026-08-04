@@ -178,8 +178,8 @@
                 <h1>🚗 Dịch Vụ Cho Thuê Xe</h1>
                 <p>Đặt xe kèm lái xe riêng 24/7 – phục vụ tận nơi tại LuxNest</p>
             </div>
-            <a href="tel:+84123456789" class="cr-hotline-btn">
-                📞 Hotline: 0123 456 789
+            <a href="tel:{{ preg_replace('/\s+/', '', $settings->hotline ?? '') }}" class="cr-hotline-btn">
+                📞 Hotline: {{ $settings->hotline ?? '' }}
             </a>
         </div>
 
@@ -262,7 +262,7 @@
                 <span>✅</span>
                 <div>
                     <strong>Yêu cầu đã được gửi!</strong>
-                    <p>Đội ngũ LuxNest sẽ liên hệ với bạn trong vòng 15 phút. Hoặc gọi ngay <a href="tel:+84123456789">0123 456 789</a>.</p>
+                    <p>Đội ngũ LuxNest sẽ liên hệ với bạn trong vòng 15 phút. Hoặc gọi ngay <a href="tel:{{ preg_replace('/\s+/', '', $settings->hotline ?? '') }}">{{ $settings->hotline ?? '' }}</a>.</p>
                 </div>
             </div>
         </div>

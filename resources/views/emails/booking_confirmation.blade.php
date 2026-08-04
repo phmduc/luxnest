@@ -168,7 +168,7 @@
                                 <div class="note-box">
                                     <strong>💳 Thanh toán:</strong> Thanh toán tại khách sạn khi nhận phòng.<br>
                                     <strong>📋 Lưu ý:</strong> Vui lòng mang theo CMND/CCCD khi làm thủ tục nhận phòng.<br>
-                                    <strong>📞 Hỗ trợ:</strong> Hotline <a href="tel:+84123456789" style="color:#92400e;font-weight:700;">0123 456 789</a>
+                                    <strong>📞 Hỗ trợ:</strong> Hotline <a href="tel:{{ preg_replace('/\s+/', '', $settings->hotline ?? '') }}" style="color:#92400e;font-weight:700;">{{ $settings->hotline ?? '' }}</a>
                                 </div>
 
                                 {{-- QR Code Check-in --}}
@@ -216,7 +216,7 @@
                     <tr>
                         <td id="template_footer">
                             <p>© {{ date('Y') }} LuxNest — Premium Accommodation<br>
-                            📧 {{ config('mail.from.address') }} &nbsp;|&nbsp; 📞 0123 456 789</p>
+                            📧 {{ config('mail.from.address') }} &nbsp;|&nbsp; 📞 {{ $settings->hotline ?? '' }}</p>
                         </td>
                     </tr>
 
