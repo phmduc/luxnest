@@ -8,33 +8,6 @@
 
 .cr-wrap { max-width: 900px; margin: 0 auto; padding: 0 20px; }
 
-.cr-header {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 20px;
-    margin-bottom: 32px;
-    flex-wrap: wrap;
-}
-.cr-header h1 { font-size: 28px; font-weight: 800; color: #0f172a; margin-bottom: 6px; }
-.cr-header p  { color: #64748b; font-size: 15px; margin: 0; }
-
-.cr-hotline-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 24px;
-    background: #996d4e;
-    color: #fff;
-    border-radius: 10px;
-    font-weight: 700;
-    font-size: 15px;
-    text-decoration: none;
-    white-space: nowrap;
-    transition: background 0.2s, transform 0.2s;
-}
-.cr-hotline-btn:hover { background: #e64f00; color: #fff; transform: translateY(-2px); }
-
 /* Table */
 .cr-table-wrap {
     background: #fff;
@@ -191,8 +164,6 @@
     .cr-form-wrap { padding: 24px 18px; }
     .cr-table { font-size: 13px; }
     .cr-table th, .cr-table td { padding: 10px 12px; }
-    .cr-header { flex-direction: column; align-items: flex-start; }
-    .cr-hotline-btn { width: 100%; justify-content: center; }
 }
 </style>
 @endpush
@@ -206,15 +177,6 @@
             $crHtml  = preg_replace('~<p>\s*\[form\]\s*</p>~i', '[form]', $crHtml);
             $crParts = preg_split('/\[form\]/i', $crHtml, 2);
         @endphp
-
-        {{-- Hotline --}}
-        @if(!empty($settings->hotline))
-        <div class="cr-header">
-            <a href="tel:{{ preg_replace('/\s+/', '', $settings->hotline) }}" class="cr-hotline-btn">
-                📞 Hotline: {{ $settings->hotline }}
-            </a>
-        </div>
-        @endif
 
         {{-- Nội dung soạn trong admin --}}
         <div class="cr-rich">{!! $crParts[0] !!}</div>
