@@ -8,15 +8,18 @@ use Illuminate\Support\Str;
 use RuntimeException;
 
 /**
- * Tải ảnh từ URL bên ngoài về thư viện media của website.
+ * Đưa ảnh từ bên ngoài vào thư viện media của website.
  *
- * Dùng cho MCP client (ChatGPT) — nó chỉ gửi được JSON nên không tự upload
- * file được; đưa link ảnh vào đây thì ảnh nằm hẳn trên server mình, không
- * phụ thuộc host bên ngoài.
+ * Dùng cho MCP client (ChatGPT) — nó chỉ gửi được JSON nên không upload file
+ * theo kiểu form được: hoặc đưa link để server tự tải (fromUrl), hoặc nhét
+ * thẳng dữ liệu ảnh dạng base64 vào tool (fromBase64).
  */
-class RemoteImage
+class ImageImporter
 {
     public const MAX_BYTES = 8388608; // 8 MB
+
+    /** Base64 phình ~33%, mà post_max_size của PHP là 8M nên chặn sớm hơn. */
+    public const MAX_BASE64_BYTES = 4194304; // 4 MB
 
     private const EXTENSIONS = [
         'image/jpeg' => 'jpg',
@@ -28,7 +31,7 @@ class RemoteImage
     /**
      * @return array{url: string, path: string, mime: string, bytes: int, width: int, height: int}
      */
-    public static function download(string $url, string $folder = 'news', ?string $filename = null): array
+    public static function fromUrl(string $url, string $folder = 'news', ?string $filename = null): array
     {
         static::assertPublicUrl($url);
 
@@ -47,15 +50,48 @@ class RemoteImage
             throw new RuntimeException("Không tải được ảnh (HTTP {$response->status()}).");
         }
 
-        $body  = $response->body();
+        return static::store(
+            $response->body(),
+            $folder,
+            $filename ?: basename((string) parse_url($url, PHP_URL_PATH)),
+            self::MAX_BYTES
+        );
+    }
+
+    /**
+     * Ảnh gửi thẳng dưới dạng base64 (chấp nhận cả data URI).
+     *
+     * @return array{url: string, path: string, mime: string, bytes: int, width: int, height: int}
+     */
+    public static function fromBase64(string $data, string $folder = 'news', ?string $filename = null): array
+    {
+        $data = preg_replace('/^data:image\/[a-z.+-]+;base64,/i', '', trim($data)) ?? '';
+        $data = preg_replace('/\s+/', '', $data) ?? '';
+
+        if ($data === '') {
+            throw new RuntimeException('Thiếu dữ liệu ảnh base64.');
+        }
+
+        $binary = base64_decode($data, true);
+
+        if ($binary === false) {
+            throw new RuntimeException('Chuỗi base64 không hợp lệ (có thể bị cắt giữa chừng — thử ảnh nhỏ hơn).');
+        }
+
+        return static::store($binary, $folder, $filename ?: 'anh', self::MAX_BASE64_BYTES);
+    }
+
+    /** @return array{url: string, path: string, mime: string, bytes: int, width: int, height: int} */
+    private static function store(string $body, string $folder, string $name, int $maxBytes): array
+    {
         $bytes = strlen($body);
 
         if ($bytes === 0) {
-            throw new RuntimeException('File tải về rỗng.');
+            throw new RuntimeException('Dữ liệu ảnh rỗng.');
         }
 
-        if ($bytes > self::MAX_BYTES) {
-            throw new RuntimeException('Ảnh nặng hơn 8 MB, hãy dùng ảnh nhỏ hơn.');
+        if ($bytes > $maxBytes) {
+            throw new RuntimeException('Ảnh nặng hơn ' . round($maxBytes / 1048576) . ' MB, hãy dùng ảnh nhỏ hơn.');
         }
 
         $info = @getimagesizefromstring($body);
@@ -65,7 +101,7 @@ class RemoteImage
             throw new RuntimeException('File không phải ảnh hợp lệ (chỉ nhận JPG, PNG, WEBP, GIF).');
         }
 
-        $path = static::buildPath($folder, $filename ?: basename((string) parse_url($url, PHP_URL_PATH)), self::EXTENSIONS[$mime]);
+        $path = static::buildPath($folder, $name, self::EXTENSIONS[$mime]);
 
         Storage::disk('public')->put($path, $body);
 

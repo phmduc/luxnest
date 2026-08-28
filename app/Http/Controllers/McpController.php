@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\News;
 use App\Support\HtmlSanitizer;
-use App\Support\RemoteImage;
+use App\Support\ImageImporter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -94,7 +94,7 @@ class McpController extends Controller
                     'name'    => config('mcp.name'),
                     'version' => config('mcp.version'),
                 ],
-                'instructions' => 'Quản lý bài viết blog (tin tức) của website. Nội dung bài viết viết bằng HTML đơn giản; dùng list_images để lấy URL ảnh có sẵn, hoặc upload_image_from_url để tải ảnh mới từ link về server, rồi chèn <img> vào bài.',
+                'instructions' => 'Quản lý bài viết blog (tin tức) của website. Nội dung bài viết viết bằng HTML đơn giản; dùng list_images để lấy URL ảnh có sẵn, upload_image_from_url để tải ảnh mới từ link về server, hoặc upload_image_base64 để gửi thẳng ảnh tự tạo, rồi chèn <img> vào bài.',
             ]),
             'ping'       => $this->result($id, (object) []),
             'tools/list' => $this->result($id, ['tools' => $this->tools()]),
@@ -217,6 +217,19 @@ class McpController extends Controller
                 ],
             ],
             [
+                'name'        => 'upload_image_base64',
+                'description' => 'Đưa một ảnh vào thư viện media bằng dữ liệu base64 và trả về URL trên luxnest.vn để chèn vào bài viết. Dùng cho ảnh tự tạo hoặc ảnh không có link công khai. Chỉ nhận JPG/PNG/WEBP/GIF, tối đa 4 MB sau khi giải mã — ảnh lớn hơn hãy nén hoặc thu nhỏ trước khi gửi.',
+                'inputSchema' => [
+                    'type'       => 'object',
+                    'properties' => [
+                        'data'     => ['type' => 'string', 'description' => 'Dữ liệu ảnh mã hóa base64 (chấp nhận cả dạng data:image/png;base64,...)'],
+                        'filename' => ['type' => 'string', 'description' => 'Tên file gợi ý, không bắt buộc (vd: da-lat-mua-mua)'],
+                        'folder'   => ['type' => 'string', 'enum' => ['news', 'rooms', 'villas', 'gallery'], 'description' => 'Thư mục lưu, mặc định news'],
+                    ],
+                    'required'   => ['data'],
+                ],
+            ],
+            [
                 'name'        => 'create_post',
                 'description' => 'Tạo bài viết blog mới. Mặc định lưu ở trạng thái draft (bản nháp) nếu không truyền status.',
                 'inputSchema' => [
@@ -259,7 +272,8 @@ class McpController extends Controller
                 'fetch'       => $this->toolFetch($args),
                 'list_posts'  => $this->toolListPosts($args),
                 'list_images' => $this->toolListImages($args),
-                'upload_image_from_url' => $this->toolUploadImage($args),
+                'upload_image_from_url' => $this->toolUploadImageFromUrl($args),
+                'upload_image_base64'   => $this->toolUploadImageBase64($args),
                 'get_post'    => $this->toolGetPost($args),
                 'create_post' => $this->toolCreatePost($args),
                 'update_post' => $this->toolUpdatePost($args),
@@ -375,7 +389,16 @@ class McpController extends Controller
         ];
     }
 
-    private function toolUploadImage(array $args): array
+    private function toolUploadImageBase64(array $args): array
+    {
+        return ImageImporter::fromBase64(
+            (string) ($args['data'] ?? ''),
+            (string) ($args['folder'] ?? 'news'),
+            $args['filename'] ?? null
+        );
+    }
+
+    private function toolUploadImageFromUrl(array $args): array
     {
         $url = trim((string) ($args['url'] ?? ''));
 
@@ -383,7 +406,7 @@ class McpController extends Controller
             throw new \InvalidArgumentException('Thiếu url của ảnh cần tải.');
         }
 
-        return RemoteImage::download($url, (string) ($args['folder'] ?? 'news'), $args['filename'] ?? null);
+        return ImageImporter::fromUrl($url, (string) ($args['folder'] ?? 'news'), $args['filename'] ?? null);
     }
 
     private function toolCreatePost(array $args): array
