@@ -867,6 +867,7 @@
                             <button type="button" class="rte-btn" title="Bỏ link" onclick="AdminApp.rteCmd('unlink')"><i class="ph ph-link-break"></i></button>
                             <button type="button" class="rte-btn" title="Chèn ảnh" onclick="AdminApp.rteImage()"><i class="ph ph-image"></i></button>
                             <button type="button" class="rte-btn" title="Chèn video YouTube / Vimeo" onclick="AdminApp.rteVideo()"><i class="ph ph-youtube-logo"></i></button>
+                            <button type="button" class="rte-btn" title="Chèn bảng" onclick="AdminApp.rteTable()"><i class="ph ph-table"></i></button>
                             <span class="rte-sep"></span>
                             <button type="button" class="rte-btn" title="Xoá định dạng" onclick="AdminApp.rteCmd('removeFormat')"><i class="ph ph-eraser"></i></button>
                         </div>
@@ -911,6 +912,7 @@
                             <button type="button" class="rte-btn" title="Bỏ link" onclick="AdminApp.rteCmd('unlink')"><i class="ph ph-link-break"></i></button>
                             <button type="button" class="rte-btn" title="Chèn ảnh" onclick="AdminApp.rteImage()"><i class="ph ph-image"></i></button>
                             <button type="button" class="rte-btn" title="Chèn video YouTube / Vimeo" onclick="AdminApp.rteVideo()"><i class="ph ph-youtube-logo"></i></button>
+                            <button type="button" class="rte-btn" title="Chèn bảng" onclick="AdminApp.rteTable()"><i class="ph ph-table"></i></button>
                             <span class="rte-sep"></span>
                             <button type="button" class="rte-btn" title="Xoá định dạng" onclick="AdminApp.rteCmd('removeFormat')"><i class="ph ph-eraser"></i></button>
                         </div>
@@ -1596,6 +1598,7 @@
                             <button type="button" class="rte-btn" title="Bỏ link" onclick="AdminApp.rteCmd('unlink')"><i class="ph ph-link-break"></i></button>
                             <button type="button" class="rte-btn" title="Chèn ảnh vào nội dung" onclick="AdminApp.rteImage()"><i class="ph ph-image"></i></button>
                             <button type="button" class="rte-btn" title="Chèn video YouTube / Vimeo" onclick="AdminApp.rteVideo()"><i class="ph ph-youtube-logo"></i></button>
+                            <button type="button" class="rte-btn" title="Chèn bảng" onclick="AdminApp.rteTable()"><i class="ph ph-table"></i></button>
                             <span class="rte-sep"></span>
                             <button type="button" class="rte-btn" title="Xoá định dạng" onclick="AdminApp.rteCmd('removeFormat')"><i class="ph ph-eraser"></i></button>
                         </div>

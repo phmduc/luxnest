@@ -1943,6 +1943,66 @@
         }, ADMIN_BASE + '/news/upload-image', true);
     }
 
+    function rteTable() {
+        rteSaveRange();
+
+        const size = prompt('Bảng mấy dòng x mấy cột? (dòng đầu là tiêu đề)', '3x3');
+        if (!size) return;
+
+        const m = String(size).match(/^\s*(\d+)\s*[x*×]\s*(\d+)\s*$/i);
+        if (!m) { alert('Nhập theo dạng số dòng x số cột, ví dụ 3x4.'); return; }
+
+        const rows = Math.min(30, Math.max(1, parseInt(m[1], 10)));
+        const cols = Math.min(10, Math.max(1, parseInt(m[2], 10)));
+
+        const head = '<tr>' + '<th>Tiêu đề</th>'.repeat(cols) + '</tr>';
+        const body = ('<tr>' + '<td>&nbsp;</td>'.repeat(cols) + '</tr>').repeat(Math.max(0, rows - 1));
+
+        rteInsertHtml(
+            `<div class="table-scroll"><table><thead>${head}</thead><tbody>${body}</tbody></table></div><p><br></p>`
+        );
+    }
+
+    /** Tab để nhảy ô; Tab ở ô cuối thì thêm dòng mới. */
+    function rteTableKeydown(e) {
+        if (e.key !== 'Tab' || !e.target.classList?.contains('rte-editor')) return;
+
+        const sel  = window.getSelection();
+        const cell = sel?.anchorNode?.parentElement?.closest?.('td, th');
+        if (!cell) return;
+
+        e.preventDefault();
+
+        const cells = [...cell.closest('table').querySelectorAll('td, th')];
+        const next  = cells[cells.indexOf(cell) + (e.shiftKey ? -1 : 1)];
+
+        if (next) {
+            rteSelectCell(next);
+            return;
+        }
+
+        if (e.shiftKey) return;
+
+        const row     = cell.closest('tr');
+        const newRow  = row.cloneNode(true);
+        newRow.querySelectorAll('td, th').forEach(c => { c.innerHTML = '&nbsp;'; });
+        row.parentNode.appendChild(newRow);
+        rteSelectCell(newRow.querySelector('td, th'));
+    }
+
+    function rteSelectCell(cell) {
+        const range = document.createRange();
+        range.selectNodeContents(cell);
+        range.collapse(true);
+
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+        rteRange = range;
+    }
+
+    document.addEventListener('keydown', rteTableKeydown);
+
     function rteVideo() {
         rteSaveRange();
         const input = prompt('Dán link video YouTube hoặc Vimeo');
@@ -2865,6 +2925,7 @@
         rteBlock,
         rteLink,
         rteImage,
+        rteTable,
         rteVideo,
         deleteNews,
         openNewsImagePicker,

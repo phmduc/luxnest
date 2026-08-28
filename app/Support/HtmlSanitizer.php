@@ -35,6 +35,14 @@ class HtmlSanitizer
         'hr'         => [],
         'figure'     => [],
         'figcaption' => [],
+        'table'      => [],
+        'thead'      => [],
+        'tbody'      => [],
+        'tfoot'      => [],
+        'tr'         => [],
+        'th'         => ['colspan', 'rowspan'],
+        'td'         => ['colspan', 'rowspan'],
+        'caption'    => [],
         'a'          => ['href', 'title', 'target', 'rel'],
         'img'        => ['src', 'alt'],
         'div'        => ['class'],
@@ -44,13 +52,15 @@ class HtmlSanitizer
     /** Tags whose content is dropped entirely, not unwrapped. */
     private const DROP = ['script', 'style', 'head', 'meta', 'link', 'object', 'embed', 'form', 'input', 'svg'];
 
+    private const SPAN_ATTRIBUTES = ['colspan', 'rowspan'];
+
     /** Only these hosts may appear in an <iframe src>. */
     private const EMBED_HOSTS = [
         'www.youtube.com', 'youtube.com', 'www.youtube-nocookie.com', 'youtube-nocookie.com',
         'player.vimeo.com', 'www.tiktok.com', 'tiktok.com', 'www.facebook.com', 'facebook.com',
     ];
 
-    private const ALLOWED_DIV_CLASSES = ['news-embed'];
+    private const ALLOWED_DIV_CLASSES = ['news-embed', 'table-scroll'];
 
     /** Nội dung đã lưu -> HTML an toàn để in ra trang. Bài cũ dạng text thuần vẫn giữ xuống dòng. */
     public static function render(?string $content): string
@@ -68,14 +78,14 @@ class HtmlSanitizer
         $html = static::clean($content);
 
         // Nội dung chỉ có thẻ inline (không có <p>, <br>...) thì vẫn phải giữ xuống dòng.
-        return preg_match('/<(p|div|h2|h3|h4|ul|ol|li|br|figure|blockquote|iframe|img|hr)\b/i', $html)
+        return preg_match('/<(p|div|h2|h3|h4|ul|ol|li|br|figure|blockquote|iframe|img|hr|table)\b/i', $html)
             ? $html
             : nl2br($html);
     }
 
     public static function looksLikeHtml(string $content): bool
     {
-        return (bool) preg_match('/<(p|br|div|h2|h3|h4|ul|ol|li|img|a|iframe|figure|blockquote|strong|em|span|b|i|u)\b[^>]*>/i', $content);
+        return (bool) preg_match('/<(p|br|div|h2|h3|h4|ul|ol|li|img|a|iframe|figure|blockquote|strong|em|span|b|i|u|table)\b[^>]*>/i', $content);
     }
 
     /** Lọc HTML theo allow-list. Text thuần đi qua đây vẫn là text thuần. */
@@ -104,6 +114,7 @@ class HtmlSanitizer
         }
 
         static::cleanChildren($root);
+        static::wrapTables($dom, $root);
 
         $out = '';
         foreach (iterator_to_array($root->childNodes) as $child) {
@@ -111,6 +122,31 @@ class HtmlSanitizer
         }
 
         return trim($out);
+    }
+
+    /** Bọc bảng trong div cuộn ngang để không phá vỡ bố cục trên điện thoại. */
+    private static function wrapTables(DOMDocument $dom, DOMNode $root): void
+    {
+        $tables = iterator_to_array((new \DOMXPath($dom))->query('.//table', $root));
+
+        foreach ($tables as $table) {
+            $parent = $table->parentNode;
+
+            if (!$parent instanceof DOMElement && !$parent instanceof DOMNode) {
+                continue;
+            }
+
+            if ($parent instanceof DOMElement
+                && strtolower($parent->nodeName) === 'div'
+                && str_contains($parent->getAttribute('class'), 'table-scroll')) {
+                continue;
+            }
+
+            $wrapper = $dom->createElement('div');
+            $wrapper->setAttribute('class', 'table-scroll');
+            $parent->replaceChild($wrapper, $table);
+            $wrapper->appendChild($table);
+        }
     }
 
     private static function cleanChildren(DOMNode $node): void
@@ -204,6 +240,18 @@ class HtmlSanitizer
             $el->setAttribute('allowfullscreen', 'true');
             $el->setAttribute('loading', 'lazy');
             $el->setAttribute('frameborder', '0');
+        }
+
+        if ($tag === 'th' || $tag === 'td') {
+            foreach (self::SPAN_ATTRIBUTES as $attr) {
+                $span = (int) $el->getAttribute($attr);
+
+                if ($span < 2 || $span > 20) {
+                    $el->removeAttribute($attr);
+                } else {
+                    $el->setAttribute($attr, (string) $span);
+                }
+            }
         }
 
         if ($tag === 'div') {

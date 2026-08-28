@@ -315,3 +315,35 @@
     background: #faf7f4;
     color: #475569;
 }
+
+/* Bảng chèn giữa nội dung bài viết */
+.news-article-body .table-scroll {
+    overflow-x: auto;
+    margin: 20px 0;
+    -webkit-overflow-scrolling: touch;
+}
+.news-article-body table {
+    width: 100%;
+    min-width: 460px;
+    border-collapse: collapse;
+    font-size: .95rem;
+}
+.news-article-body th,
+.news-article-body td {
+    padding: 10px 14px;
+    border: 1px solid #e2e8f0;
+    text-align: left;
+    vertical-align: top;
+}
+.news-article-body th {
+    background: #f8fafc;
+    font-weight: 700;
+    color: #0f172a;
+}
+.news-article-body tbody tr:nth-child(even) { background: #fcfcfd; }
+.news-article-body caption {
+    caption-side: bottom;
+    padding-top: 8px;
+    font-size: .85rem;
+    color: #64748b;
+}

@@ -1751,3 +1751,20 @@ textarea.mf-input { resize: vertical; }
     .car-row { grid-template-columns: 1fr 1fr; }
     .car-row__del { grid-column: 1/-1; }
 }
+
+/* Bảng bên trong trình soạn thảo */
+.rte-editor .table-scroll { overflow-x: auto; margin: 12px 0; }
+.rte-editor table {
+    width: 100%;
+    min-width: 420px;
+    border-collapse: collapse;
+    font-size: .9rem;
+}
+.rte-editor th,
+.rte-editor td {
+    padding: 7px 10px;
+    border: 1px solid var(--border);
+    text-align: left;
+    min-width: 70px;
+}
+.rte-editor th { background: #F9FAFB; font-weight: 700; }

@@ -157,7 +157,7 @@ class McpController extends Controller
     {
         $postFields = [
             'title'        => ['type' => 'string', 'description' => 'Tiêu đề bài viết'],
-            'content'      => ['type' => 'string', 'description' => 'Nội dung bài viết dạng HTML đơn giản. Thẻ được phép: <p> <h2> <h3> <h4> <ul>/<ol>/<li> <strong> <em> <blockquote> <hr> <br> <figure>/<figcaption>, link <a href="..."> , ảnh <img src="URL ảnh lấy từ list_images"> và video nhúng <div class="news-embed"><iframe src="https://www.youtube.com/embed/VIDEO_ID"></iframe></div>. Thẻ ngoài danh sách này sẽ bị loại bỏ khi lưu.'],
+            'content'      => ['type' => 'string', 'description' => 'Nội dung bài viết dạng HTML đơn giản. Thẻ được phép: <p> <h2> <h3> <h4> <ul>/<ol>/<li> <strong> <em> <blockquote> <hr> <br> <figure>/<figcaption>, bảng <table>/<thead>/<tbody>/<tr>/<th>/<td> (bảng tự được bọc khung cuộn ngang, đặt xen kẽ giữa các đoạn được), link <a href="..."> , ảnh <img src="URL ảnh lấy từ list_images"> và video nhúng <div class="news-embed"><iframe src="https://www.youtube.com/embed/VIDEO_ID"></iframe></div>. Thẻ ngoài danh sách này sẽ bị loại bỏ khi lưu.'],
             'excerpt'      => ['type' => 'string', 'description' => 'Tóm tắt ngắn, tối đa 1000 ký tự'],
             'tag'          => ['type' => 'string', 'description' => 'Nhãn/chuyên mục, ví dụ: Khuyến mãi'],
             'image'        => ['type' => 'string', 'description' => 'URL ảnh đại diện (ảnh phải upload sẵn trong admin)'],
@@ -263,7 +263,7 @@ class McpController extends Controller
             ],
             [
                 'name'        => 'update_page',
-                'description' => 'Cập nhật nội dung một trang tĩnh. Chỉ truyền các trường muốn đổi trong "fields", các trường khác giữ nguyên. Trường tên kết thúc bằng _html nhận HTML đơn giản như nội dung bài viết; trường dạng danh sách (vd cars của trang Thuê xe) phải gửi đủ tất cả các dòng vì nó ghi đè cả danh sách.',
+                'description' => 'Cập nhật nội dung một trang tĩnh. Chỉ truyền các trường muốn đổi trong "fields", các trường khác giữ nguyên. Trường tên kết thúc bằng _html nhận HTML đơn giản như nội dung bài viết (kể cả <table>); trường dạng danh sách (vd cars của trang Thuê xe) phải gửi đủ tất cả các dòng vì nó ghi đè cả danh sách.',
                 'inputSchema' => [
                     'type'       => 'object',
                     'properties' => [
