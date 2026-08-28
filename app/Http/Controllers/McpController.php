@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\News;
 use App\Support\HtmlSanitizer;
+use App\Support\RemoteImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -93,7 +94,7 @@ class McpController extends Controller
                     'name'    => config('mcp.name'),
                     'version' => config('mcp.version'),
                 ],
-                'instructions' => 'Quản lý bài viết blog (tin tức) của website. Nội dung bài viết viết bằng HTML đơn giản; dùng list_images để lấy URL ảnh có sẵn trước khi chèn <img> vào bài.',
+                'instructions' => 'Quản lý bài viết blog (tin tức) của website. Nội dung bài viết viết bằng HTML đơn giản; dùng list_images để lấy URL ảnh có sẵn, hoặc upload_image_from_url để tải ảnh mới từ link về server, rồi chèn <img> vào bài.',
             ]),
             'ping'       => $this->result($id, (object) []),
             'tools/list' => $this->result($id, ['tools' => $this->tools()]),
@@ -203,6 +204,19 @@ class McpController extends Controller
                 ],
             ],
             [
+                'name'        => 'upload_image_from_url',
+                'description' => 'Tải một ảnh từ link bên ngoài về thư viện media của website và trả về URL trên luxnest.vn để chèn vào bài viết. Dùng khi cần ảnh mới chưa có trong list_images. Chỉ nhận JPG/PNG/WEBP/GIF, tối đa 8 MB.',
+                'inputSchema' => [
+                    'type'       => 'object',
+                    'properties' => [
+                        'url'      => ['type' => 'string', 'description' => 'Link ảnh công khai (http/https)'],
+                        'filename' => ['type' => 'string', 'description' => 'Tên file gợi ý, không bắt buộc (vd: da-lat-mua-mua)'],
+                        'folder'   => ['type' => 'string', 'enum' => ['news', 'rooms', 'villas', 'gallery'], 'description' => 'Thư mục lưu, mặc định news'],
+                    ],
+                    'required'   => ['url'],
+                ],
+            ],
+            [
                 'name'        => 'create_post',
                 'description' => 'Tạo bài viết blog mới. Mặc định lưu ở trạng thái draft (bản nháp) nếu không truyền status.',
                 'inputSchema' => [
@@ -245,6 +259,7 @@ class McpController extends Controller
                 'fetch'       => $this->toolFetch($args),
                 'list_posts'  => $this->toolListPosts($args),
                 'list_images' => $this->toolListImages($args),
+                'upload_image_from_url' => $this->toolUploadImage($args),
                 'get_post'    => $this->toolGetPost($args),
                 'create_post' => $this->toolCreatePost($args),
                 'update_post' => $this->toolUpdatePost($args),
@@ -358,6 +373,17 @@ class McpController extends Controller
                 ->values()
                 ->all(),
         ];
+    }
+
+    private function toolUploadImage(array $args): array
+    {
+        $url = trim((string) ($args['url'] ?? ''));
+
+        if ($url === '') {
+            throw new \InvalidArgumentException('Thiếu url của ảnh cần tải.');
+        }
+
+        return RemoteImage::download($url, (string) ($args['folder'] ?? 'news'), $args['filename'] ?? null);
     }
 
     private function toolCreatePost(array $args): array
