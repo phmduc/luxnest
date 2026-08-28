@@ -97,24 +97,9 @@ class PageContent extends Model
             ],
 
             'car-rental' => [
-                'hero_title'    => '🚗 Dịch Vụ Cho Thuê Xe',
-                'hero_subtitle' => 'Đặt xe kèm lái xe riêng 24/7 – phục vụ tận nơi tại LuxNest',
-
-                'intro_html' => '',
-
-                'cars' => [
-                    ['type' => 'Sedan 4 chỗ',     'model' => 'Toyota Camry / Mazda 6',             'price' => '800.000',   'note' => 'Phù hợp cặp đôi, công tác'],
-                    ['type' => 'MPV 7 chỗ',       'model' => 'Toyota Innova / Mitsubishi Xpander', 'price' => '1.200.000', 'note' => 'Gia đình, nhóm nhỏ'],
-                    ['type' => 'MPV Hạng Sang',   'model' => 'Toyota Alphard 2024',                'price' => '3.500.000', 'note' => 'VIP, sự kiện, đón sân bay'],
-                    ['type' => 'Sedan Hạng Sang', 'model' => 'Mercedes-Benz E/S Class',            'price' => '4.500.000', 'note' => 'Hội nghị, đối tác cao cấp'],
-                    ['type' => 'Xe 9 chỗ',        'model' => 'Hyundai Starex / Ford Transit 9',    'price' => '1.600.000', 'note' => 'Nhóm gia đình, du lịch'],
-                    ['type' => 'Xe 16 chỗ',       'model' => 'Ford Transit 16 / Hyundai County',   'price' => '2.200.000', 'note' => 'Đoàn lớn, team building'],
-                ],
-
-                'table_note' => '* Giá trên chưa bao gồm phí xăng dầu và đường cao tốc. Liên hệ để nhận báo giá cụ thể.',
-                'form_title' => '📋 Để lại thông tin – Chúng tôi sẽ liên hệ lại trong 15 phút',
-
-                'outro_html' => '',
+                // Toàn bộ nội dung trang, soạn bằng trình soạn thảo trong admin.
+                // Đặt [form] ở chỗ muốn hiện form liên hệ; không có thì form nằm cuối trang.
+                'content_html' => '<h1>🚗 Dịch Vụ Cho Thuê Xe</h1><p>Đặt xe kèm lái xe riêng 24/7 – phục vụ tận nơi tại LuxNest.</p><div class="table-scroll"><table><thead><tr><th>Loại xe</th><th>Mẫu xe</th><th>Giá từ (VNĐ/ngày)</th><th>Ghi chú</th></tr></thead><tbody><tr><td>Sedan 4 chỗ</td><td>Toyota Camry / Mazda 6</td><td>800.000đ</td><td>Phù hợp cặp đôi, công tác</td></tr><tr><td>MPV 7 chỗ</td><td>Toyota Innova / Mitsubishi Xpander</td><td>1.200.000đ</td><td>Gia đình, nhóm nhỏ</td></tr><tr><td>MPV Hạng Sang</td><td>Toyota Alphard 2024</td><td>3.500.000đ</td><td>VIP, sự kiện, đón sân bay</td></tr><tr><td>Sedan Hạng Sang</td><td>Mercedes-Benz E/S Class</td><td>4.500.000đ</td><td>Hội nghị, đối tác cao cấp</td></tr><tr><td>Xe 9 chỗ</td><td>Hyundai Starex / Ford Transit 9</td><td>1.600.000đ</td><td>Nhóm gia đình, du lịch</td></tr><tr><td>Xe 16 chỗ</td><td>Ford Transit 16 / Hyundai County</td><td>2.200.000đ</td><td>Đoàn lớn, team building</td></tr></tbody></table></div><p><em>* Giá trên chưa bao gồm phí xăng dầu và đường cao tốc. Liên hệ để nhận báo giá cụ thể.</em></p><h2>📋 Để lại thông tin – Chúng tôi sẽ liên hệ lại trong 15 phút</h2>[form]',
             ],
 
             default => [],

@@ -25,6 +25,7 @@ class HtmlSanitizer
         'em'         => [],
         'i'          => [],
         'u'          => [],
+        'h1'         => [],
         'h2'         => [],
         'h3'         => [],
         'h4'         => [],
@@ -78,14 +79,14 @@ class HtmlSanitizer
         $html = static::clean($content);
 
         // Nội dung chỉ có thẻ inline (không có <p>, <br>...) thì vẫn phải giữ xuống dòng.
-        return preg_match('/<(p|div|h2|h3|h4|ul|ol|li|br|figure|blockquote|iframe|img|hr|table)\b/i', $html)
+        return preg_match('/<(p|div|h1|h2|h3|h4|ul|ol|li|br|figure|blockquote|iframe|img|hr|table)\b/i', $html)
             ? $html
             : nl2br($html);
     }
 
     public static function looksLikeHtml(string $content): bool
     {
-        return (bool) preg_match('/<(p|br|div|h2|h3|h4|ul|ol|li|img|a|iframe|figure|blockquote|strong|em|span|b|i|u|table)\b[^>]*>/i', $content);
+        return (bool) preg_match('/<(p|br|div|h1|h2|h3|h4|ul|ol|li|img|a|iframe|figure|blockquote|strong|em|span|b|i|u|table)\b[^>]*>/i', $content);
     }
 
     /** Lọc HTML theo allow-list. Text thuần đi qua đây vẫn là text thuần. */

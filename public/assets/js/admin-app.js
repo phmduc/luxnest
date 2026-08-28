@@ -2020,7 +2020,7 @@
         if (!ed) return;
         const raw = String(content || '');
 
-        ed.innerHTML = /<(p|div|br|h2|h3|h4|ul|ol|li|img|a|iframe|figure|blockquote|strong|em)\b[^>]*>/i.test(raw)
+        ed.innerHTML = /<(p|div|br|h1|h2|h3|h4|ul|ol|li|img|a|iframe|figure|blockquote|strong|em)\b[^>]*>/i.test(raw)
             ? raw
             : raw.split(/\n{2,}/).filter(b => b.trim() !== '')
                  .map(b => '<p>' + rteEscape(b.trim()).replace(/\n/g, '<br>') + '</p>').join('');
@@ -2332,73 +2332,9 @@
         });
     }
 
-    const CAR_RENTAL_KEYS      = ['hero_title', 'hero_subtitle', 'table_note', 'form_title'];
-    const CAR_RENTAL_HTML_KEYS = ['intro_html', 'outro_html'];
-    const CAR_COLUMNS          = [
-        { col: 'type',  placeholder: 'Loại xe' },
-        { col: 'model', placeholder: 'Mẫu xe' },
-        { col: 'price', placeholder: 'Giá từ (VNĐ/ngày)' },
-        { col: 'note',  placeholder: 'Ghi chú' },
-    ];
-
-    function carRow(car = {}) {
-        const row = document.createElement('div');
-        row.className = 'car-row';
-
-        CAR_COLUMNS.forEach(({ col, placeholder }) => {
-            const input = document.createElement('input');
-            input.type        = 'text';
-            input.className   = 'mf-input';
-            input.placeholder = placeholder;
-            input.dataset.col = col;
-            input.value       = car[col] || '';
-            row.appendChild(input);
-        });
-
-        const del = document.createElement('button');
-        del.type      = 'button';
-        del.className = 'btn-view car-row__del';
-        del.title     = 'Xoá dòng';
-        del.innerHTML = '<i class="ph ph-trash"></i>';
-        del.onclick   = () => row.remove();
-        row.appendChild(del);
-
-        return row;
-    }
-
-    function renderCarRows(cars) {
-        const wrap = document.getElementById('car-rows');
-        if (!wrap) return;
-
-        wrap.innerHTML = '';
-        (cars || []).forEach(car => wrap.appendChild(carRow(car)));
-        if (!wrap.children.length) wrap.appendChild(carRow());
-    }
-
-    function addCarRow() {
-        document.getElementById('car-rows')?.appendChild(carRow());
-    }
-
-    function collectCarRows() {
-        return [...document.querySelectorAll('#car-rows .car-row')]
-            .map(row => {
-                const car = {};
-                row.querySelectorAll('input').forEach(i => { car[i.dataset.col] = i.value.trim(); });
-                return car;
-            })
-            .filter(car => CAR_COLUMNS.some(({ col }) => car[col]));
-    }
-
     async function loadCarRentalContent() {
         const res = await apiFetch(ADMIN_BASE + '/page-contents/car-rental');
-        if (!res.success) return;
-
-        CAR_RENTAL_KEYS.forEach(key => {
-            const el = document.getElementById('car-rental-' + key);
-            if (el) el.value = res.data[key] || '';
-        });
-        CAR_RENTAL_HTML_KEYS.forEach(key => rteSetContent(`car-rental-${key}-editor`, res.data[key] || ''));
-        renderCarRows(res.data.cars);
+        if (res.success) rteSetContent('car-rental-content_html-editor', res.data.content_html || '');
     }
 
     function loadPageContent() {
@@ -2450,10 +2386,8 @@
 
     document.getElementById('car-rental-content-form')?.addEventListener('submit', function (e) {
         e.preventDefault();
-        submitPageContent('car-rental', CAR_RENTAL_KEYS, {
-            cars:       collectCarRows(),
-            intro_html: rteGetContent('car-rental-intro_html-editor'),
-            outro_html: rteGetContent('car-rental-outro_html-editor'),
+        submitPageContent('car-rental', [], {
+            content_html: rteGetContent('car-rental-content_html-editor'),
         });
     });
 
@@ -2920,7 +2854,6 @@
         clearSettingsOg,
         // News
         openNewsModal,
-        addCarRow,
         rteCmd,
         rteBlock,
         rteLink,

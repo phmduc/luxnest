@@ -10,7 +10,7 @@
 
 .cr-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
     gap: 20px;
     margin-bottom: 32px;
@@ -57,6 +57,7 @@
 .cr-table-note { font-size: 13px; color: #94a3b8; margin-bottom: 40px; font-style: italic; }
 
 .cr-rich { color: #334155; font-size: 15px; line-height: 1.8; margin-bottom: 32px; }
+.cr-rich h1 { font-size: 28px; font-weight: 800; color: #0f172a; margin-bottom: 10px; }
 .cr-rich p { margin-bottom: 14px; }
 .cr-rich h2 { font-size: 22px; font-weight: 800; color: #0f172a; margin: 26px 0 12px; }
 .cr-rich h3 { font-size: 17px; font-weight: 700; color: #0f172a; margin: 20px 0 10px; }
@@ -188,52 +189,26 @@
 <div class="cr-page">
     <div class="cr-wrap">
 
-        {{-- Header --}}
+        @php
+            $crHtml  = \App\Support\HtmlSanitizer::render($page['content_html'] ?? '');
+            $crHtml  = preg_replace('~<p>\s*\[form\]\s*</p>~i', '[form]', $crHtml);
+            $crParts = preg_split('/\[form\]/i', $crHtml, 2);
+        @endphp
+
+        {{-- Hotline --}}
+        @if(!empty($settings->hotline))
         <div class="cr-header">
-            <div>
-                <h1>{{ $page['hero_title'] }}</h1>
-                <p>{{ $page['hero_subtitle'] }}</p>
-            </div>
-            <a href="tel:{{ preg_replace('/\s+/', '', $settings->hotline ?? '') }}" class="cr-hotline-btn">
-                📞 Hotline: {{ $settings->hotline ?? '' }}
+            <a href="tel:{{ preg_replace('/\s+/', '', $settings->hotline) }}" class="cr-hotline-btn">
+                📞 Hotline: {{ $settings->hotline }}
             </a>
         </div>
-
-        @if(!empty($page['intro_html']))
-        <div class="cr-rich">{!! \App\Support\HtmlSanitizer::render($page['intro_html']) !!}</div>
         @endif
 
-        {{-- Table --}}
-        <div class="cr-table-wrap">
-            <table class="cr-table">
-                <thead>
-                    <tr>
-                        <th>Loại xe</th>
-                        <th>Mẫu xe</th>
-                        <th>Giá từ (VNĐ/ngày)</th>
-                        <th>Ghi chú</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($cars as $i => $car)
-                    <tr class="{{ $i % 2 === 0 ? 'cr-row-even' : '' }}">
-                        <td><strong>{{ $car['type'] }}</strong></td>
-                        <td>{{ $car['model'] }}</td>
-                        <td class="cr-price-cell">{{ $car['price'] }}đ</td>
-                        <td class="cr-note">{{ $car['note'] }}</td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-        @if(!empty($page['table_note']))
-        <p class="cr-table-note">{{ $page['table_note'] }}</p>
-        @endif
+        {{-- Nội dung soạn trong admin --}}
+        <div class="cr-rich">{!! $crParts[0] !!}</div>
 
         {{-- Inquiry Form --}}
         <div class="cr-form-wrap">
-            <h2>{{ $page['form_title'] }}</h2>
-
             <form class="cr-form" id="cr-inquiry-form">
                 @csrf
                 <div class="cr-form-grid">
@@ -251,12 +226,7 @@
                     </div>
                     <div class="cr-field">
                         <label>Loại xe cần thuê</label>
-                        <select name="cr_car_type">
-                            <option value="">-- Chọn loại xe --</option>
-                            @foreach($cars as $car)
-                            <option value="{{ $car['type'] }}">{{ $car['type'] }} – {{ $car['model'] }}</option>
-                            @endforeach
-                        </select>
+                        <input type="text" name="cr_car_type" placeholder="VD: Xe 16 chỗ, Toyota Innova...">
                     </div>
                     <div class="cr-field">
                         <label>Ngày nhận xe</label>
@@ -289,8 +259,8 @@
             </div>
         </div>
 
-        @if(!empty($page['outro_html']))
-        <div class="cr-rich">{!! \App\Support\HtmlSanitizer::render($page['outro_html']) !!}</div>
+        @if(!empty(trim($crParts[1] ?? '')))
+        <div class="cr-rich">{!! $crParts[1] !!}</div>
         @endif
 
     </div>
