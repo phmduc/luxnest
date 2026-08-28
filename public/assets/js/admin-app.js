@@ -102,6 +102,7 @@
         if (tab === 'news')        loadNews();
         if (tab === 'faqs')        loadFaqs();
         if (tab === 'pagecontent')    loadPageContent();
+        if (tab === 'carrental')      loadCarRentalContent();
         if (tab === 'remarketing')    loadRemarketing();
         if (tab === 'voucher')        loadVouchers();
         if (tab === 'emailmarketing') { loadCampaigns(); loadVoucherOptions(); }
@@ -2343,7 +2344,6 @@
     function loadPageContent() {
         loadPageContentSlug('about', ABOUT_KEYS);
         loadPageContentSlug('partner', PARTNER_KEYS);
-        loadCarRentalContent();
     }
 
     async function submitPageContent(slug, keys, extra = {}) {

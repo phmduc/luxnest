@@ -42,6 +42,9 @@
             <a href="#" class="nav-item" data-tab="pagecontent">
                 <i class="ph ph-file-text"></i> Nội Dung Trang
             </a>
+            <a href="#" class="nav-item" data-tab="carrental">
+                <i class="ph ph-car"></i> Trang Thuê Xe
+            </a>
             <a href="#" class="nav-item" data-tab="voucher">
                 <i class="ph ph-ticket"></i> Voucher
             </a>
@@ -818,11 +821,21 @@
 
             </section>
 
-                {{-- ── Trang Thuê xe ── --}}
-                <div style="margin-bottom:40px;">
-                    <h3 style="font-size:1.05rem; font-weight:800; color:var(--text); margin-bottom:14px;">
-                        <i class="ph ph-car"></i> Trang Thuê xe
-                    </h3>
+            {{-- ═══════════════════ CAR RENTAL TAB ═══════════════════ --}}
+            <section id="tab-carrental" class="dashboard-tab">
+
+                <div class="section-toolbar">
+                    <h2>Trang Thuê Xe</h2>
+                    <a href="{{ route('car-rental.index') }}" target="_blank" class="btn-view">
+                        <i class="ph ph-arrow-square-out"></i> Xem trang
+                    </a>
+                </div>
+
+                <p style="font-size:.83rem;color:var(--text-muted);margin-bottom:18px;">
+                    Nội dung hiển thị tại <strong>luxnest.vn/thue-xe</strong>. Sửa bảng giá ở đây thì ô chọn loại xe trong form liên hệ cũng đổi theo.
+                </p>
+
+
 
                     <form id="car-rental-content-form" style="max-width:920px;">
                         @csrf
@@ -918,7 +931,6 @@
                             </button>
                         </div>
                     </form>
-                </div>
 
             </section>
 
@@ -2130,7 +2142,8 @@ if (typeof AdminApp !== 'undefined') AdminApp.loadRooms();
         settings:    'Thông Tin Doanh Nghiệp',
         news:        'Quản Lý Tin Tức',
         faqs:        'Câu Hỏi Thường Gặp',
-        pagecontent: 'Nội Dung Trang'
+        pagecontent: 'Nội Dung Trang',
+        carrental:   'Trang Thuê Xe'
     };
     document.querySelectorAll('.nav-item[data-tab]').forEach(function (el) {
         el.addEventListener('click', function () {
