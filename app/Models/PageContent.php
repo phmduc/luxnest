@@ -2,10 +2,18 @@
 
 namespace App\Models;
 
+use App\Support\HtmlSanitizer;
 use Illuminate\Database\Eloquent\Model;
 
 class PageContent extends Model
 {
+    /** slug => tên hiển thị của các trang sửa được nội dung */
+    public const EDITABLE = [
+        'about'       => 'Trang Giới thiệu',
+        'partner'     => 'Trang Hợp tác',
+        'car-rental'  => 'Trang Thuê xe',
+    ];
+
     protected $fillable = ['slug', 'data'];
 
     protected $casts = [
@@ -88,8 +96,63 @@ class PageContent extends Model
                 'benefit_4_text'  => 'Tỷ lệ hoa hồng và chính sách thanh toán rõ ràng, công bằng cho đối tác.',
             ],
 
+            'car-rental' => [
+                'hero_title'    => '🚗 Dịch Vụ Cho Thuê Xe',
+                'hero_subtitle' => 'Đặt xe kèm lái xe riêng 24/7 – phục vụ tận nơi tại LuxNest',
+
+                'intro_html' => '',
+
+                'cars' => [
+                    ['type' => 'Sedan 4 chỗ',     'model' => 'Toyota Camry / Mazda 6',             'price' => '800.000',   'note' => 'Phù hợp cặp đôi, công tác'],
+                    ['type' => 'MPV 7 chỗ',       'model' => 'Toyota Innova / Mitsubishi Xpander', 'price' => '1.200.000', 'note' => 'Gia đình, nhóm nhỏ'],
+                    ['type' => 'MPV Hạng Sang',   'model' => 'Toyota Alphard 2024',                'price' => '3.500.000', 'note' => 'VIP, sự kiện, đón sân bay'],
+                    ['type' => 'Sedan Hạng Sang', 'model' => 'Mercedes-Benz E/S Class',            'price' => '4.500.000', 'note' => 'Hội nghị, đối tác cao cấp'],
+                    ['type' => 'Xe 9 chỗ',        'model' => 'Hyundai Starex / Ford Transit 9',    'price' => '1.600.000', 'note' => 'Nhóm gia đình, du lịch'],
+                    ['type' => 'Xe 16 chỗ',       'model' => 'Ford Transit 16 / Hyundai County',   'price' => '2.200.000', 'note' => 'Đoàn lớn, team building'],
+                ],
+
+                'table_note' => '* Giá trên chưa bao gồm phí xăng dầu và đường cao tốc. Liên hệ để nhận báo giá cụ thể.',
+                'form_title' => '📋 Để lại thông tin – Chúng tôi sẽ liên hệ lại trong 15 phút',
+
+                'outro_html' => '',
+            ],
+
             default => [],
         };
+    }
+
+    /**
+     * Ghép dữ liệu gửi lên vào đúng khuôn mặc định của trang: khóa `*_html`
+     * đi qua bộ lọc HTML, khóa dạng mảng (vd bảng giá xe) giữ đúng cột.
+     */
+    public static function normalize(array $defaults, array $input): array
+    {
+        $data = [];
+
+        foreach ($defaults as $key => $default) {
+            if (is_array($default)) {
+                $rows    = is_array($input[$key] ?? null) ? $input[$key] : $default;
+                $columns = array_keys($default[0] ?? []);
+
+                $data[$key] = collect($rows)
+                    ->filter(fn ($row) => is_array($row))
+                    ->take(50)
+                    ->map(fn ($row) => collect($columns)
+                        ->mapWithKeys(fn ($col) => [$col => trim((string) ($row[$col] ?? ''))])
+                        ->all())
+                    ->filter(fn ($row) => implode('', $row) !== '')
+                    ->values()
+                    ->all();
+
+                continue;
+            }
+
+            $value = (string) ($input[$key] ?? $default);
+
+            $data[$key] = str_ends_with($key, '_html') ? HtmlSanitizer::clean($value) : $value;
+        }
+
+        return $data;
     }
 
     public static function dataFor(string $slug): array

@@ -56,6 +56,18 @@
 
 .cr-table-note { font-size: 13px; color: #94a3b8; margin-bottom: 40px; font-style: italic; }
 
+.cr-rich { color: #334155; font-size: 15px; line-height: 1.8; margin-bottom: 32px; }
+.cr-rich p { margin-bottom: 14px; }
+.cr-rich h2 { font-size: 22px; font-weight: 800; color: #0f172a; margin: 26px 0 12px; }
+.cr-rich h3 { font-size: 17px; font-weight: 700; color: #0f172a; margin: 20px 0 10px; }
+.cr-rich ul, .cr-rich ol { padding-left: 22px; margin-bottom: 14px; }
+.cr-rich li { margin-bottom: 6px; }
+.cr-rich a { color: #996d4e; text-decoration: underline; }
+.cr-rich img { max-width: 100%; height: auto; border-radius: 10px; margin: 14px 0; display: block; }
+.cr-rich blockquote { margin: 16px 0; padding: 12px 18px; border-left: 3px solid #996d4e; background: #faf7f4; }
+.cr-rich .news-embed { position: relative; width: 100%; padding-top: 56.25%; margin: 16px 0; border-radius: 10px; overflow: hidden; background: #000; }
+.cr-rich .news-embed iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
 /* Form */
 .cr-form-wrap {
     background: #fff;
@@ -175,13 +187,17 @@
         {{-- Header --}}
         <div class="cr-header">
             <div>
-                <h1>🚗 Dịch Vụ Cho Thuê Xe</h1>
-                <p>Đặt xe kèm lái xe riêng 24/7 – phục vụ tận nơi tại LuxNest</p>
+                <h1>{{ $page['hero_title'] }}</h1>
+                <p>{{ $page['hero_subtitle'] }}</p>
             </div>
             <a href="tel:{{ preg_replace('/\s+/', '', $settings->hotline ?? '') }}" class="cr-hotline-btn">
                 📞 Hotline: {{ $settings->hotline ?? '' }}
             </a>
         </div>
+
+        @if(!empty($page['intro_html']))
+        <div class="cr-rich">{!! \App\Support\HtmlSanitizer::render($page['intro_html']) !!}</div>
+        @endif
 
         {{-- Table --}}
         <div class="cr-table-wrap">
@@ -206,11 +222,13 @@
                 </tbody>
             </table>
         </div>
-        <p class="cr-table-note">* Giá trên chưa bao gồm phí xăng dầu và đường cao tốc. Liên hệ để nhận báo giá cụ thể.</p>
+        @if(!empty($page['table_note']))
+        <p class="cr-table-note">{{ $page['table_note'] }}</p>
+        @endif
 
         {{-- Inquiry Form --}}
         <div class="cr-form-wrap">
-            <h2>📋 Để lại thông tin – Chúng tôi sẽ liên hệ lại trong 15 phút</h2>
+            <h2>{{ $page['form_title'] }}</h2>
 
             <form class="cr-form" id="cr-inquiry-form">
                 @csrf
@@ -266,6 +284,10 @@
                 </div>
             </div>
         </div>
+
+        @if(!empty($page['outro_html']))
+        <div class="cr-rich">{!! \App\Support\HtmlSanitizer::render($page['outro_html']) !!}</div>
+        @endif
 
     </div>
 </div>

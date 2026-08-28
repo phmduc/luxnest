@@ -1734,3 +1734,20 @@ textarea.mf-input { resize: vertical; }
     height: 100%;
     border: 0;
 }
+
+/* Bảng giá xe trong tab Nội dung trang */
+.car-row {
+    display: grid;
+    grid-template-columns: 1.1fr 1.6fr 1fr 1.4fr auto;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+.car-row__del {
+    padding: 0 12px;
+    color: #dc2626;
+    border-color: #fecdd3;
+}
+@media (max-width: 860px) {
+    .car-row { grid-template-columns: 1fr 1fr; }
+    .car-row__del { grid-column: 1/-1; }
+}

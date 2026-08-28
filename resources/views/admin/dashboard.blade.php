@@ -818,6 +818,110 @@
 
             </section>
 
+                {{-- ── Trang Thuê xe ── --}}
+                <div style="margin-bottom:40px;">
+                    <h3 style="font-size:1.05rem; font-weight:800; color:var(--text); margin-bottom:14px;">
+                        <i class="ph ph-car"></i> Trang Thuê xe
+                    </h3>
+
+                    <form id="car-rental-content-form" style="max-width:920px;">
+                        @csrf
+                        <div class="mf-grid-2">
+                            <div class="mf-group" style="grid-column:1/-1;">
+                                <label class="mf-label">Tiêu đề trang</label>
+                                <input type="text" id="car-rental-hero_title" class="mf-input">
+                            </div>
+                            <div class="mf-group" style="grid-column:1/-1;">
+                                <label class="mf-label">Mô tả ngắn dưới tiêu đề</label>
+                                <textarea id="car-rental-hero_subtitle" class="mf-input" rows="2"></textarea>
+                            </div>
+
+                            <div class="mf-group" style="grid-column:1/-1;">
+                                <label class="mf-label">Nội dung phía trên bảng giá <span style="font-weight:400; font-size:0.75rem; text-transform:none; letter-spacing:0;">(chèn ảnh, link, video)</span></label>
+                    <div class="rte">
+                        <div class="rte-toolbar">
+                            <button type="button" class="rte-btn" title="In đậm" onclick="AdminApp.rteCmd('bold')"><i class="ph ph-text-b"></i></button>
+                            <button type="button" class="rte-btn" title="In nghiêng" onclick="AdminApp.rteCmd('italic')"><i class="ph ph-text-italic"></i></button>
+                            <span class="rte-sep"></span>
+                            <button type="button" class="rte-btn rte-btn--text" title="Tiêu đề lớn" onclick="AdminApp.rteBlock('h2')">H2</button>
+                            <button type="button" class="rte-btn rte-btn--text" title="Tiêu đề nhỏ" onclick="AdminApp.rteBlock('h3')">H3</button>
+                            <button type="button" class="rte-btn rte-btn--text" title="Đoạn văn thường" onclick="AdminApp.rteBlock('p')">¶</button>
+                            <span class="rte-sep"></span>
+                            <button type="button" class="rte-btn" title="Danh sách dấu chấm" onclick="AdminApp.rteCmd('insertUnorderedList')"><i class="ph ph-list-bullets"></i></button>
+                            <button type="button" class="rte-btn" title="Danh sách đánh số" onclick="AdminApp.rteCmd('insertOrderedList')"><i class="ph ph-list-numbers"></i></button>
+                            <span class="rte-sep"></span>
+                            <button type="button" class="rte-btn" title="Chèn link" onclick="AdminApp.rteLink()"><i class="ph ph-link"></i></button>
+                            <button type="button" class="rte-btn" title="Bỏ link" onclick="AdminApp.rteCmd('unlink')"><i class="ph ph-link-break"></i></button>
+                            <button type="button" class="rte-btn" title="Chèn ảnh" onclick="AdminApp.rteImage()"><i class="ph ph-image"></i></button>
+                            <button type="button" class="rte-btn" title="Chèn video YouTube / Vimeo" onclick="AdminApp.rteVideo()"><i class="ph ph-youtube-logo"></i></button>
+                            <span class="rte-sep"></span>
+                            <button type="button" class="rte-btn" title="Xoá định dạng" onclick="AdminApp.rteCmd('removeFormat')"><i class="ph ph-eraser"></i></button>
+                        </div>
+                        <div id="car-rental-intro_html-editor" class="rte-editor" contenteditable="true"
+                             data-placeholder="Soạn nội dung, chèn ảnh / link / video..."></div>
+                    </div>
+                            </div>
+
+                            <div class="mf-group" style="grid-column:1/-1;">
+                                <label class="mf-label">Bảng giá xe</label>
+                                <div id="car-rows"></div>
+                                <button type="button" class="btn-view" style="margin-top:10px;" onclick="AdminApp.addCarRow()">
+                                    <i class="ph ph-plus"></i> Thêm dòng xe
+                                </button>
+                            </div>
+
+                            <div class="mf-group" style="grid-column:1/-1;">
+                                <label class="mf-label">Ghi chú dưới bảng giá</label>
+                                <input type="text" id="car-rental-table_note" class="mf-input">
+                            </div>
+
+                            <div class="mf-group" style="grid-column:1/-1;">
+                                <label class="mf-label">Tiêu đề form liên hệ</label>
+                                <input type="text" id="car-rental-form_title" class="mf-input">
+                            </div>
+
+                            <div class="mf-group" style="grid-column:1/-1;">
+                                <label class="mf-label">Nội dung phía dưới form <span style="font-weight:400; font-size:0.75rem; text-transform:none; letter-spacing:0;">(tuỳ chọn)</span></label>
+                    <div class="rte">
+                        <div class="rte-toolbar">
+                            <button type="button" class="rte-btn" title="In đậm" onclick="AdminApp.rteCmd('bold')"><i class="ph ph-text-b"></i></button>
+                            <button type="button" class="rte-btn" title="In nghiêng" onclick="AdminApp.rteCmd('italic')"><i class="ph ph-text-italic"></i></button>
+                            <span class="rte-sep"></span>
+                            <button type="button" class="rte-btn rte-btn--text" title="Tiêu đề lớn" onclick="AdminApp.rteBlock('h2')">H2</button>
+                            <button type="button" class="rte-btn rte-btn--text" title="Tiêu đề nhỏ" onclick="AdminApp.rteBlock('h3')">H3</button>
+                            <button type="button" class="rte-btn rte-btn--text" title="Đoạn văn thường" onclick="AdminApp.rteBlock('p')">¶</button>
+                            <span class="rte-sep"></span>
+                            <button type="button" class="rte-btn" title="Danh sách dấu chấm" onclick="AdminApp.rteCmd('insertUnorderedList')"><i class="ph ph-list-bullets"></i></button>
+                            <button type="button" class="rte-btn" title="Danh sách đánh số" onclick="AdminApp.rteCmd('insertOrderedList')"><i class="ph ph-list-numbers"></i></button>
+                            <span class="rte-sep"></span>
+                            <button type="button" class="rte-btn" title="Chèn link" onclick="AdminApp.rteLink()"><i class="ph ph-link"></i></button>
+                            <button type="button" class="rte-btn" title="Bỏ link" onclick="AdminApp.rteCmd('unlink')"><i class="ph ph-link-break"></i></button>
+                            <button type="button" class="rte-btn" title="Chèn ảnh" onclick="AdminApp.rteImage()"><i class="ph ph-image"></i></button>
+                            <button type="button" class="rte-btn" title="Chèn video YouTube / Vimeo" onclick="AdminApp.rteVideo()"><i class="ph ph-youtube-logo"></i></button>
+                            <span class="rte-sep"></span>
+                            <button type="button" class="rte-btn" title="Xoá định dạng" onclick="AdminApp.rteCmd('removeFormat')"><i class="ph ph-eraser"></i></button>
+                        </div>
+                        <div id="car-rental-outro_html-editor" class="rte-editor" contenteditable="true"
+                             data-placeholder="Soạn nội dung, chèn ảnh / link / video..."></div>
+                    </div>
+                            </div>
+                        </div>
+
+                        <div id="car-rental-content-error"
+                             style="display:none; margin-top:14px; padding:11px 14px; background:#FEE2E2; border-radius:9px; color:#991B1B; font-weight:600; font-size:0.85rem;"></div>
+                        <div id="car-rental-content-success"
+                             style="display:none; margin-top:14px; padding:11px 14px; background:#DCFCE7; border-radius:9px; color:#166534; font-weight:600; font-size:0.85rem;"></div>
+
+                        <div style="margin-top:24px; display:flex; gap:10px; justify-content:flex-end;">
+                            <button type="submit" class="btn-primary" style="padding:10px 22px;">
+                                <i class="ph ph-floppy-disk"></i> Lưu nội dung Thuê xe
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+            </section>
+
             {{-- ═══════════════════ GALLERY TAB ═══════════════════ --}}
             <section id="tab-gallery" class="dashboard-tab">
 

@@ -775,7 +775,7 @@ class AdminDashboardController extends Controller
 
     public function getPageContent(string $slug): JsonResponse
     {
-        if (!in_array($slug, ['about', 'partner'], true)) {
+        if (!array_key_exists($slug, PageContent::EDITABLE)) {
             return response()->json(['success' => false, 'message' => 'Trang không hợp lệ.'], 404);
         }
 
@@ -784,16 +784,11 @@ class AdminDashboardController extends Controller
 
     public function updatePageContent(Request $request, string $slug): JsonResponse
     {
-        if (!in_array($slug, ['about', 'partner'], true)) {
+        if (!array_key_exists($slug, PageContent::EDITABLE)) {
             return response()->json(['success' => false, 'message' => 'Trang không hợp lệ.'], 404);
         }
 
-        $defaults = PageContent::defaults($slug);
-        $data     = [];
-
-        foreach ($defaults as $key => $default) {
-            $data[$key] = (string) $request->input($key, $default);
-        }
+        $data = PageContent::normalize(PageContent::defaults($slug), $request->all());
 
         PageContent::updateOrCreate(['slug' => $slug], ['data' => $data]);
 

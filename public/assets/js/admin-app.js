@@ -1849,12 +1849,13 @@
         }
     }
 
-    // ── Rich text editor cho nội dung bài viết ────────────────────
+    // ── Rich text editor (dùng chung cho bài viết & nội dung trang) ─
 
-    let rteRange = null;
+    let rteActive = null;
+    let rteRange  = null;
 
     function rteEditor() {
-        return document.getElementById('news-content-editor');
+        return rteActive;
     }
 
     function rteEscape(str) {
@@ -1875,7 +1876,7 @@
         const ed = rteEditor();
         if (!ed) return null;
         ed.focus();
-        if (rteRange) {
+        if (rteRange && ed.contains(rteRange.commonAncestorContainer)) {
             const sel = window.getSelection();
             sel.removeAllRanges();
             sel.addRange(rteRange);
@@ -1952,9 +1953,9 @@
         rteInsertHtml(`<div class="news-embed"><iframe src="${rteEscape(embed)}" allowfullscreen></iframe></div><p><br></p>`);
     }
 
-    /** Đổ nội dung vào editor; bài cũ dạng text thuần được tách thành đoạn. */
-    function rteSetContent(content) {
-        const ed = rteEditor();
+    /** Đổ nội dung vào editor; nội dung cũ dạng text thuần được tách thành đoạn. */
+    function rteSetContent(id, content) {
+        const ed = document.getElementById(id);
         if (!ed) return;
         const raw = String(content || '');
 
@@ -1963,18 +1964,32 @@
             : raw.split(/\n{2,}/).filter(b => b.trim() !== '')
                  .map(b => '<p>' + rteEscape(b.trim()).replace(/\n/g, '<br>') + '</p>').join('');
 
-        rteRange = null;
+        if (rteActive === ed) rteRange = null;
     }
 
-    function rteGetContent() {
-        const ed = rteEditor();
+    function rteGetContent(id) {
+        const ed = document.getElementById(id);
         if (!ed) return '';
         const html = ed.innerHTML.trim();
         return ['', '<br>', '<p></p>', '<p><br></p>', '<div><br></div>'].includes(html) ? '' : html;
     }
 
-    rteEditor()?.addEventListener('paste', function (e) {
+    // Nhớ editor đang thao tác: bấm nút trên thanh công cụ cũng tính.
+    document.addEventListener('focusin', function (e) {
+        if (e.target.classList?.contains('rte-editor')) rteActive = e.target;
+    });
+
+    document.addEventListener('mousedown', function (e) {
+        const wrap = e.target.closest?.('.rte');
+        const ed   = wrap?.querySelector('.rte-editor');
+        if (ed) rteActive = ed;
+    });
+
+    document.addEventListener('paste', function (e) {
+        if (!e.target.classList?.contains('rte-editor')) return;
         e.preventDefault();
+        rteActive = e.target;
+
         const text = (e.clipboardData || window.clipboardData).getData('text/plain');
         if (/^https?:\/\/\S+$/i.test(text.trim())) {
             const url = text.trim();
@@ -1985,7 +2000,9 @@
         rteSaveRange();
     });
 
-    ['keyup', 'mouseup', 'input'].forEach(evt => rteEditor()?.addEventListener(evt, rteSaveRange));
+    ['keyup', 'mouseup', 'input'].forEach(evt => document.addEventListener(evt, function (e) {
+        if (e.target.classList?.contains('rte-editor')) rteSaveRange();
+    }));
 
     function openNewsModal(article) {
         const modal = document.getElementById('news-modal');
@@ -2000,7 +2017,7 @@
         if (newsSlugEl) delete newsSlugEl.dataset.manual;
         document.getElementById('news-status').value = 'active';
         renderNewsImage('');
-        rteSetContent('');
+        rteSetContent('news-content-editor', '');
         const fileInput = document.getElementById('news-file-input');
         if (fileInput) fileInput.value = '';
         const errEl = document.getElementById('news-form-error');
@@ -2015,7 +2032,7 @@
             document.getElementById('news-tag').value          = article.tag || '';
             document.getElementById('news-published-at').value = article.published_at ? String(article.published_at).slice(0, 10) : '';
             document.getElementById('news-excerpt').value      = article.excerpt || '';
-            rteSetContent(article.content || '');
+            rteSetContent('news-content-editor', article.content || '');
             document.getElementById('news-status').value       = article.status || 'active';
             document.getElementById('news-image').value        = article.image || '';
             renderNewsImage(article.image || '');
@@ -2041,7 +2058,7 @@
             tag:          document.getElementById('news-tag').value || null,
             published_at: document.getElementById('news-published-at').value || null,
             excerpt:      document.getElementById('news-excerpt').value || null,
-            content:      rteGetContent() || null,
+            content:      rteGetContent('news-content-editor') || null,
             image:        document.getElementById('news-image').value || null,
             status:       document.getElementById('news-status').value,
         };
@@ -2254,18 +2271,88 @@
         });
     }
 
+    const CAR_RENTAL_KEYS      = ['hero_title', 'hero_subtitle', 'table_note', 'form_title'];
+    const CAR_RENTAL_HTML_KEYS = ['intro_html', 'outro_html'];
+    const CAR_COLUMNS          = [
+        { col: 'type',  placeholder: 'Loại xe' },
+        { col: 'model', placeholder: 'Mẫu xe' },
+        { col: 'price', placeholder: 'Giá từ (VNĐ/ngày)' },
+        { col: 'note',  placeholder: 'Ghi chú' },
+    ];
+
+    function carRow(car = {}) {
+        const row = document.createElement('div');
+        row.className = 'car-row';
+
+        CAR_COLUMNS.forEach(({ col, placeholder }) => {
+            const input = document.createElement('input');
+            input.type        = 'text';
+            input.className   = 'mf-input';
+            input.placeholder = placeholder;
+            input.dataset.col = col;
+            input.value       = car[col] || '';
+            row.appendChild(input);
+        });
+
+        const del = document.createElement('button');
+        del.type      = 'button';
+        del.className = 'btn-view car-row__del';
+        del.title     = 'Xoá dòng';
+        del.innerHTML = '<i class="ph ph-trash"></i>';
+        del.onclick   = () => row.remove();
+        row.appendChild(del);
+
+        return row;
+    }
+
+    function renderCarRows(cars) {
+        const wrap = document.getElementById('car-rows');
+        if (!wrap) return;
+
+        wrap.innerHTML = '';
+        (cars || []).forEach(car => wrap.appendChild(carRow(car)));
+        if (!wrap.children.length) wrap.appendChild(carRow());
+    }
+
+    function addCarRow() {
+        document.getElementById('car-rows')?.appendChild(carRow());
+    }
+
+    function collectCarRows() {
+        return [...document.querySelectorAll('#car-rows .car-row')]
+            .map(row => {
+                const car = {};
+                row.querySelectorAll('input').forEach(i => { car[i.dataset.col] = i.value.trim(); });
+                return car;
+            })
+            .filter(car => CAR_COLUMNS.some(({ col }) => car[col]));
+    }
+
+    async function loadCarRentalContent() {
+        const res = await apiFetch(ADMIN_BASE + '/page-contents/car-rental');
+        if (!res.success) return;
+
+        CAR_RENTAL_KEYS.forEach(key => {
+            const el = document.getElementById('car-rental-' + key);
+            if (el) el.value = res.data[key] || '';
+        });
+        CAR_RENTAL_HTML_KEYS.forEach(key => rteSetContent(`car-rental-${key}-editor`, res.data[key] || ''));
+        renderCarRows(res.data.cars);
+    }
+
     function loadPageContent() {
         loadPageContentSlug('about', ABOUT_KEYS);
         loadPageContentSlug('partner', PARTNER_KEYS);
+        loadCarRentalContent();
     }
 
-    async function submitPageContent(slug, keys) {
+    async function submitPageContent(slug, keys, extra = {}) {
         const errEl = document.getElementById(slug + '-content-error');
         const okEl  = document.getElementById(slug + '-content-success');
         if (errEl) errEl.style.display = 'none';
         if (okEl)  okEl.style.display  = 'none';
 
-        const payload = {};
+        const payload = { ...extra };
         keys.forEach(key => {
             const el = document.getElementById(slug + '-' + key);
             payload[key] = el ? el.value : '';
@@ -2299,6 +2386,15 @@
     document.getElementById('partner-content-form')?.addEventListener('submit', function (e) {
         e.preventDefault();
         submitPageContent('partner', PARTNER_KEYS);
+    });
+
+    document.getElementById('car-rental-content-form')?.addEventListener('submit', function (e) {
+        e.preventDefault();
+        submitPageContent('car-rental', CAR_RENTAL_KEYS, {
+            cars:       collectCarRows(),
+            intro_html: rteGetContent('car-rental-intro_html-editor'),
+            outro_html: rteGetContent('car-rental-outro_html-editor'),
+        });
     });
 
     // ---------------------------------------------------------------
@@ -2764,6 +2860,7 @@
         clearSettingsOg,
         // News
         openNewsModal,
+        addCarRow,
         rteCmd,
         rteBlock,
         rteLink,

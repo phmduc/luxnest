@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\News;
+use App\Models\PageContent;
 use App\Support\HtmlSanitizer;
 use App\Support\ImageImporter;
 use Illuminate\Http\Request;
@@ -111,7 +112,7 @@ class McpController extends Controller
                     'name'    => config('mcp.name'),
                     'version' => config('mcp.version'),
                 ],
-                'instructions' => 'Quản lý bài viết blog (tin tức) của website. Nội dung bài viết viết bằng HTML đơn giản; dùng list_images để lấy URL ảnh có sẵn, upload_image_from_url để tải ảnh mới từ link về server, hoặc upload_image_base64 để gửi thẳng ảnh tự tạo, rồi chèn <img> vào bài.',
+                'instructions' => 'Quản lý bài viết blog (tin tức) của website. Nội dung bài viết viết bằng HTML đơn giản; dùng list_images để lấy URL ảnh có sẵn, upload_image_from_url để tải ảnh mới từ link về server, hoặc upload_image_base64 để gửi thẳng ảnh tự tạo. Ngoài bài viết, các trang tĩnh (Giới thiệu, Hợp tác, Thuê xe) sửa được qua list_pages/get_page/update_page, rồi chèn <img> vào bài.',
             ]),
             'ping'       => $this->result($id, (object) []),
             'tools/list' => $this->result($id, ['tools' => $this->tools()]),
@@ -247,6 +248,32 @@ class McpController extends Controller
                 ],
             ],
             [
+                'name'        => 'list_pages',
+                'description' => 'Liệt kê các trang tĩnh sửa được nội dung (Giới thiệu, Hợp tác, Thuê xe) kèm slug.',
+                'inputSchema' => ['type' => 'object', 'properties' => (object) []],
+            ],
+            [
+                'name'        => 'get_page',
+                'description' => 'Đọc toàn bộ nội dung hiện tại của một trang tĩnh theo slug. Luôn gọi trước khi sửa để biết tên các trường.',
+                'inputSchema' => [
+                    'type'       => 'object',
+                    'properties' => ['slug' => ['type' => 'string', 'enum' => array_keys(PageContent::EDITABLE), 'description' => 'Slug của trang']],
+                    'required'   => ['slug'],
+                ],
+            ],
+            [
+                'name'        => 'update_page',
+                'description' => 'Cập nhật nội dung một trang tĩnh. Chỉ truyền các trường muốn đổi trong "fields", các trường khác giữ nguyên. Trường tên kết thúc bằng _html nhận HTML đơn giản như nội dung bài viết; trường dạng danh sách (vd cars của trang Thuê xe) phải gửi đủ tất cả các dòng vì nó ghi đè cả danh sách.',
+                'inputSchema' => [
+                    'type'       => 'object',
+                    'properties' => [
+                        'slug'   => ['type' => 'string', 'enum' => array_keys(PageContent::EDITABLE), 'description' => 'Slug của trang'],
+                        'fields' => ['type' => 'object', 'description' => 'Các trường cần đổi, vd {"hero_title": "...", "intro_html": "<p>...</p>"}'],
+                    ],
+                    'required'   => ['slug', 'fields'],
+                ],
+            ],
+            [
                 'name'        => 'create_post',
                 'description' => 'Tạo bài viết blog mới. Mặc định lưu ở trạng thái draft (bản nháp) nếu không truyền status.',
                 'inputSchema' => [
@@ -289,6 +316,9 @@ class McpController extends Controller
                 'fetch'       => $this->toolFetch($args),
                 'list_posts'  => $this->toolListPosts($args),
                 'list_images' => $this->toolListImages($args),
+                'list_pages'  => $this->toolListPages(),
+                'get_page'    => $this->toolGetPage($args),
+                'update_page' => $this->toolUpdatePage($args),
                 'upload_image_from_url' => $this->toolUploadImageFromUrl($args),
                 'upload_image_base64'   => $this->toolUploadImageBase64($args),
                 'get_post'    => $this->toolGetPost($args),
@@ -404,6 +434,69 @@ class McpController extends Controller
                 ->values()
                 ->all(),
         ];
+    }
+
+    private function toolListPages(): array
+    {
+        return [
+            'pages' => collect(PageContent::EDITABLE)
+                ->map(fn ($label, $slug) => [
+                    'slug'   => $slug,
+                    'label'  => $label,
+                    'fields' => array_keys(PageContent::defaults($slug)),
+                ])
+                ->values()
+                ->all(),
+        ];
+    }
+
+    private function toolGetPage(array $args): array
+    {
+        $slug = $this->pageSlug($args);
+
+        return [
+            'slug'  => $slug,
+            'label' => PageContent::EDITABLE[$slug],
+            'data'  => PageContent::dataFor($slug),
+        ];
+    }
+
+    private function toolUpdatePage(array $args): array
+    {
+        $slug   = $this->pageSlug($args);
+        $fields = $args['fields'] ?? [];
+
+        if (!is_array($fields) || $fields === []) {
+            throw new \InvalidArgumentException('Thiếu "fields" — cần ít nhất một trường để cập nhật.');
+        }
+
+        $defaults = PageContent::defaults($slug);
+        $unknown  = array_diff(array_keys($fields), array_keys($defaults));
+
+        if ($unknown !== []) {
+            throw new \InvalidArgumentException('Trường không hợp lệ: ' . implode(', ', $unknown) . '. Gọi get_page để xem danh sách trường.');
+        }
+
+        $data = PageContent::normalize($defaults, array_merge(PageContent::dataFor($slug), $fields));
+
+        PageContent::updateOrCreate(['slug' => $slug], ['data' => $data]);
+
+        return [
+            'slug'    => $slug,
+            'updated' => array_keys($fields),
+            'data'    => PageContent::dataFor($slug),
+        ];
+    }
+
+    private function pageSlug(array $args): string
+    {
+        $slug = (string) ($args['slug'] ?? '');
+
+        if (!array_key_exists($slug, PageContent::EDITABLE)) {
+            throw new \InvalidArgumentException('Slug không hợp lệ. Các trang sửa được: ' . implode(', ', array_keys(PageContent::EDITABLE)));
+        }
+
+        return $slug;
     }
 
     private function toolUploadImageBase64(array $args): array
