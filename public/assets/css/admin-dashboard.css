@@ -1737,18 +1737,33 @@ textarea.mf-input { resize: vertical; }
 }
 
 /* Bảng bên trong trình soạn thảo */
-.rte-editor .table-scroll { overflow-x: auto; margin: 12px 0; }
+.rte-editor .table-scroll {
+    overflow-x: auto;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    margin: 14px 0;
+}
 .rte-editor table {
     width: 100%;
     min-width: 420px;
     border-collapse: collapse;
-    font-size: .9rem;
+    font-size: .88rem;
 }
-.rte-editor th,
-.rte-editor td {
-    padding: 7px 10px;
-    border: 1px solid var(--border);
+.rte-editor thead tr { background: #0f172a; color: #fff; }
+.rte-editor th {
+    padding: 11px 14px;
     text-align: left;
-    min-width: 70px;
+    font-weight: 600;
+    font-size: .78rem;
+    letter-spacing: .3px;
+    min-width: 80px;
 }
-.rte-editor th { background: #F9FAFB; font-weight: 700; }
+.rte-editor td {
+    padding: 10px 14px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+    min-width: 80px;
+}
+.rte-editor tbody tr:nth-child(even) { background: #f8fafc; }
+.rte-editor tbody tr:last-child td { border-bottom: none; }

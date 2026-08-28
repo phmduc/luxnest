@@ -65,10 +65,22 @@
 .cr-rich li { margin-bottom: 6px; }
 .cr-rich a { color: #996d4e; text-decoration: underline; }
 .cr-rich img { max-width: 100%; height: auto; border-radius: 10px; margin: 14px 0; display: block; }
-.cr-rich .table-scroll { overflow-x: auto; margin: 16px 0; }
-.cr-rich .table-scroll table { width: 100%; min-width: 420px; border-collapse: collapse; font-size: 14px; }
-.cr-rich .table-scroll th, .cr-rich .table-scroll td { padding: 9px 12px; border: 1px solid #e2e8f0; text-align: left; }
-.cr-rich .table-scroll th { background: #f8fafc; font-weight: 700; color: #0f172a; }
+.cr-rich .table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    margin: 18px 0;
+}
+.cr-rich .table-scroll table { width: 100%; min-width: 460px; border-collapse: collapse; font-size: 14px; }
+.cr-rich .table-scroll thead tr { background: #0f172a; color: #fff; }
+.cr-rich .table-scroll th { padding: 14px 18px; text-align: left; font-weight: 600; font-size: 13px; letter-spacing: .3px; }
+.cr-rich .table-scroll td { padding: 13px 18px; border-bottom: 1px solid #f1f5f9; color: #334155; vertical-align: middle; }
+.cr-rich .table-scroll tbody tr:nth-child(even) { background: #f8fafc; }
+.cr-rich .table-scroll tbody tr:hover { background: #fff7f3; }
+.cr-rich .table-scroll tbody tr:last-child td { border-bottom: none; }
 .cr-rich blockquote { margin: 16px 0; padding: 12px 18px; border-left: 3px solid #996d4e; background: #faf7f4; }
 .cr-rich .news-embed { position: relative; width: 100%; padding-top: 56.25%; margin: 16px 0; border-radius: 10px; overflow: hidden; background: #000; }
 .cr-rich .news-embed iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
