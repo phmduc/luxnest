@@ -6,6 +6,7 @@ use App\Models\News;
 use App\Support\HtmlSanitizer;
 use App\Support\ImageImporter;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -49,12 +50,28 @@ class McpController extends Controller
                 : $this->respond($request, $results);
         }
 
+        $this->logCall($request, $payload);
+
         $result = $this->dispatch($payload);
 
         // Notifications get no body.
         return $result === null
             ? response()->noContent(202)
             : $this->respond($request, $result);
+    }
+
+    /** Ghi lại client nào gọi method nào — để soi khi client báo thiếu tool. */
+    private function logCall(Request $request, array $payload): void
+    {
+        $method = $payload['method'] ?? '?';
+
+        Log::channel('mcp')->info('mcp', [
+            'method'   => $method,
+            'tool'     => $payload['params']['name'] ?? null,
+            'protocol' => $payload['params']['protocolVersion'] ?? null,
+            'client'   => $payload['params']['clientInfo']['name'] ?? $request->userAgent(),
+            'tools'    => $method === 'tools/list' ? count($this->tools()) : null,
+        ]);
     }
 
     private function presentedToken(Request $request, ?string $fromPath): ?string

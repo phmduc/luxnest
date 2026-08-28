@@ -58,6 +58,13 @@ return [
             'ignore_exceptions' => false,
         ],
 
+        'mcp' => [
+            'driver' => 'daily',
+            'path'   => storage_path('logs/mcp.log'),
+            'level'  => 'debug',
+            'days'   => 7,
+        ],
+
         'single' => [
             'driver' => 'single',
             'path' => storage_path('logs/laravel.log'),
