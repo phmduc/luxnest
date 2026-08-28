@@ -66,7 +66,7 @@
     {{-- Content --}}
     @if($article->content)
     <div class="news-article-body">
-        {!! nl2br(e($article->content)) !!}
+        {!! $article->content_html !!}
     </div>
     @else
     <div style="text-align:center; padding:40px 0; color:#94a3b8;">

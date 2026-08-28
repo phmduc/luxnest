@@ -14,6 +14,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
         ]);
+
+        // MCP clients authenticate with a bearer token, not a session cookie.
+        $middleware->validateCsrfTokens(except: ['mcp', 'mcp/*']);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

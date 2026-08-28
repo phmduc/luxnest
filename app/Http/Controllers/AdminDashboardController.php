@@ -15,6 +15,7 @@ use App\Models\User;
 use App\Models\VillaListing;
 use App\Models\Voucher;
 use App\Services\CampaignMailerService;
+use App\Support\HtmlSanitizer;
 use App\Services\GoHostService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -658,6 +659,7 @@ class AdminDashboardController extends Controller
 
         $validated['published_at'] = $validated['published_at'] ?? now()->toDateString();
         $validated['slug']         = $this->uniqueNewsSlug($validated['slug'] ?? null, $validated['title']);
+        $validated['content']      = HtmlSanitizer::clean($validated['content'] ?? '');
 
         $news = News::create($validated);
 
@@ -681,6 +683,7 @@ class AdminDashboardController extends Controller
 
         $validated['published_at'] = $validated['published_at'] ?? now()->toDateString();
         $validated['slug']         = $this->uniqueNewsSlug($validated['slug'] ?? null, $validated['title'], $id);
+        $validated['content']      = HtmlSanitizer::clean($validated['content'] ?? '');
 
         $news->update($validated);
 
@@ -689,18 +692,7 @@ class AdminDashboardController extends Controller
 
     private function uniqueNewsSlug(?string $slug, string $title, ?int $excludeId = null): string
     {
-        $base = $slug ? \Illuminate\Support\Str::slug($slug) : \Illuminate\Support\Str::slug($title);
-        if (!$base) $base = 'bai-viet';
-        $candidate = $base;
-        $i = 2;
-        while (
-            \App\Models\News::where('slug', $candidate)
-                ->when($excludeId, fn($q) => $q->where('id', '!=', $excludeId))
-                ->exists()
-        ) {
-            $candidate = $base . '-' . $i++;
-        }
-        return $candidate;
+        return News::uniqueSlug($slug, $title, $excludeId);
     }
 
     public function destroyNews(int $id): JsonResponse

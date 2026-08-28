@@ -12,9 +12,21 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\McpController;
 use App\Http\Controllers\MemberDashboardController;
 use App\Http\Controllers\PageController;
 use App\Services\GoHostService;
+
+// ---------------------------------------------------------------
+// MCP server (ChatGPT / Claude connector) - token auth, no session
+// ---------------------------------------------------------------
+Route::post('/mcp', [McpController::class, 'handle'])->name('mcp');
+Route::post('/mcp/{token}', [McpController::class, 'handle'])->name('mcp.token');
+Route::match(['get', 'delete'], '/mcp/{token?}', fn () => response()->json([
+    'jsonrpc' => '2.0',
+    'id'      => null,
+    'error'   => ['code' => -32000, 'message' => 'Method Not Allowed'],
+], 405));
 
 // ---------------------------------------------------------------
 // Public routes

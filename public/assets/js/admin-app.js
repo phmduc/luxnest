@@ -1849,6 +1849,144 @@
         }
     }
 
+    // ── Rich text editor cho nội dung bài viết ────────────────────
+
+    let rteRange = null;
+
+    function rteEditor() {
+        return document.getElementById('news-content-editor');
+    }
+
+    function rteEscape(str) {
+        return String(str ?? '')
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function rteSaveRange() {
+        const ed  = rteEditor();
+        const sel = window.getSelection();
+        if (!ed || !sel || !sel.rangeCount) return;
+        const range = sel.getRangeAt(0);
+        if (ed.contains(range.commonAncestorContainer)) rteRange = range;
+    }
+
+    function rteFocus() {
+        const ed = rteEditor();
+        if (!ed) return null;
+        ed.focus();
+        if (rteRange) {
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(rteRange);
+        }
+        return ed;
+    }
+
+    function rteCmd(cmd, value = null) {
+        if (!rteFocus()) return;
+        document.execCommand(cmd, false, value);
+        rteSaveRange();
+    }
+
+    function rteBlock(tag) {
+        rteCmd('formatBlock', '<' + tag.toUpperCase() + '>');
+    }
+
+    function rteInsertHtml(html) {
+        if (!rteFocus()) return;
+        document.execCommand('insertHTML', false, html);
+        rteSaveRange();
+    }
+
+    function rteNormalizeUrl(url) {
+        const raw = String(url || '').trim();
+        if (!raw) return null;
+        if (/^(https?:\/\/|mailto:|tel:|\/)/i.test(raw)) return raw;
+        if (/^[\w.-]+\.[a-z]{2,}(\/|$)/i.test(raw)) return 'https://' + raw;
+        return null;
+    }
+
+    function rteEmbedUrl(url) {
+        const raw = String(url || '').trim();
+        let m = raw.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|live\/|shorts\/)|youtu\.be\/)([\w-]{6,})/i);
+        if (m) return 'https://www.youtube.com/embed/' + m[1];
+        m = raw.match(/vimeo\.com\/(?:video\/)?(\d+)/i);
+        if (m) return 'https://player.vimeo.com/video/' + m[1];
+        return null;
+    }
+
+    function rteLink() {
+        rteSaveRange();
+        const url = rteNormalizeUrl(prompt('Dán link (vd: https://luxnest.vn/rooms)'));
+        if (!url) return;
+
+        if (rteRange && !rteRange.collapsed) {
+            rteFocus();
+            document.execCommand('createLink', false, url);
+            rteSaveRange();
+            return;
+        }
+
+        const text = prompt('Chữ hiển thị cho link:', url) || url;
+        rteInsertHtml(`<a href="${rteEscape(url)}">${rteEscape(text)}</a>&nbsp;`);
+    }
+
+    function rteImage() {
+        rteSaveRange();
+        openMediaLibrary((items) => {
+            const list = Array.isArray(items) ? items : [{ url: items }];
+            const html = list.map(i => `<p><img src="${rteEscape(i.url)}" alt=""></p>`).join('');
+            if (html) rteInsertHtml(html + '<p><br></p>');
+        }, ADMIN_BASE + '/news/upload-image', true);
+    }
+
+    function rteVideo() {
+        rteSaveRange();
+        const input = prompt('Dán link video YouTube hoặc Vimeo');
+        if (!input) return;
+
+        const embed = rteEmbedUrl(input);
+        if (!embed) { alert('Chỉ hỗ trợ link YouTube hoặc Vimeo.'); return; }
+
+        rteInsertHtml(`<div class="news-embed"><iframe src="${rteEscape(embed)}" allowfullscreen></iframe></div><p><br></p>`);
+    }
+
+    /** Đổ nội dung vào editor; bài cũ dạng text thuần được tách thành đoạn. */
+    function rteSetContent(content) {
+        const ed = rteEditor();
+        if (!ed) return;
+        const raw = String(content || '');
+
+        ed.innerHTML = /<(p|div|br|h2|h3|h4|ul|ol|li|img|a|iframe|figure|blockquote|strong|em)\b[^>]*>/i.test(raw)
+            ? raw
+            : raw.split(/\n{2,}/).filter(b => b.trim() !== '')
+                 .map(b => '<p>' + rteEscape(b.trim()).replace(/\n/g, '<br>') + '</p>').join('');
+
+        rteRange = null;
+    }
+
+    function rteGetContent() {
+        const ed = rteEditor();
+        if (!ed) return '';
+        const html = ed.innerHTML.trim();
+        return ['', '<br>', '<p></p>', '<p><br></p>', '<div><br></div>'].includes(html) ? '' : html;
+    }
+
+    rteEditor()?.addEventListener('paste', function (e) {
+        e.preventDefault();
+        const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+        if (/^https?:\/\/\S+$/i.test(text.trim())) {
+            const url = text.trim();
+            document.execCommand('insertHTML', false, `<a href="${rteEscape(url)}">${rteEscape(url)}</a>&nbsp;`);
+        } else {
+            document.execCommand('insertText', false, text);
+        }
+        rteSaveRange();
+    });
+
+    ['keyup', 'mouseup', 'input'].forEach(evt => rteEditor()?.addEventListener(evt, rteSaveRange));
+
     function openNewsModal(article) {
         const modal = document.getElementById('news-modal');
         const title = document.getElementById('news-modal-title');
@@ -1862,6 +2000,7 @@
         if (newsSlugEl) delete newsSlugEl.dataset.manual;
         document.getElementById('news-status').value = 'active';
         renderNewsImage('');
+        rteSetContent('');
         const fileInput = document.getElementById('news-file-input');
         if (fileInput) fileInput.value = '';
         const errEl = document.getElementById('news-form-error');
@@ -1876,7 +2015,7 @@
             document.getElementById('news-tag').value          = article.tag || '';
             document.getElementById('news-published-at').value = article.published_at ? String(article.published_at).slice(0, 10) : '';
             document.getElementById('news-excerpt').value      = article.excerpt || '';
-            document.getElementById('news-content').value      = article.content || '';
+            rteSetContent(article.content || '');
             document.getElementById('news-status').value       = article.status || 'active';
             document.getElementById('news-image').value        = article.image || '';
             renderNewsImage(article.image || '');
@@ -1902,7 +2041,7 @@
             tag:          document.getElementById('news-tag').value || null,
             published_at: document.getElementById('news-published-at').value || null,
             excerpt:      document.getElementById('news-excerpt').value || null,
-            content:      document.getElementById('news-content').value || null,
+            content:      rteGetContent() || null,
             image:        document.getElementById('news-image').value || null,
             status:       document.getElementById('news-status').value,
         };
@@ -2625,6 +2764,11 @@
         clearSettingsOg,
         // News
         openNewsModal,
+        rteCmd,
+        rteBlock,
+        rteLink,
+        rteImage,
+        rteVideo,
         deleteNews,
         openNewsImagePicker,
         handleNewsImageDrop,

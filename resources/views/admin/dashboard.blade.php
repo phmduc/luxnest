@@ -1463,8 +1463,30 @@
                     <textarea id="news-excerpt" class="mf-input" rows="2" placeholder="Tóm tắt ngắn hiển thị ở trang Tin tức..."></textarea>
                 </div>
                 <div class="mf-group" style="grid-column:1/-1;">
-                    <label class="mf-label">Nội dung chi tiết <span style="font-weight:400; font-size:0.75rem; text-transform:none; letter-spacing:0;">(tuỳ chọn)</span></label>
-                    <textarea id="news-content" class="mf-input" rows="5" placeholder="Nội dung đầy đủ của bài viết..."></textarea>
+                    <label class="mf-label">Nội dung chi tiết <span style="font-weight:400; font-size:0.75rem; text-transform:none; letter-spacing:0;">(chèn ảnh, link, video ngay trong bài)</span></label>
+                    <div class="rte">
+                        <div class="rte-toolbar">
+                            <button type="button" class="rte-btn" title="In đậm" onclick="AdminApp.rteCmd('bold')"><i class="ph ph-text-b"></i></button>
+                            <button type="button" class="rte-btn" title="In nghiêng" onclick="AdminApp.rteCmd('italic')"><i class="ph ph-text-italic"></i></button>
+                            <span class="rte-sep"></span>
+                            <button type="button" class="rte-btn rte-btn--text" title="Tiêu đề lớn" onclick="AdminApp.rteBlock('h2')">H2</button>
+                            <button type="button" class="rte-btn rte-btn--text" title="Tiêu đề nhỏ" onclick="AdminApp.rteBlock('h3')">H3</button>
+                            <button type="button" class="rte-btn rte-btn--text" title="Đoạn văn thường" onclick="AdminApp.rteBlock('p')">¶</button>
+                            <span class="rte-sep"></span>
+                            <button type="button" class="rte-btn" title="Danh sách dấu chấm" onclick="AdminApp.rteCmd('insertUnorderedList')"><i class="ph ph-list-bullets"></i></button>
+                            <button type="button" class="rte-btn" title="Danh sách đánh số" onclick="AdminApp.rteCmd('insertOrderedList')"><i class="ph ph-list-numbers"></i></button>
+                            <span class="rte-sep"></span>
+                            <button type="button" class="rte-btn" title="Chèn link" onclick="AdminApp.rteLink()"><i class="ph ph-link"></i></button>
+                            <button type="button" class="rte-btn" title="Bỏ link" onclick="AdminApp.rteCmd('unlink')"><i class="ph ph-link-break"></i></button>
+                            <button type="button" class="rte-btn" title="Chèn ảnh vào nội dung" onclick="AdminApp.rteImage()"><i class="ph ph-image"></i></button>
+                            <button type="button" class="rte-btn" title="Chèn video YouTube / Vimeo" onclick="AdminApp.rteVideo()"><i class="ph ph-youtube-logo"></i></button>
+                            <span class="rte-sep"></span>
+                            <button type="button" class="rte-btn" title="Xoá định dạng" onclick="AdminApp.rteCmd('removeFormat')"><i class="ph ph-eraser"></i></button>
+                        </div>
+                        <div id="news-content-editor" class="rte-editor" contenteditable="true"
+                             data-placeholder="Nội dung đầy đủ của bài viết..."></div>
+                    </div>
+                    <textarea id="news-content" style="display:none;"></textarea>
                 </div>
 
                 <div class="mf-group">
