@@ -21,7 +21,10 @@
 
         const fetchOpts = { method, headers };
 
-        if (options.body) {
+        if (options.body instanceof FormData) {
+            // Để trình duyệt tự đặt Content-Type kèm boundary, không được JSON hoá.
+            fetchOpts.body = options.body;
+        } else if (options.body) {
             headers['Content-Type'] = 'application/json';
             fetchOpts.body = typeof options.body === 'string' ? options.body : JSON.stringify(options.body);
         }
