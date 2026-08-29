@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\GalleryPhoto;
+use App\Models\News;
 use App\Models\Room;
 use Illuminate\Http\Request;
 
@@ -35,6 +36,12 @@ class HomeController extends Controller
             ->orderBy('id')
             ->get();
 
-        return view('home', compact('featuredRooms', 'trendingRooms', 'branchRooms', 'galleryPhotos'));
+        $latestNews = News::where('status', 'active')
+            ->orderByDesc('published_at')
+            ->orderByDesc('id')
+            ->limit(6)
+            ->get();
+
+        return view('home', compact('featuredRooms', 'trendingRooms', 'branchRooms', 'galleryPhotos', 'latestNews'));
     }
 }

@@ -330,6 +330,49 @@
 @endif
 
 {{-- ============================================================
+     TIN TỨC / BÀI VIẾT MỚI NHẤT
+     ============================================================ --}}
+@if($latestNews->isNotEmpty())
+<section class="lx-section">
+    <div class="lx-container">
+        <div class="lx-section__header">
+            <h2 class="lx-section__title">Bài viết mới nhất</h2>
+            <a href="{{ route('news.index') }}" class="lx-section__link">Xem tất cả <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+
+        <div class="lx-news-grid">
+            @foreach($latestNews as $article)
+            <a href="{{ route('news.show', $article->slug) }}" class="lx-news-card">
+                <div class="lx-news-card__thumb">
+                    @if($article->image)
+                    <img src="{{ $article->image }}" alt="{{ $article->title }}" loading="lazy">
+                    @else
+                    <span class="lx-news-card__placeholder">📰</span>
+                    @endif
+                </div>
+                <div class="lx-news-card__body">
+                    <div class="lx-news-card__meta">
+                        @if($article->tag)<span class="lx-news-card__tag">{{ $article->tag }}</span>@endif
+                        @if($article->published_at)<span class="lx-news-card__date">{{ $article->published_at->format('d/m/Y') }}</span>@endif
+                    </div>
+                    <h3 class="lx-news-card__title">{{ $article->title }}</h3>
+                    @if($article->excerpt)
+                    <p class="lx-news-card__excerpt">{{ $article->excerpt }}</p>
+                    @endif
+                    <span class="lx-news-card__cta">Đọc tiếp <i class="fa-solid fa-arrow-right"></i></span>
+                </div>
+            </a>
+            @endforeach
+        </div>
+
+        <div class="lx-news-more">
+            <a href="{{ route('news.index') }}" class="lx-news-more__btn">Xem tất cả bài viết</a>
+        </div>
+    </div>
+</section>
+@endif
+
+{{-- ============================================================
      MASONRY GALLERY
      ============================================================ --}}
 @if($galleryPhotos->isNotEmpty())
