@@ -589,6 +589,7 @@ class AdminDashboardController extends Controller
             'facebook_url'       => 'nullable|url|max:500',
             'instagram_url'      => 'nullable|url|max:500',
             'youtube_url'        => 'nullable|url|max:500',
+            'tiktok_url'         => 'nullable|url|max:500',
             'footer_description' => 'nullable|string|max:1000',
         ]);
 

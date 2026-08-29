@@ -1538,6 +1538,7 @@
         document.getElementById('settings-map-link').value    = s.map_link || '';
         document.getElementById('settings-facebook').value    = s.facebook_url || '';
         document.getElementById('settings-instagram').value   = s.instagram_url || '';
+        document.getElementById('settings-tiktok').value      = s.tiktok_url || '';
         document.getElementById('settings-youtube').value     = s.youtube_url || '';
         document.getElementById('settings-footer-desc').value = s.footer_description || '';
         document.getElementById('settings-logo').value        = s.logo || '';
@@ -1666,6 +1667,7 @@
             map_link:           document.getElementById('settings-map-link').value.trim() || null,
             facebook_url:       document.getElementById('settings-facebook').value.trim() || null,
             instagram_url:      document.getElementById('settings-instagram').value.trim() || null,
+            tiktok_url:         document.getElementById('settings-tiktok').value.trim() || null,
             youtube_url:        document.getElementById('settings-youtube').value.trim() || null,
             footer_description: document.getElementById('settings-footer-desc').value.trim() || null,
         };

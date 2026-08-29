@@ -550,6 +550,10 @@
                             <label class="mf-label">YouTube</label>
                             <input type="url" id="settings-youtube" class="mf-input" placeholder="https://youtube.com/...">
                         </div>
+                        <div class="mf-group">
+                            <label class="mf-label">TikTok</label>
+                            <input type="url" id="settings-tiktok" class="mf-input" placeholder="https://tiktok.com/@...">
+                        </div>
 
                         <div class="mf-group" style="grid-column:1/-1;">
                             <label class="mf-label">Mô tả footer</label>

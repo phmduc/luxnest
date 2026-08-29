@@ -140,6 +140,9 @@
                             @if($settings->youtube_url)
                             <a href="{{ $settings->youtube_url }}" target="_blank" rel="noopener" class="lx-footer__social"><i class="fab fa-youtube"></i></a>
                             @endif
+                            @if($settings->tiktok_url)
+                            <a href="{{ $settings->tiktok_url }}" target="_blank" rel="noopener" class="lx-footer__social" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+                            @endif
                         </div>
                     </div>
                     <div class="lx-footer__col">

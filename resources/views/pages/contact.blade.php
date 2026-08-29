@@ -63,7 +63,7 @@
                     </div>
                 </div>
 
-                @if($settings->facebook_url || $settings->instagram_url || $settings->youtube_url)
+                @if($settings->facebook_url || $settings->instagram_url || $settings->youtube_url || $settings->tiktok_url)
                 <div class="pg-contact-row">
                     <i class="fa-solid fa-share-nodes"></i>
                     <div>
@@ -72,6 +72,7 @@
                             @if($settings->facebook_url)<a href="{{ $settings->facebook_url }}" target="_blank" rel="noopener">Facebook</a>@endif
                             @if($settings->instagram_url) &nbsp;·&nbsp; <a href="{{ $settings->instagram_url }}" target="_blank" rel="noopener">Instagram</a>@endif
                             @if($settings->youtube_url) &nbsp;·&nbsp; <a href="{{ $settings->youtube_url }}" target="_blank" rel="noopener">YouTube</a>@endif
+                            @if($settings->tiktok_url) &nbsp;·&nbsp; <a href="{{ $settings->tiktok_url }}" target="_blank" rel="noopener">TikTok</a>@endif
                         </span>
                     </div>
                 </div>

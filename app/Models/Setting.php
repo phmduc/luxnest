@@ -9,7 +9,7 @@ class Setting extends Model
 {
     protected $fillable = [
         'site_name', 'logo', 'og_image', 'hotline', 'email', 'address', 'map_link',
-        'facebook_url', 'instagram_url', 'youtube_url', 'footer_description',
+        'facebook_url', 'instagram_url', 'youtube_url', 'tiktok_url', 'footer_description',
         'remarketing_subject', 'remarketing_greeting', 'remarketing_body',
         'remarketing_discount', 'remarketing_auto', 'remarketing_send_at',
     ];
