@@ -36,6 +36,21 @@
     <meta name="twitter:description" content="@yield('og_description', $defaultOgDesc)">
     <meta name="twitter:image"       content="@yield('og_image', $defaultOgImage)">
 
+    @if($settings->ga_measurement_id)
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ $settings->ga_measurement_id }}"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', '{{ $settings->ga_measurement_id }}');
+    </script>
+    @endif
+
+    @if($settings->head_code)
+    {!! $settings->head_code !!}
+    @endif
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

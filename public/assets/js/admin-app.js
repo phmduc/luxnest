@@ -1539,6 +1539,8 @@
         document.getElementById('settings-facebook').value    = s.facebook_url || '';
         document.getElementById('settings-instagram').value   = s.instagram_url || '';
         document.getElementById('settings-tiktok').value      = s.tiktok_url || '';
+        document.getElementById('settings-ga').value          = s.ga_measurement_id || '';
+        document.getElementById('settings-head-code').value   = s.head_code || '';
         document.getElementById('settings-youtube').value     = s.youtube_url || '';
         document.getElementById('settings-footer-desc').value = s.footer_description || '';
         document.getElementById('settings-logo').value        = s.logo || '';
@@ -1668,6 +1670,8 @@
             facebook_url:       document.getElementById('settings-facebook').value.trim() || null,
             instagram_url:      document.getElementById('settings-instagram').value.trim() || null,
             tiktok_url:         document.getElementById('settings-tiktok').value.trim() || null,
+            ga_measurement_id:  document.getElementById('settings-ga').value.trim().toUpperCase() || null,
+            head_code:          document.getElementById('settings-head-code').value.trim() || null,
             youtube_url:        document.getElementById('settings-youtube').value.trim() || null,
             footer_description: document.getElementById('settings-footer-desc').value.trim() || null,
         };

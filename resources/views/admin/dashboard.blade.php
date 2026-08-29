@@ -554,6 +554,14 @@
                             <label class="mf-label">TikTok</label>
                             <input type="url" id="settings-tiktok" class="mf-input" placeholder="https://tiktok.com/@...">
                         </div>
+                        <div class="mf-group">
+                            <label class="mf-label">Google Analytics 4 <span style="font-weight:400; font-size:0.75rem; text-transform:none; letter-spacing:0;">(Measurement ID)</span></label>
+                            <input type="text" id="settings-ga" class="mf-input" placeholder="G-XXXXXXXXXX">
+                        </div>
+                        <div class="mf-group" style="grid-column:1/-1;">
+                            <label class="mf-label">Mã chèn vào &lt;head&gt; <span style="font-weight:400; font-size:0.75rem; text-transform:none; letter-spacing:0;">(Search Console, Facebook Pixel... — dán nguyên thẻ, để trống nếu không dùng)</span></label>
+                            <textarea id="settings-head-code" class="mf-input" rows="4" placeholder="&lt;meta name=&quot;google-site-verification&quot; content=&quot;...&quot;&gt;"></textarea>
+                        </div>
 
                         <div class="mf-group" style="grid-column:1/-1;">
                             <label class="mf-label">Mô tả footer</label>

@@ -590,6 +590,8 @@ class AdminDashboardController extends Controller
             'instagram_url'      => 'nullable|url|max:500',
             'youtube_url'        => 'nullable|url|max:500',
             'tiktok_url'         => 'nullable|url|max:500',
+            'ga_measurement_id'  => ['nullable', 'string', 'max:30', 'regex:/^G-[A-Z0-9]{4,20}$/'],
+            'head_code'          => 'nullable|string|max:5000',
             'footer_description' => 'nullable|string|max:1000',
         ]);
 
