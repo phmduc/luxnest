@@ -1993,6 +1993,21 @@
                 </label>
                 <p style="font-size:.72rem;color:var(--text-muted);margin-top:14px;opacity:.7;">JPG · PNG · WebP · GIF · tối đa 8 MB</p>
             </div>
+
+            <div style="margin-top:18px;">
+                <label class="mf-label">Hoặc dán link ảnh</label>
+                <div style="display:flex; gap:8px;">
+                    <input type="url" id="media-lib-url-input" class="mf-input" style="flex:1;"
+                           placeholder="https://... (link ảnh trên mạng hoặc ảnh do AI tạo)">
+                    <button type="button" class="btn-primary" style="padding:9px 18px; white-space:nowrap;"
+                            onclick="AdminApp.importMediaFromUrl()">
+                        <i class="ph ph-download-simple"></i> Tải về
+                    </button>
+                </div>
+                <p style="font-size:.72rem;color:var(--text-muted);margin-top:6px;opacity:.8;">
+                    Ảnh được tải về máy chủ LuxNest, không phụ thuộc website gốc.
+                </p>
+            </div>
             <div id="media-lib-upload-progress" style="display:none;margin-top:20px;text-align:center;">
                 <div style="height:4px;background:var(--border);border-radius:3px;overflow:hidden;max-width:320px;margin:0 auto 10px;">
                     <div id="media-lib-upload-bar" style="height:100%;background:var(--orange);width:0%;transition:width .3s;"></div>

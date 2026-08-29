@@ -2532,8 +2532,63 @@
         }, 400);
     }
 
+    /** Thư mục lưu suy ra từ endpoint upload của ngữ cảnh đang mở. */
+    function mediaLibFolder() {
+        const m = String(mediaLib.uploadUrl).match(/\/(news|rooms|villas|gallery-photos)\/upload/);
+        if (!m) return 'news';
+        return m[1] === 'gallery-photos' ? 'gallery' : m[1];
+    }
+
+    function acceptMediaLibResult(res) {
+        if (!res?.success || !res.url) {
+            alert(res?.message || 'Upload thất bại');
+            return;
+        }
+
+        if (mediaLib.multiSelect) {
+            mediaLib.selected.push({ url: res.url, path: res.path });
+            updateMediaLibSelectBtn();
+            switchMediaLibTab('library');
+            loadMediaLibraryImages(true);
+        } else {
+            mediaLibraryOnPick?.(res.url, res.path);
+            closeMediaLibrary();
+        }
+    }
+
+    async function importMediaFromUrl() {
+        const input = document.getElementById('media-lib-url-input');
+        const url   = (input?.value || '').trim();
+
+        if (!url) { alert('Dán link ảnh vào ô bên cạnh trước đã.'); return; }
+
+        const progress = document.getElementById('media-lib-upload-progress');
+        const bar      = document.getElementById('media-lib-upload-bar');
+        if (progress) progress.style.display = 'block';
+        if (bar)      bar.style.width = '40%';
+
+        const res = await apiFetch(ADMIN_BASE + '/media-library/import-url', {
+            method: 'POST',
+            body:   { url, folder: mediaLibFolder() },
+        });
+
+        if (bar) bar.style.width = '100%';
+        if (res?.success && input) input.value = '';
+        acceptMediaLibResult(res);
+
+        setTimeout(() => {
+            if (progress) progress.style.display = 'none';
+            if (bar) bar.style.width = '0%';
+        }, 600);
+    }
+
     async function handleMediaLibUpload(file) {
-        if (!file || !mediaLib.uploadUrl) return;
+        if (!mediaLib.uploadUrl) return;
+
+        if (!file || file.size === 0) {
+            alert('Không đọc được file ảnh (file rỗng). Nếu ảnh do AI tạo, hãy copy link ảnh rồi dùng ô "Hoặc dán link ảnh" bên dưới.');
+            return;
+        }
         const progress = document.getElementById('media-lib-upload-progress');
         const bar      = document.getElementById('media-lib-upload-bar');
         if (progress) progress.style.display = 'block';
@@ -2543,19 +2598,7 @@
         try {
             const res = await apiFetch(mediaLib.uploadUrl, { method: 'POST', body: fd });
             if (bar) bar.style.width = '100%';
-            if (res?.success && res.url) {
-                if (mediaLib.multiSelect) {
-                    mediaLib.selected.push({ url: res.url, path: res.path });
-                    updateMediaLibSelectBtn();
-                    switchMediaLibTab('library');
-                    loadMediaLibraryImages(true);
-                } else {
-                    mediaLibraryOnPick?.(res.url, res.path);
-                    closeMediaLibrary();
-                }
-            } else {
-                alert(res?.message || 'Upload thất bại');
-            }
+            acceptMediaLibResult(res);
         } catch (e) {
             alert('Upload thất bại');
         } finally {
@@ -2913,6 +2956,7 @@
         openMediaLibraryForRoomSlot,
         openMediaLibraryForVillaSlot,
         openMediaLibraryForNews,
+        importMediaFromUrl,
         openMediaLibraryForGalleryPhoto,
         // Gallery Photos
         loadGalleryPhotos,

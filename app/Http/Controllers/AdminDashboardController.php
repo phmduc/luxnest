@@ -16,6 +16,7 @@ use App\Models\VillaListing;
 use App\Models\Voucher;
 use App\Services\CampaignMailerService;
 use App\Support\HtmlSanitizer;
+use App\Support\ImageImporter;
 use App\Services\GoHostService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -1162,6 +1163,23 @@ class AdminDashboardController extends Controller
             'has_more' => ($page * $perPage) < $total,
             'total'    => $total,
         ]);
+    }
+
+    /** Tải ảnh từ link bên ngoài vào thư viện media (cho ảnh AI tạo, ảnh trên mạng). */
+    public function importMediaFromUrl(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'url'    => 'required|string|max:2000',
+            'folder' => 'nullable|in:news,rooms,villas,gallery',
+        ]);
+
+        try {
+            $image = ImageImporter::fromUrl($validated['url'], $validated['folder'] ?? 'news');
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+        }
+
+        return response()->json(['success' => true, 'url' => $image['url'], 'path' => $image['path']]);
     }
 
     public function uploadGalleryImage(Request $request): JsonResponse

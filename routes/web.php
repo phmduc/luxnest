@@ -191,6 +191,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,employee'])->group(funct
 
         // Media library
         Route::get('/media-library', [AdminDashboardController::class, 'getMediaLibrary']);
+        Route::post('/media-library/import-url', [AdminDashboardController::class, 'importMediaFromUrl']);
 
         // Gallery photos
         Route::get('/gallery-photos', [AdminDashboardController::class, 'getGalleryPhotos']);
