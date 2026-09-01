@@ -63,6 +63,9 @@ class PageContent extends Model
                 'hero_title'    => 'Hợp tác cùng LuxNest',
                 'hero_subtitle' => 'Bạn đang sở hữu khách sạn, villa, dịch vụ thuê xe hoặc tour du lịch tại Đà Lạt? Cùng đồng hành với LuxNest để tiếp cận thêm nhiều khách hàng.',
 
+                // Khối nội dung tự do, hiện phía trên mục "Hình thức hợp tác".
+                'intro_html' => '',
+
                 'types_title' => 'Hình thức hợp tác',
 
                 'type_1_icon'  => '🏠',

@@ -778,6 +778,34 @@
                             </div>
 
                             <div class="mf-group" style="grid-column:1/-1;">
+                                <label class="mf-label">Nội dung tự do <span style="font-weight:400; font-size:0.75rem; text-transform:none; letter-spacing:0;">(hiện phía trên mục "Hình thức hợp tác" — chèn ảnh, link, video, bảng)</span></label>
+<div class="rte">
+                        <div class="rte-toolbar">
+                            <button type="button" class="rte-btn" title="In đậm" onclick="AdminApp.rteCmd('bold')"><i class="ph ph-text-b"></i></button>
+                            <button type="button" class="rte-btn" title="In nghiêng" onclick="AdminApp.rteCmd('italic')"><i class="ph ph-text-italic"></i></button>
+                            <span class="rte-sep"></span>
+                            <button type="button" class="rte-btn rte-btn--text" title="Tiêu đề trang" onclick="AdminApp.rteBlock('h1')">H1</button>
+                            <button type="button" class="rte-btn rte-btn--text" title="Tiêu đề lớn" onclick="AdminApp.rteBlock('h2')">H2</button>
+                            <button type="button" class="rte-btn rte-btn--text" title="Tiêu đề nhỏ" onclick="AdminApp.rteBlock('h3')">H3</button>
+                            <button type="button" class="rte-btn rte-btn--text" title="Đoạn văn thường" onclick="AdminApp.rteBlock('p')">¶</button>
+                            <span class="rte-sep"></span>
+                            <button type="button" class="rte-btn" title="Danh sách dấu chấm" onclick="AdminApp.rteCmd('insertUnorderedList')"><i class="ph ph-list-bullets"></i></button>
+                            <button type="button" class="rte-btn" title="Danh sách đánh số" onclick="AdminApp.rteCmd('insertOrderedList')"><i class="ph ph-list-numbers"></i></button>
+                            <span class="rte-sep"></span>
+                            <button type="button" class="rte-btn" title="Chèn link" onclick="AdminApp.rteLink()"><i class="ph ph-link"></i></button>
+                            <button type="button" class="rte-btn" title="Bỏ link" onclick="AdminApp.rteCmd('unlink')"><i class="ph ph-link-break"></i></button>
+                            <button type="button" class="rte-btn" title="Chèn ảnh" onclick="AdminApp.rteImage()"><i class="ph ph-image"></i></button>
+                            <button type="button" class="rte-btn" title="Chèn video YouTube / Vimeo" onclick="AdminApp.rteVideo()"><i class="ph ph-youtube-logo"></i></button>
+                            <button type="button" class="rte-btn" title="Chèn bảng" onclick="AdminApp.rteTable()"><i class="ph ph-table"></i></button>
+                            <span class="rte-sep"></span>
+                            <button type="button" class="rte-btn" title="Xoá định dạng" onclick="AdminApp.rteCmd('removeFormat')"><i class="ph ph-eraser"></i></button>
+                        </div>
+                        <div id="partner-intro_html-editor" class="rte-editor" contenteditable="true"
+                             data-placeholder="Soạn nội dung, chèn ảnh / link / video..."></div>
+                    </div>
+                            </div>
+
+                            <div class="mf-group" style="grid-column:1/-1;">
                                 <label class="mf-label">Tiêu đề mục "Hình thức hợp tác"</label>
                                 <input type="text" id="partner-types_title" class="mf-input">
                             </div>

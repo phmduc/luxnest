@@ -2513,9 +2513,17 @@
         if (res.success) rteSetContent('car-rental-content_html-editor', res.data.content_html || '');
     }
 
-    function loadPageContent() {
+    async function loadPageContent() {
         loadPageContentSlug('about', ABOUT_KEYS);
-        loadPageContentSlug('partner', PARTNER_KEYS);
+
+        const partner = await apiFetch(ADMIN_BASE + '/page-contents/partner');
+        if (!partner?.success) return;
+
+        PARTNER_KEYS.forEach(key => {
+            const el = document.getElementById('partner-' + key);
+            if (el) el.value = partner.data[key] || '';
+        });
+        rteSetContent('partner-intro_html-editor', partner.data.intro_html || '');
     }
 
     async function submitPageContent(slug, keys, extra = {}) {
@@ -2557,7 +2565,9 @@
 
     document.getElementById('partner-content-form')?.addEventListener('submit', function (e) {
         e.preventDefault();
-        submitPageContent('partner', PARTNER_KEYS);
+        submitPageContent('partner', PARTNER_KEYS, {
+            intro_html: rteGetContent('partner-intro_html-editor'),
+        });
     });
 
     document.getElementById('car-rental-content-form')?.addEventListener('submit', function (e) {

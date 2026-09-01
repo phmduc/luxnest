@@ -15,6 +15,14 @@
     </div>
 </div>
 
+@if(!empty($content['intro_html']))
+<section class="pg-section">
+    <div class="lx-container">
+        <div class="pg-rich">{!! \App\Support\HtmlSanitizer::render($content['intro_html']) !!}</div>
+    </div>
+</section>
+@endif
+
 <section class="pg-section pg-section--center">
     <div class="lx-container">
         <h2>{{ $content['types_title'] }}</h2>
