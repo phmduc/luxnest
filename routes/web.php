@@ -137,6 +137,12 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,employee'])->group(funct
         Route::post('/rooms/upload-image', [AdminDashboardController::class, 'uploadRoomImage']);
         Route::post('/rooms/upload-video', [AdminDashboardController::class, 'uploadRoomVideo']);
 
+        // Branch (chi nhánh) management
+        Route::get('/branches', [AdminDashboardController::class, 'getBranches']);
+        Route::post('/branches', [AdminDashboardController::class, 'storeBranch']);
+        Route::put('/branches/{id}', [AdminDashboardController::class, 'updateBranch']);
+        Route::delete('/branches/{id}', [AdminDashboardController::class, 'destroyBranch']);
+
         // Villa listings management
         Route::get('/villas', [AdminDashboardController::class, 'getVillas']);
         Route::post('/villas', [AdminDashboardController::class, 'storeVilla']);

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Branch;
 use App\Models\Room;
 use App\Services\GoHostService;
 use Illuminate\Http\Request;
@@ -118,9 +119,11 @@ class RoomsController extends Controller
         $displayKeyword  = $keyword ?: 'LuxNest';
         $hasAvailability = $availableGoHostIds !== null;
 
+        $branchOptions = Branch::active();
+
         return view('rooms.index', compact(
             'hotels', 'keyword', 'checkIn', 'checkOut', 'adults', 'children',
-            'sort', 'displayKeyword', 'hasAvailability'
+            'sort', 'displayKeyword', 'hasAvailability', 'branchOptions'
         ));
     }
 }

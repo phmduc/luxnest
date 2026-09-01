@@ -503,13 +503,13 @@
                             <h4>Loại chỗ ở</h4>
                             <button type="button" class="reset-link" onclick="resetCheckboxes('branch')">Đặt lại</button>
                         </div>
-                        @foreach(['Hotel' => 'Khách sạn', 'Villa' => 'Villa', 'Residence' => 'Căn hộ'] as $val => $label)
+                        @foreach($branchOptions as $branch)
                         <label class="filter-checkbox">
-                            <input type="checkbox" name="branch[]" value="{{ $val }}"
-                                   {{ in_array($val, (array)request('branch',[])) ? 'checked' : '' }}
+                            <input type="checkbox" name="branch[]" value="{{ $branch->name }}"
+                                   {{ in_array($branch->name, (array)request('branch',[])) ? 'checked' : '' }}
                                    onchange="document.getElementById('sidebar-filter-form').submit()">
                             <span class="checkmark"></span>
-                            <span>{{ $label }}</span>
+                            <span>{{ $branch->label ?: $branch->name }}</span>
                         </label>
                         @endforeach
                     </div>

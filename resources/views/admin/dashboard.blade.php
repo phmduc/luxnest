@@ -247,14 +247,14 @@
                     <div class="toolbar-actions">
                         <select id="room-branch-filter" class="filter-select">
                             <option value="">Tất cả chi nhánh</option>
-                            <option value="Hotel">Hotel</option>
-                            <option value="Villa">Villa</option>
-                            <option value="Residence">Residence</option>
                         </select>
                         <div class="search-wrapper">
                             <input type="text" id="room-search" placeholder="Tìm theo tên phòng...">
                             <i class="ph ph-magnifying-glass"></i>
                         </div>
+                        <button onclick="AdminApp.openBranchModal()" class="btn-view">
+                            <i class="ph ph-buildings"></i> Chi nhánh
+                        </button>
                         <button onclick="AdminApp.openRoomModal()" class="btn-primary">
                             <i class="ph ph-plus"></i> Thêm phòng
                         </button>
@@ -1089,11 +1089,7 @@
                 </div>
                 <div class="mf-group">
                     <label class="mf-label">Chi nhánh</label>
-                    <select id="room-branch" class="mf-select">
-                        <option value="Hotel">Hotel</option>
-                        <option value="Villa">Villa</option>
-                        <option value="Residence">Residence</option>
-                    </select>
+                    <select id="room-branch" class="mf-select"></select>
                 </div>
                 <div class="mf-group">
                     <label class="mf-label">Loại phòng</label>
@@ -1462,6 +1458,34 @@
                 <button type="button" id="villa-modal-cancel" class="btn-view">Hủy</button>
                 <button type="submit" id="villa-submit-btn" class="btn-primary" style="padding:10px 22px;">Lưu villa</button>
             </div>
+        </form>
+    </div>
+</div>
+
+{{-- ═══ MODAL: Branches ═══ --}}
+<div id="branch-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-content" style="max-width:720px;">
+        <button class="modal-close" id="branch-modal-close"><i class="ph ph-x"></i></button>
+        <h2 style="font-size:1.4rem; font-weight:800; margin-bottom:6px; color:var(--text);">Chi nhánh</h2>
+        <p style="font-size:.83rem; color:var(--text-muted); margin-bottom:20px;">
+            Danh sách chi nhánh dùng cho phòng. Đổi tên chi nhánh thì các phòng đang thuộc chi nhánh đó tự đổi theo.
+        </p>
+
+        <div id="branch-list" style="margin-bottom:18px;"></div>
+
+        <form id="branch-form" style="border-top:1px solid var(--border); padding-top:16px;">
+            @csrf
+            <label class="mf-label">Thêm chi nhánh mới</label>
+            <div class="branch-row">
+                <input type="text" id="branch-name" class="mf-input" placeholder="Tên (vd: Resort)">
+                <input type="text" id="branch-label" class="mf-input" placeholder="Nhãn hiển thị (vd: Khu nghỉ dưỡng)">
+                <input type="color" id="branch-color" class="branch-color" value="#1a3a6b" title="Màu nhãn">
+                <button type="submit" class="btn-primary" style="white-space:nowrap;">
+                    <i class="ph ph-plus"></i> Thêm
+                </button>
+            </div>
+            <div id="branch-form-error"
+                 style="display:none; margin-top:12px; padding:11px 14px; background:#FEE2E2; border-radius:9px; color:#991B1B; font-weight:600; font-size:0.85rem;"></div>
         </form>
     </div>
 </div>

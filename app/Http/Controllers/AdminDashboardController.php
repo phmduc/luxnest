@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Console\Commands\SendRemarketingEmails;
 use App\Mail\RemarketingVoucher;
+use App\Models\Branch;
 use App\Models\EmailCampaign;
 use App\Models\Faq;
 use App\Models\GalleryPhoto;
@@ -24,6 +25,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
@@ -293,6 +295,71 @@ class AdminDashboardController extends Controller
     // Rooms CRUD (admin only)
     // ---------------------------------------------------------------
 
+    // ---------------------------------------------------------------
+    // Branch CRUD (admin only)
+    // ---------------------------------------------------------------
+
+    public function getBranches(): JsonResponse
+    {
+        $branches = Branch::ordered()->withCount('rooms')->get();
+
+        return response()->json(['success' => true, 'data' => $branches]);
+    }
+
+    public function storeBranch(Request $request): JsonResponse
+    {
+        $validated = $this->validateBranch($request);
+
+        $validated['sort_order'] = $validated['sort_order'] ?? ((int) Branch::max('sort_order') + 1);
+
+        return response()->json(['success' => true, 'data' => Branch::create($validated)], 201);
+    }
+
+    public function updateBranch(Request $request, int $id): JsonResponse
+    {
+        $branch    = Branch::findOrFail($id);
+        $validated = $this->validateBranch($request, $branch->id);
+
+        DB::transaction(function () use ($branch, $validated) {
+            // Phòng gắn với chi nhánh bằng tên, nên đổi tên thì kéo theo phòng.
+            if ($validated['name'] !== $branch->name) {
+                Room::where('branch', $branch->name)->update(['branch' => $validated['name']]);
+            }
+
+            $branch->update($validated);
+        });
+
+        return response()->json(['success' => true, 'data' => $branch->fresh()]);
+    }
+
+    public function destroyBranch(int $id): JsonResponse
+    {
+        $branch = Branch::findOrFail($id);
+        $rooms  = Room::where('branch', $branch->name)->count();
+
+        if ($rooms > 0) {
+            return response()->json([
+                'success' => false,
+                'message' => "Còn {$rooms} phòng thuộc chi nhánh này. Chuyển các phòng đó sang chi nhánh khác trước khi xoá.",
+            ], 422);
+        }
+
+        $branch->delete();
+
+        return response()->json(['success' => true]);
+    }
+
+    private function validateBranch(Request $request, ?int $excludeId = null): array
+    {
+        return $request->validate([
+            'name'       => ['required', 'string', 'max:100', Rule::unique('branches', 'name')->ignore($excludeId)],
+            'label'      => 'nullable|string|max:100',
+            'color'      => ['nullable', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'sort_order' => 'nullable|integer',
+            'is_active'  => 'nullable|boolean',
+        ]);
+    }
+
     public function getRooms(Request $request): JsonResponse
     {
         $search = trim((string) $request->input('search', ''));
@@ -324,7 +391,7 @@ class AdminDashboardController extends Controller
         $validated = $request->validate([
             'name'               => 'required|string|max:255',
             'slug'               => 'required|string|unique:rooms,slug',
-            'branch'             => 'required|in:Hotel,Villa,Residence',
+            'branch'             => ['required', Rule::in(Branch::names())],
             'type'               => 'nullable|string|max:100',
             'description'        => 'nullable|string',
             'price'              => 'required|integer|min:0',
@@ -350,7 +417,7 @@ class AdminDashboardController extends Controller
         $validated = $request->validate([
             'name'               => 'required|string|max:255',
             'slug'               => "required|string|unique:rooms,slug,$id",
-            'branch'             => 'required|in:Hotel,Villa,Residence',
+            'branch'             => ['required', Rule::in(Branch::names())],
             'type'               => 'nullable|string|max:100',
             'description'        => 'nullable|string',
             'price'              => 'required|integer|min:0',

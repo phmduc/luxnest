@@ -29,10 +29,6 @@ class Room extends Model
 
     public function getBranchColorAttribute(): string
     {
-        return match ($this->branch) {
-            'Villa'     => '#7c3aed',
-            'Residence' => '#0f766e',
-            default     => '#1a3a6b',
-        };
+        return Branch::colorFor($this->branch);
     }
 }

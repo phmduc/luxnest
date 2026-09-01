@@ -1767,3 +1767,31 @@ textarea.mf-input { resize: vertical; }
 }
 .rte-editor tbody tr:nth-child(even) { background: #f8fafc; }
 .rte-editor tbody tr:last-child td { border-bottom: none; }
+
+/* Quản lý chi nhánh */
+.branch-row {
+    display: grid;
+    grid-template-columns: 1fr 1.3fr 46px auto;
+    gap: 8px;
+    align-items: center;
+}
+.branch-row + .branch-row { margin-top: 8px; }
+.branch-color {
+    width: 46px;
+    height: 38px;
+    padding: 2px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #fff;
+    cursor: pointer;
+}
+.branch-row__count {
+    font-size: .78rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+.branch-row__actions { display: flex; gap: 6px; }
+@media (max-width: 720px) {
+    .branch-row { grid-template-columns: 1fr 1fr; }
+    .branch-row__actions { grid-column: 1/-1; }
+}

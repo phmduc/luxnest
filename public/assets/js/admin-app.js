@@ -99,7 +99,7 @@
 
         if (tab === 'bookings')    loadBookings();
         if (tab === 'members')     loadMembers();
-        if (tab === 'rooms')       loadRooms();
+        if (tab === 'rooms')       { loadBranches(); loadRooms(); }
         if (tab === 'villas')      loadVillas();
         if (tab === 'settings')    loadSettings();
         if (tab === 'news')        loadNews();
@@ -539,6 +539,173 @@
     let roomPage = 1;
     let roomSearchTimer = null;
 
+    // ---------------------------------------------------------------
+    // Chi nhánh (admin only)
+    // ---------------------------------------------------------------
+
+    let branches = [];
+
+    async function loadBranches() {
+        const res = await apiFetch(ADMIN_BASE + '/branches');
+        if (!res?.success) return branches;
+
+        branches = res.data || [];
+        populateBranchSelects();
+        renderBranchList();
+
+        return branches;
+    }
+
+    /** Đặt chi nhánh cho form phòng, thêm tạm option nếu chi nhánh đó không còn trong danh sách. */
+    function setRoomBranch(name) {
+        const select = document.getElementById('room-branch');
+        if (!select) return;
+
+        if (name && !branches.some(b => b.name === name)) {
+            const option = document.createElement('option');
+            option.value = name;
+            option.textContent = name + ' (không còn trong danh sách)';
+            select.appendChild(option);
+        }
+
+        select.value = name || branches[0]?.name || '';
+    }
+
+    function populateBranchSelects() {
+        const form   = document.getElementById('room-branch');
+        const filter = document.getElementById('room-branch-filter');
+
+        if (form) {
+            const current = form.value;
+            form.innerHTML = branches
+                .map(b => `<option value="${b.name}">${b.label ? `${b.name} — ${b.label}` : b.name}</option>`)
+                .join('');
+            if (current && branches.some(b => b.name === current)) form.value = current;
+        }
+
+        if (filter) {
+            const current = filter.value;
+            filter.innerHTML = '<option value="">Tất cả chi nhánh</option>'
+                + branches.map(b => `<option value="${b.name}">${b.name}</option>`).join('');
+            filter.value = current;
+        }
+    }
+
+    function renderBranchList() {
+        const wrap = document.getElementById('branch-list');
+        if (!wrap) return;
+
+        wrap.innerHTML = '';
+
+        if (!branches.length) {
+            wrap.innerHTML = '<p style="font-size:.85rem;color:var(--text-muted);">Chưa có chi nhánh nào.</p>';
+            return;
+        }
+
+        branches.forEach(branch => {
+            const row = document.createElement('div');
+            row.className = 'branch-row';
+            row.innerHTML = `
+                <input type="text" class="mf-input" data-field="name" value="">
+                <input type="text" class="mf-input" data-field="label" value="">
+                <input type="color" class="branch-color" data-field="color" value="#1a3a6b">
+                <div class="branch-row__actions">
+                    <span class="branch-row__count"></span>
+                    <button type="button" class="btn-view" title="Lưu"><i class="ph ph-check"></i></button>
+                    <button type="button" class="btn-view" style="color:#dc2626;border-color:#fecdd3;" title="Xoá"><i class="ph ph-trash"></i></button>
+                </div>`;
+
+            row.querySelector('[data-field="name"]').value  = branch.name || '';
+            row.querySelector('[data-field="label"]').value = branch.label || '';
+            row.querySelector('[data-field="color"]').value = branch.color || '#1a3a6b';
+            row.querySelector('.branch-row__count').textContent = `${branch.rooms_count ?? 0} phòng`;
+
+            const [saveBtn, deleteBtn] = row.querySelectorAll('.branch-row__actions button');
+            saveBtn.onclick   = () => saveBranch(branch.id, row);
+            deleteBtn.onclick = () => deleteBranch(branch);
+
+            wrap.appendChild(row);
+        });
+    }
+
+    function branchError(message) {
+        const el = document.getElementById('branch-form-error');
+        if (!el) { alert(message); return; }
+        el.textContent = message;
+        el.style.display = message ? 'block' : 'none';
+    }
+
+    function branchErrorFrom(res) {
+        if (res?.errors) return Object.values(res.errors).flat().join(' ');
+        return res?.message || 'Có lỗi xảy ra, vui lòng thử lại.';
+    }
+
+    async function saveBranch(id, row) {
+        const payload = {
+            name:  row.querySelector('[data-field="name"]').value.trim(),
+            label: row.querySelector('[data-field="label"]').value.trim() || null,
+            color: row.querySelector('[data-field="color"]').value,
+        };
+
+        const res = await apiFetch(ADMIN_BASE + '/branches/' + id, { method: 'PUT', body: payload });
+
+        if (!res?.success) { branchError(branchErrorFrom(res)); return; }
+
+        branchError('');
+        await loadBranches();
+        loadRooms(roomPage);
+    }
+
+    async function deleteBranch(branch) {
+        if (!confirm(`Xoá chi nhánh "${branch.name}"?`)) return;
+
+        const res = await apiFetch(ADMIN_BASE + '/branches/' + branch.id, { method: 'DELETE' });
+
+        if (!res?.success) { branchError(branchErrorFrom(res)); return; }
+
+        branchError('');
+        loadBranches();
+    }
+
+    function openBranchModal() {
+        if (typeof USER_ROLE !== 'undefined' && USER_ROLE !== 'admin') return;
+        branchError('');
+        loadBranches();
+        const modal = document.getElementById('branch-modal');
+        if (modal) modal.style.display = 'flex';
+    }
+
+    function closeBranchModal() {
+        const modal = document.getElementById('branch-modal');
+        if (modal) modal.style.display = 'none';
+    }
+
+    document.getElementById('branch-modal-close')?.addEventListener('click', closeBranchModal);
+    document.getElementById('branch-modal')?.addEventListener('click', function (e) {
+        if (e.target === this) closeBranchModal();
+    });
+
+    document.getElementById('branch-form')?.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const payload = {
+            name:  document.getElementById('branch-name').value.trim(),
+            label: document.getElementById('branch-label').value.trim() || null,
+            color: document.getElementById('branch-color').value,
+        };
+
+        if (!payload.name) { branchError('Nhập tên chi nhánh.'); return; }
+
+        const res = await apiFetch(ADMIN_BASE + '/branches', { method: 'POST', body: payload });
+
+        if (!res?.success) { branchError(branchErrorFrom(res)); return; }
+
+        branchError('');
+        document.getElementById('branch-name').value  = '';
+        document.getElementById('branch-label').value = '';
+        loadBranches();
+    });
+
     async function loadRooms(page = 1) {
         roomPage = page;
         if (typeof USER_ROLE !== 'undefined' && USER_ROLE !== 'admin') return;
@@ -920,7 +1087,7 @@
         });
         const slugEl = document.getElementById('room-slug');
         if (slugEl) delete slugEl.dataset.manual;
-        document.getElementById('room-branch').value = 'Hotel';
+        document.getElementById('room-branch').value = branches[0]?.name || '';
         document.getElementById('room-status').value = 'active';
         resetGallery();
         resetRoomVideo();
@@ -938,7 +1105,7 @@
             document.getElementById('room-name').value          = room.name           || '';
             document.getElementById('room-slug').value          = room.slug           || '';
             document.getElementById('room-slug').dataset.manual = '1';
-            document.getElementById('room-branch').value        = room.branch         || 'Hotel';
+            setRoomBranch(room.branch);
             document.getElementById('room-type').value          = room.type           || '';
             document.getElementById('room-price').value         = room.price          || '';
             document.getElementById('room-regular-price').value = room.regular_price  || '';
@@ -2874,6 +3041,7 @@
         openMemberModal,
         deleteMember,
         openRoomModal,
+        openBranchModal,
         deleteRoom,
         toggleRoomStatus,
         loadRooms,
