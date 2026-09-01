@@ -39,8 +39,11 @@
             <a href="#" class="nav-item" data-tab="faqs">
                 <i class="ph ph-question"></i> Câu Hỏi Thường Gặp
             </a>
-            <a href="#" class="nav-item" data-tab="pagecontent">
-                <i class="ph ph-file-text"></i> Nội Dung Trang
+            <a href="#" class="nav-item" data-tab="about">
+                <i class="ph ph-info"></i> Trang Giới Thiệu
+            </a>
+            <a href="#" class="nav-item" data-tab="partner">
+                <i class="ph ph-handshake"></i> Trang Hợp Tác
             </a>
             <a href="#" class="nav-item" data-tab="carrental">
                 <i class="ph ph-car"></i> Trang Thuê Xe
@@ -664,17 +667,15 @@
 
             {{-- ═══ TAB: PAGE CONTENT - Giới thiệu / Hợp tác (admin only) ═══ --}}
             @if(auth()->user()->isAdmin())
-            <section id="tab-pagecontent" class="dashboard-tab">
+            {{-- ═══════════════════ ABOUT PAGE TAB ═══════════════════ --}}
+            <section id="tab-about" class="dashboard-tab">
 
                 <div class="section-toolbar">
-                    <h2>Nội Dung Trang</h2>
+                    <h2>Trang Giới Thiệu</h2>
+                    <a href="{{ route('about.index') }}" target="_blank" class="btn-view">
+                        <i class="ph ph-arrow-square-out"></i> Xem trang
+                    </a>
                 </div>
-
-                {{-- ── Trang Giới thiệu ── --}}
-                <div style="margin-bottom:40px;">
-                    <h3 style="font-size:1.05rem; font-weight:800; color:var(--text); margin-bottom:14px;">
-                        <i class="ph ph-info"></i> Trang Giới thiệu
-                    </h3>
 
                     <form id="about-content-form" style="max-width:920px;">
                         @csrf
@@ -757,13 +758,18 @@
                             </button>
                         </div>
                     </form>
-                </div>
 
-                {{-- ── Trang Hợp tác ── --}}
-                <div>
-                    <h3 style="font-size:1.05rem; font-weight:800; color:var(--text); margin-bottom:14px;">
-                        <i class="ph ph-handshake"></i> Trang Hợp tác
-                    </h3>
+            </section>
+
+            {{-- ═══════════════════ PARTNER PAGE TAB ═══════════════════ --}}
+            <section id="tab-partner" class="dashboard-tab">
+
+                <div class="section-toolbar">
+                    <h2>Trang Hợp Tác</h2>
+                    <a href="{{ route('partner.index') }}" target="_blank" class="btn-view">
+                        <i class="ph ph-arrow-square-out"></i> Xem trang
+                    </a>
+                </div>
 
                     <form id="partner-content-form" style="max-width:920px;">
                         @csrf
@@ -857,7 +863,6 @@
                             </button>
                         </div>
                     </form>
-                </div>
 
             </section>
 
@@ -2172,7 +2177,8 @@ if (typeof AdminApp !== 'undefined') AdminApp.loadRooms();
         settings:    'Thông Tin Doanh Nghiệp',
         news:        'Quản Lý Tin Tức',
         faqs:        'Câu Hỏi Thường Gặp',
-        pagecontent: 'Nội Dung Trang',
+        about:       'Trang Giới Thiệu',
+        partner:     'Trang Hợp Tác',
         carrental:   'Trang Thuê Xe'
     };
     document.querySelectorAll('.nav-item[data-tab]').forEach(function (el) {

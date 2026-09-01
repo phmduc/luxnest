@@ -104,7 +104,8 @@
         if (tab === 'settings')    loadSettings();
         if (tab === 'news')        loadNews();
         if (tab === 'faqs')        loadFaqs();
-        if (tab === 'pagecontent')    loadPageContent();
+        if (tab === 'about')          loadAboutContent();
+        if (tab === 'partner')        loadPartnerContent();
         if (tab === 'carrental')      loadCarRentalContent();
         if (tab === 'remarketing')    loadRemarketing();
         if (tab === 'voucher')        loadVouchers();
@@ -2513,17 +2514,19 @@
         if (res.success) rteSetContent('car-rental-content_html-editor', res.data.content_html || '');
     }
 
-    async function loadPageContent() {
+    function loadAboutContent() {
         loadPageContentSlug('about', ABOUT_KEYS);
+    }
 
-        const partner = await apiFetch(ADMIN_BASE + '/page-contents/partner');
-        if (!partner?.success) return;
+    async function loadPartnerContent() {
+        const res = await apiFetch(ADMIN_BASE + '/page-contents/partner');
+        if (!res?.success) return;
 
         PARTNER_KEYS.forEach(key => {
             const el = document.getElementById('partner-' + key);
-            if (el) el.value = partner.data[key] || '';
+            if (el) el.value = res.data[key] || '';
         });
-        rteSetContent('partner-intro_html-editor', partner.data.intro_html || '');
+        rteSetContent('partner-intro_html-editor', res.data.intro_html || '');
     }
 
     async function submitPageContent(slug, keys, extra = {}) {
